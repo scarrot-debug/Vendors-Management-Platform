@@ -71,7 +71,7 @@ export default function Login() {
 
           <button type="submit" disabled={loading} style={{
             padding: '11px', borderRadius: 8, border: 'none',
-            background: loading ? '#e2e6ed' : '#2563eb',
+            background: loading ? '#6b7280' : '#1a1d23',
             color: '#fff', fontSize: 14, fontWeight: 600,
             cursor: loading ? 'not-allowed' : 'pointer', marginTop: 4,
           }}>
