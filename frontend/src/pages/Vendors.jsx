@@ -253,26 +253,26 @@ function DistributorRow({ dist, isViewer, open, onToggle, columns, onEditDist, o
       </tr>
       {open && (
         <>
-          <tr style={{ background:'#f0f6ff', borderTop:'2px solid #2563eb', borderBottom:'1px solid #dbeafe' }}>
+          <tr style={{ background:'#d1d5db', borderTop:'2px solid #1a1d23', borderBottom:'1px solid #9ca3af' }}>
             <td colSpan={2} style={{ padding:'7px 16px 7px 48px' }}/>
-            <td style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#2563eb', textTransform:'uppercase', letterSpacing:1 }}>Status</td>
-            <td style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#2563eb', textTransform:'uppercase', letterSpacing:1 }}>Product Name</td>
-            <td style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#2563eb', textTransform:'uppercase', letterSpacing:1 }}>Manufacturer</td>
-            <td style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#2563eb', textTransform:'uppercase', letterSpacing:1 }}>Category</td>
-            <td style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#2563eb', textTransform:'uppercase', letterSpacing:1 }}>Description</td>
-            <td style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#2563eb', textTransform:'uppercase', letterSpacing:1 }}>Cost</td>
-            <td style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#2563eb', textTransform:'uppercase', letterSpacing:1 }}>Actions</td>
+            <td style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#374151', textTransform:'uppercase', letterSpacing:1 }}>Status</td>
+            <td style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#374151', textTransform:'uppercase', letterSpacing:1 }}>Product Name</td>
+            <td style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#374151', textTransform:'uppercase', letterSpacing:1 }}>Manufacturer</td>
+            <td style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#374151', textTransform:'uppercase', letterSpacing:1 }}>Category</td>
+            <td style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#374151', textTransform:'uppercase', letterSpacing:1 }}>Description</td>
+            <td style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#374151', textTransform:'uppercase', letterSpacing:1 }}>Cost</td>
+            <td style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#374151', textTransform:'uppercase', letterSpacing:1 }}>Actions</td>
           </tr>
           {dist.products?.length === 0 ? (
-            <tr style={{ background:'#f8fbff', borderBottom:'2px solid #e2e6ed' }}>
+            <tr style={{ background:'#f3f4f6', borderBottom:'2px solid #1a1d23' }}>
               <td colSpan={10} style={{ padding:'12px 48px', color:'#9ca3af', fontSize:13, fontStyle:'italic' }}>No products for this distributor</td>
             </tr>
           ) : dist.products?.map((p, idx) => (
             <tr key={p.id} style={{
-              background: idx % 2 === 0 ? '#f8fbff' : '#f0f6ff',
-              borderBottom: idx === (dist.products.length-1) ? '2px solid #bfdbfe' : '1px solid #e8f0fe',
+              background: idx % 2 === 0 ? '#f3f4f6' : '#e9eaec',
+              borderBottom: idx === (dist.products.length-1) ? '2px solid #1a1d23' : '1px solid #d1d5db',
             }}>
-              <td style={{ padding:'10px 0 10px 32px', borderLeft:'3px solid #2563eb' }} colSpan={2}/>
+              <td style={{ padding:'10px 0 10px 32px', borderLeft:'3px solid #1a1d23' }} colSpan={2}/>
               <td style={{ padding:'10px 16px' }}><StatusBadge status={p.status}/></td>
               <td style={{ padding:'10px 16px' }}><div style={{ fontWeight:600, color:'#1e40af', fontSize:13 }}>{p.name}</div></td>
               <td style={{ padding:'10px 16px', color:'#374151', fontSize:13 }}>{p.vendor || '—'}</td>
