@@ -1,84 +1,212 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api/client.js';
-import { Users, CheckCircle, Clock, XCircle, TrendingUp } from 'lucide-react';
+import { Users, CheckCircle, Clock, XCircle, TrendingUp, Package, DollarSign, BarChart2 } from 'lucide-react';
+
+function formatCurrency(val) {
+  if (!val) return '$0';
+  return '$' + parseFloat(val).toLocaleString('en-US', { maximumFractionDigits: 0 });
+}
+
+function BarChart({ data, colorFn, valueLabel }) {
+  if (!data.length) return <div style={{ color:'#9ca3af', fontSize:13, padding:'16px 0' }}>No data</div>;
+  const max = Math.max(...data.map(d => d.value), 1);
+  return (
+    <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+      {data.map(({ label, value, count }) => (
+        <div key={label}>
+          <div style={{ display:'flex', justifyContent:'space-between', fontSize:13, marginBottom:5, color:'#374151' }}>
+            <span style={{ fontWeight:500 }}>{label}</span>
+            <span style={{ color:'#6b7280' }}>
+              {valueLabel === 'cost' ? formatCurrency(value) : value}
+              {count !== undefined && <span style={{ marginLeft:6, color:'#9ca3af' }}>({count})</span>}
+            </span>
+          </div>
+          <div style={{ height:8, background:'#f1f5f9', borderRadius:99, overflow:'hidden' }}>
+            <div style={{
+              height:'100%', width:`${(value/max)*100}%`,
+              background: colorFn ? colorFn(label) : 'linear-gradient(90deg,#2563eb,#3b82f6)',
+              borderRadius:99, transition:'width 0.6s ease',
+            }}/>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function DonutChart({ segments, size = 120 }) {
+  const total = segments.reduce((s, x) => s + x.value, 0);
+  if (!total) return null;
+  let offset = 0;
+  const cx = size/2, cy = size/2, r = size*0.38, stroke = size*0.18;
+  const circumference = 2 * Math.PI * r;
+  return (
+    <div style={{ display:'flex', alignItems:'center', gap:20 }}>
+      <svg width={size} height={size} style={{ flexShrink:0 }}>
+        {segments.map((seg, i) => {
+          const pct = seg.value / total;
+          const dash = pct * circumference;
+          const gap = circumference - dash;
+          const el = (
+            <circle key={i} cx={cx} cy={cy} r={r}
+              fill="none" stroke={seg.color} strokeWidth={stroke}
+              strokeDasharray={`${dash} ${gap}`}
+              strokeDashoffset={-offset * circumference}
+              style={{ transition:'all 0.5s ease' }}
+            />
+          );
+          offset += pct;
+          return el;
+        })}
+        <text x={cx} y={cy+5} textAnchor="middle" fontSize={size*0.18} fontWeight={700} fill="#1a1d23">{total}</text>
+      </svg>
+      <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
+        {segments.map(seg => (
+          <div key={seg.label} style={{ display:'flex', alignItems:'center', gap:7, fontSize:13 }}>
+            <div style={{ width:10, height:10, borderRadius:'50%', background:seg.color, flexShrink:0 }}/>
+            <span style={{ color:'#374151' }}>{seg.label}</span>
+            <span style={{ color:'#9ca3af', marginLeft:'auto', paddingLeft:12 }}>{seg.value}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function Dashboard() {
-  const [vendors, setVendors] = useState([]);
+  const [distributors, setDistributors] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.getVendors({ limit: 100 }).then(d => { setVendors(d.distributors || []); setLoading(false); });
+    api.getVendors({ limit: 200 }).then(d => {
+      setDistributors(d.distributors || []);
+      setLoading(false);
+    });
   }, []);
 
-  const active   = vendors.filter(v => v.status === 'Active').length;
-  const pending  = vendors.filter(v => v.status === 'Pending').length;
-  const inactive = vendors.filter(v => v.status === 'Inactive').length;
+  const allProducts = distributors.flatMap(d => (d.products || []).map(p => ({ ...p, distributorName: d.name })));
+
+  const active   = distributors.filter(v => v.status === 'Active').length;
+  const pending  = distributors.filter(v => v.status === 'Pending').length;
+  const inactive = distributors.filter(v => v.status === 'Inactive').length;
+  const totalProducts = allProducts.length;
+  const totalCost = allProducts.reduce((s, p) => s + (parseFloat(p.cost) || 0), 0);
 
   const stats = [
-    { label: 'Total Vendors', value: vendors.length, icon: Users,        color: '#2563eb', bg: '#eff6ff', iconBg: '#dbeafe' },
-    { label: 'Active',        value: active,          icon: CheckCircle,  color: '#16a34a', bg: '#f0fdf4', iconBg: '#dcfce7' },
-    { label: 'Pending',       value: pending,         icon: Clock,        color: '#d97706', bg: '#fffbeb', iconBg: '#fef3c7' },
-    { label: 'Inactive',      value: inactive,        icon: XCircle,      color: '#dc2626', bg: '#fef2f2', iconBg: '#fee2e2' },
+    { label:'Total Distributors', value: distributors.length, icon: Users,        color:'#2563eb', bg:'#eff6ff' },
+    { label:'Active',             value: active,               icon: CheckCircle,  color:'#16a34a', bg:'#f0fdf4' },
+    { label:'Pending',            value: pending,              icon: Clock,        color:'#d97706', bg:'#fffbeb' },
+    { label:'Inactive',           value: inactive,             icon: XCircle,      color:'#dc2626', bg:'#fef2f2' },
+    { label:'Total Products',     value: totalProducts,        icon: Package,      color:'#7c3aed', bg:'#f5f3ff' },
+    { label:'Total Cost',         value: formatCurrency(totalCost), icon: DollarSign, color:'#0891b2', bg:'#ecfeff', isText:true },
   ];
 
-  const categories = vendors.reduce((acc, d) => {
-    (d.products || []).forEach(p => {
-      if (p.category) acc[p.category] = (acc[p.category] || 0) + 1;
-    });
-    return acc;
-  }, {});
+  // Cost by category
+  const byCat = {};
+  allProducts.forEach(p => {
+    if (!p.category) return;
+    byCat[p.category] = (byCat[p.category] || 0) + (parseFloat(p.cost) || 0);
+  });
+  const catData = Object.entries(byCat).sort((a,b)=>b[1]-a[1]).map(([label,value])=>({ label, value }));
+
+  // Cost by distributor
+  const byDist = {};
+  distributors.forEach(d => {
+    const cost = (d.products||[]).reduce((s,p)=>s+(parseFloat(p.cost)||0),0);
+    if (cost > 0) byDist[d.name] = cost;
+  });
+  const distData = Object.entries(byDist).sort((a,b)=>b[1]-a[1]).slice(0,8).map(([label,value])=>({ label, value }));
+
+  // Products by category (count)
+  const prodByCat = {};
+  allProducts.forEach(p => { if (p.category) prodByCat[p.category] = (prodByCat[p.category]||0)+1; });
+  const prodCatData = Object.entries(prodByCat).sort((a,b)=>b[1]-a[1]).map(([label,value])=>({ label, value }));
+
+  // Status donut
+  const statusSegments = [
+    { label:'Active',  value:active,  color:'#22c55e' },
+    { label:'Pending', value:pending, color:'#f59e0b' },
+    { label:'Inactive',value:inactive,color:'#94a3b8' },
+  ].filter(s=>s.value>0);
+
+  // Products per distributor
+  const prodByDist = distributors.map(d=>({ label:d.name, value:d.products?.length||0 }))
+    .filter(x=>x.value>0).sort((a,b)=>b.value-a.value).slice(0,8);
+
+  const COLORS = ['#2563eb','#7c3aed','#0891b2','#16a34a','#d97706','#dc2626','#6366f1','#ec4899'];
+
+  if (loading) return (
+    <div style={{ padding:32, display:'flex', alignItems:'center', justifyContent:'center', flex:1 }}>
+      <span style={{ color:'#9ca3af' }}>Loading dashboard…</span>
+    </div>
+  );
 
   return (
-    <div style={{ padding: 32 }}>
-      <h1 style={{ fontSize: 24, fontWeight: 700, marginBottom: 4, color: '#1a1d23' }}>Dashboard</h1>
-      <p style={{ color: '#6b7280', fontSize: 14, marginBottom: 28 }}>Overview of your vendor ecosystem</p>
+    <div style={{ padding:32, flex:1 }}>
+      <h1 style={{ fontSize:24, fontWeight:700, marginBottom:4, color:'#1a1d23' }}>Dashboard</h1>
+      <p style={{ color:'#6b7280', fontSize:14, marginBottom:24 }}>Overview of your vendor ecosystem</p>
 
       {/* Stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 28 }}>
-        {stats.map(({ label, value, icon: Icon, color, bg, iconBg }) => (
-          <div key={label} style={{
-            background: '#fff', border: '1px solid #e2e6ed',
-            borderRadius: 10, padding: 20,
-            boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-              <span style={{ fontSize: 13, color: '#6b7280', fontWeight: 500 }}>{label}</span>
-              <div style={{ width: 36, height: 36, borderRadius: 8, background: iconBg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Icon size={18} color={color} />
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(6, 1fr)', gap:14, marginBottom:24 }}>
+        {stats.map(({ label, value, icon:Icon, color, bg, isText }) => (
+          <div key={label} style={{ background:'#fff', border:'1px solid #e2e6ed', borderRadius:10, padding:18, boxShadow:'0 1px 3px rgba(0,0,0,0.04)' }}>
+            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:10 }}>
+              <span style={{ fontSize:12, color:'#6b7280', fontWeight:500, lineHeight:1.3 }}>{label}</span>
+              <div style={{ width:32, height:32, borderRadius:8, background:bg, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                <Icon size={16} color={color}/>
               </div>
             </div>
-            <div style={{ fontSize: 34, fontWeight: 700, color }}>
-              {loading ? '–' : value}
-            </div>
+            <div style={{ fontSize: isText ? 18 : 28, fontWeight:700, color }}>{value}</div>
           </div>
         ))}
       </div>
 
-      {/* Categories */}
-      <div style={{ background: '#fff', border: '1px solid #e2e6ed', borderRadius: 10, padding: 24, boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-        <h2 style={{ fontSize: 15, fontWeight: 600, marginBottom: 20, display: 'flex', alignItems: 'center', gap: 8, color: '#1a1d23' }}>
-          <TrendingUp size={16} color="#2563eb" /> Vendors by Category
-        </h2>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          {Object.entries(categories).map(([cat, count]) => {
-            const pct = vendors.length ? (count / vendors.length) * 100 : 0;
-            return (
-              <div key={cat}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 6, color: '#374151' }}>
-                  <span>{cat}</span>
-                  <span style={{ color: '#6b7280' }}>{count} vendor{count !== 1 ? 's' : ''}</span>
-                </div>
-                <div style={{ height: 6, background: '#f1f5f9', borderRadius: 99, overflow: 'hidden' }}>
-                  <div style={{
-                    height: '100%', width: `${pct}%`,
-                    background: 'linear-gradient(90deg, #2563eb, #3b82f6)',
-                    borderRadius: 99, transition: 'width 0.6s ease',
-                  }} />
-                </div>
-              </div>
-            );
-          })}
+      {/* Row 1 */}
+      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:16, marginBottom:16 }}>
+
+        {/* Status donut */}
+        <div style={{ background:'#fff', border:'1px solid #e2e6ed', borderRadius:10, padding:22, boxShadow:'0 1px 3px rgba(0,0,0,0.04)' }}>
+          <h2 style={{ fontSize:15, fontWeight:600, color:'#1a1d23', marginBottom:18, display:'flex', alignItems:'center', gap:8 }}>
+            <BarChart2 size={15} color="#2563eb"/> Distributor Status
+          </h2>
+          <DonutChart segments={statusSegments} size={130}/>
         </div>
+
+        {/* Products per distributor */}
+        <div style={{ background:'#fff', border:'1px solid #e2e6ed', borderRadius:10, padding:22, boxShadow:'0 1px 3px rgba(0,0,0,0.04)' }}>
+          <h2 style={{ fontSize:15, fontWeight:600, color:'#1a1d23', marginBottom:18, display:'flex', alignItems:'center', gap:8 }}>
+            <Package size={15} color="#7c3aed"/> Products per Distributor
+          </h2>
+          <BarChart data={prodByDist} colorFn={(_, i) => COLORS[prodByDist.findIndex(x=>x.label===_) % COLORS.length]} valueLabel="count"/>
+        </div>
+      </div>
+
+      {/* Row 2 */}
+      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:16, marginBottom:16 }}>
+
+        {/* Cost by category */}
+        <div style={{ background:'#fff', border:'1px solid #e2e6ed', borderRadius:10, padding:22, boxShadow:'0 1px 3px rgba(0,0,0,0.04)' }}>
+          <h2 style={{ fontSize:15, fontWeight:600, color:'#1a1d23', marginBottom:18, display:'flex', alignItems:'center', gap:8 }}>
+            <DollarSign size={15} color="#0891b2"/> Cost by Category
+          </h2>
+          <BarChart data={catData} colorFn={()=>'linear-gradient(90deg,#0891b2,#06b6d4)'} valueLabel="cost"/>
+        </div>
+
+        {/* Cost by distributor */}
+        <div style={{ background:'#fff', border:'1px solid #e2e6ed', borderRadius:10, padding:22, boxShadow:'0 1px 3px rgba(0,0,0,0.04)' }}>
+          <h2 style={{ fontSize:15, fontWeight:600, color:'#1a1d23', marginBottom:18, display:'flex', alignItems:'center', gap:8 }}>
+            <TrendingUp size={15} color="#16a34a"/> Cost by Distributor
+          </h2>
+          <BarChart data={distData} colorFn={()=>'linear-gradient(90deg,#16a34a,#22c55e)'} valueLabel="cost"/>
+        </div>
+      </div>
+
+      {/* Row 3 — products by category count */}
+      <div style={{ background:'#fff', border:'1px solid #e2e6ed', borderRadius:10, padding:22, boxShadow:'0 1px 3px rgba(0,0,0,0.04)' }}>
+        <h2 style={{ fontSize:15, fontWeight:600, color:'#1a1d23', marginBottom:18, display:'flex', alignItems:'center', gap:8 }}>
+          <TrendingUp size={15} color="#2563eb"/> Products by Category
+        </h2>
+        <BarChart data={prodCatData} colorFn={()=>'linear-gradient(90deg,#2563eb,#3b82f6)'} valueLabel="count"/>
       </div>
     </div>
   );

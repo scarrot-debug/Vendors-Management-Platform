@@ -1,7 +1,20 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { api } from '../api/client.js';
 import { useAuth } from '../hooks/useAuth.jsx';
-import { Plus, Search, Edit2, Trash2, RefreshCw, X, Check, ChevronDown, ChevronRight, Package, ChevronsDownUp, ChevronsUpDown, ArrowUpDown } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, RefreshCw, X, Check, ChevronDown, ChevronRight, Package, ChevronsDownUp, ChevronsUpDown, ArrowUpDown, GripVertical } from 'lucide-react';
+
+// Default column order — can be rearranged by drag & drop
+const DEFAULT_COLUMNS = [
+  { key: 'status',   label: 'Status' },
+  { key: 'name',     label: 'Distributor Name' },
+  { key: 'contact',  label: 'Contact' },
+  { key: 'email',    label: 'Email' },
+  { key: 'phone',    label: 'Phone' },
+  { key: 'mobile',   label: 'Mobile' },
+  { key: 'website',  label: 'Website' },
+  { key: 'products', label: 'Products' },
+  { key: 'actions',  label: 'Actions' },
+];
 
 const STATUS_STYLES = {
   Active:   { bg: '#dcfce7', color: '#16a34a', border: '#bbf7d0' },
@@ -137,44 +150,58 @@ function SortIcon({ field, sortField, sortDir }) {
     : <ChevronDown size={12} style={{ marginLeft:4, color:'#2563eb', transform:'rotate(180deg)' }}/>;
 }
 
-function SortableHeader({ label, field, sortField, sortDir, onSort, style }) {
+function DraggableHeader({ col, sortField, sortDir, onSort, onDragStart, onDragOver, onDrop, isDragOver }) {
+  const isSortable = !['website','actions'].includes(col.key);
   return (
-    <th onClick={()=>onSort(field)} style={{
-      padding:'11px 16px', textAlign:'left', color: sortField===field ? '#2563eb' : '#374151',
-      fontWeight:600, fontSize:13, cursor:'pointer', userSelect:'none',
-      whiteSpace:'nowrap', ...style,
-    }}>
-      <span style={{ display:'inline-flex', alignItems:'center' }}>
-        {label}<SortIcon field={field} sortField={sortField} sortDir={sortDir}/>
+    <th
+      draggable
+      onDragStart={e => onDragStart(e, col.key)}
+      onDragOver={e => { e.preventDefault(); onDragOver(col.key); }}
+      onDrop={e => { e.preventDefault(); onDrop(col.key); }}
+      onClick={() => isSortable && onSort(col.key)}
+      style={{
+        padding:'11px 16px', textAlign:'left',
+        color: sortField===col.key ? '#2563eb' : '#374151',
+        fontWeight:600, fontSize:13,
+        cursor: isSortable ? 'pointer' : 'default',
+        userSelect:'none', whiteSpace:'nowrap',
+        background: isDragOver ? '#eff6ff' : '#f8f9fb',
+        borderLeft: isDragOver ? '2px solid #2563eb' : '2px solid transparent',
+        transition:'background 0.15s',
+      }}
+    >
+      <span style={{ display:'inline-flex', alignItems:'center', gap:4 }}>
+        <GripVertical size={12} style={{ opacity:0.3, cursor:'grab' }}/>
+        {col.label}
+        {isSortable && <SortIcon field={col.key} sortField={sortField} sortDir={sortDir}/>}
       </span>
     </th>
   );
 }
 
-function DistributorRow({ dist, isViewer, open, onToggle, onEditDist, onDeleteDist, onAddProduct, onEditProduct, onDeleteProduct }) {
+function DistributorRow({ dist, isViewer, open, onToggle, columns, onEditDist, onDeleteDist, onAddProduct, onEditProduct, onDeleteProduct }) {
   const productCount = dist.products?.length || 0;
-  return (
-    <>
-      <tr style={{ background:'#fff', borderBottom: open ? 'none' : '1px solid #e2e6ed' }}>
-        <td style={{ padding:'13px 12px 13px 16px', width:36 }}>
-          <button onClick={onToggle} style={{ background:'none', border:'none', cursor:'pointer', color:'#6b7280', display:'flex', alignItems:'center', padding:2 }}>
-            {open ? <ChevronDown size={16}/> : <ChevronRight size={16}/>}
-          </button>
-        </td>
-        <td style={{ padding:'13px 12px' }}><StatusBadge status={dist.status}/></td>
-        <td style={{ padding:'13px 16px', fontWeight:700, color:'#1a1d23', fontSize:14 }}>
+
+  const renderCell = (key) => {
+    switch(key) {
+      case 'status': return <td key={key} style={{ padding:'13px 12px' }}><StatusBadge status={dist.status}/></td>;
+      case 'name': return (
+        <td key={key} style={{ padding:'13px 16px', fontWeight:700, color:'#1a1d23', fontSize:14 }}>
           {dist.website
-            ? <a href={dist.website.startsWith('http') ? dist.website : `https://${dist.website}`} target="_blank" rel="noreferrer" style={{ color:'#1a1d23', textDecoration:'none' }}
+            ? <a href={dist.website.startsWith('http') ? dist.website : `https://${dist.website}`} target="_blank" rel="noreferrer"
+                style={{ color:'#1a1d23', textDecoration:'none' }}
                 onMouseEnter={e=>e.currentTarget.style.color='#2563eb'} onMouseLeave={e=>e.currentTarget.style.color='#1a1d23'}>
                 {dist.name}
               </a>
             : dist.name}
         </td>
-        <td style={{ padding:'13px 16px', color:'#374151' }}>{dist.contact}</td>
-        <td style={{ padding:'13px 16px', color:'#6b7280', fontSize:13 }}>{dist.email}</td>
-        <td style={{ padding:'13px 16px', color:'#6b7280', fontSize:13 }}>{dist.phone}</td>
-        <td style={{ padding:'13px 16px', color:'#6b7280', fontSize:13 }}>{dist.mobile || '—'}</td>
-        <td style={{ padding:'13px 16px', fontSize:13 }}>
+      );
+      case 'contact': return <td key={key} style={{ padding:'13px 16px', color:'#374151' }}>{dist.contact || '—'}</td>;
+      case 'email':   return <td key={key} style={{ padding:'13px 16px', color:'#6b7280', fontSize:13 }}>{dist.email || '—'}</td>;
+      case 'phone':   return <td key={key} style={{ padding:'13px 16px', color:'#6b7280', fontSize:13 }}>{dist.phone || '—'}</td>;
+      case 'mobile':  return <td key={key} style={{ padding:'13px 16px', color:'#6b7280', fontSize:13 }}>{dist.mobile || '—'}</td>;
+      case 'website': return (
+        <td key={key} style={{ padding:'13px 16px', fontSize:13 }}>
           {dist.website ? (
             <a href={dist.website.startsWith('http') ? dist.website : `https://${dist.website}`}
               target="_blank" rel="noreferrer"
@@ -185,12 +212,16 @@ function DistributorRow({ dist, isViewer, open, onToggle, onEditDist, onDeleteDi
             </a>
           ) : '—'}
         </td>
-        <td style={{ padding:'13px 16px' }}>
+      );
+      case 'products': return (
+        <td key={key} style={{ padding:'13px 16px' }}>
           <span style={{ display:'inline-flex', alignItems:'center', gap:5, background:'#eff6ff', color:'#2563eb', borderRadius:6, padding:'3px 10px', fontSize:12, fontWeight:500 }}>
             <Package size={12}/> {productCount} product{productCount !== 1 ? 's' : ''}
           </span>
         </td>
-        <td style={{ padding:'13px 16px' }}>
+      );
+      case 'actions': return (
+        <td key={key} style={{ padding:'13px 16px' }}>
           {!isViewer && (
             <div style={{ display:'flex', gap:5 }}>
               <button onClick={()=>onAddProduct(dist)} style={{...btnStyle, padding:'4px 10px', background:'#f0fdf4', color:'#16a34a', border:'1px solid #bbf7d0', fontSize:12}}>
@@ -205,6 +236,20 @@ function DistributorRow({ dist, isViewer, open, onToggle, onEditDist, onDeleteDi
             </div>
           )}
         </td>
+      );
+      default: return <td key={key}/>;
+    }
+  };
+
+  return (
+    <>
+      <tr style={{ background:'#fff', borderBottom: open ? 'none' : '1px solid #e2e6ed' }}>
+        <td style={{ padding:'13px 12px 13px 16px', width:36 }}>
+          <button onClick={onToggle} style={{ background:'none', border:'none', cursor:'pointer', color:'#6b7280', display:'flex', alignItems:'center', padding:2 }}>
+            {open ? <ChevronDown size={16}/> : <ChevronRight size={16}/>}
+          </button>
+        </td>
+        {columns.map(col => renderCell(col.key))}
       </tr>
       {open && (
         <>
@@ -276,6 +321,25 @@ export default function Vendors() {
   const [categoryFilter, setCategoryFilter] = useState('All Categories');
   const [categories, setCategories] = useState([]);
   const [exporting, setExporting] = useState(false);
+  const [columns, setColumns] = useState(DEFAULT_COLUMNS);
+  const [dragOver, setDragOver] = useState(null);
+  const dragKey = useRef(null);
+
+  const handleDragStart = (e, key) => { dragKey.current = key; };
+  const handleDragOver = (key) => { setDragOver(key); };
+  const handleDrop = (targetKey) => {
+    if (!dragKey.current || dragKey.current === targetKey) { setDragOver(null); return; }
+    setColumns(prev => {
+      const cols = [...prev];
+      const fromIdx = cols.findIndex(c => c.key === dragKey.current);
+      const toIdx = cols.findIndex(c => c.key === targetKey);
+      const [moved] = cols.splice(fromIdx, 1);
+      cols.splice(toIdx, 0, moved);
+      return cols;
+    });
+    dragKey.current = null;
+    setDragOver(null);
+  };
 
   const toggleRow = (id) => setOpenRows(prev => {
     const next = new Set(prev);
@@ -413,24 +477,28 @@ export default function Vendors() {
       <div style={{ background:'#fff', border:'1px solid #e2e6ed', borderRadius:10, overflow:'hidden' }}>
         <table style={{ width:'100%', borderCollapse:'collapse', fontSize:14 }}>
           <thead>
-            <tr style={{ borderBottom:'1px solid #e2e6ed', background:'#f8f9fb' }}>
+            <tr style={{ borderBottom:'1px solid #e2e6ed', background:'#f8f9fb' }} onDragLeave={()=>setDragOver(null)}>
               <th style={{ width:36, padding:'11px 16px' }}/>
-              <SortableHeader label="Status" field="status" sortField={sortField} sortDir={sortDir} onSort={handleSort}/>
-              <SortableHeader label="Distributor Name" field="name" sortField={sortField} sortDir={sortDir} onSort={handleSort}/>
-              <SortableHeader label="Contact" field="contact" sortField={sortField} sortDir={sortDir} onSort={handleSort}/>
-              <SortableHeader label="Email" field="email" sortField={sortField} sortDir={sortDir} onSort={handleSort}/>
-              <SortableHeader label="Phone" field="phone" sortField={sortField} sortDir={sortDir} onSort={handleSort}/>
-              <SortableHeader label="Mobile" field="mobile" sortField={sortField} sortDir={sortDir} onSort={handleSort}/>
-              <th style={{ padding:'11px 16px', textAlign:'left', color:'#374151', fontWeight:600, fontSize:13 }}>Website</th>
-              <SortableHeader label="Products" field="products" sortField={sortField} sortDir={sortDir} onSort={handleSort}/>
-              <th style={{ padding:'11px 16px', textAlign:'left', color:'#374151', fontWeight:600, fontSize:13 }}>Actions</th>
+              {columns.map(col => (
+                <DraggableHeader
+                  key={col.key}
+                  col={col}
+                  sortField={sortField}
+                  sortDir={sortDir}
+                  onSort={handleSort}
+                  onDragStart={handleDragStart}
+                  onDragOver={handleDragOver}
+                  onDrop={handleDrop}
+                  isDragOver={dragOver === col.key}
+                />
+              ))}
             </tr>
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={10} style={{ padding:40, textAlign:'center', color:'#9ca3af' }}>Loading…</td></tr>
+              <tr><td colSpan={columns.length+1} style={{ padding:40, textAlign:'center', color:'#9ca3af' }}>Loading…</td></tr>
             ) : sorted.length === 0 ? (
-              <tr><td colSpan={10} style={{ padding:40, textAlign:'center', color:'#9ca3af' }}>No distributors found</td></tr>
+              <tr><td colSpan={columns.length+1} style={{ padding:40, textAlign:'center', color:'#9ca3af' }}>No distributors found</td></tr>
             ) : sorted.map(dist => (
               <DistributorRow
                 key={dist.id}
@@ -438,6 +506,7 @@ export default function Vendors() {
                 isViewer={isViewer}
                 open={openRows.has(dist.id)}
                 onToggle={() => toggleRow(dist.id)}
+                columns={columns}
                 onEditDist={d => setModal({type:'editDist', data:d})}
                 onDeleteDist={d => setDeleteConfirm({type:'dist', data:d})}
                 onAddProduct={d => setModal({type:'addProduct', dist:d})}
