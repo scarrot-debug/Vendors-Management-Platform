@@ -1,3 +1,5 @@
+# Fix SSL in pool.js - run this before every git push
+$content = @"
 const { Pool } = require('pg');
 
 const pool = new Pool({
@@ -14,3 +16,6 @@ pool.on('error', (err) => {
 });
 
 module.exports = pool;
+"@
+Set-Content -Path "backend\src\db\pool.js" -Value $content
+Write-Host "SSL fixed in pool.js" -ForegroundColor Green

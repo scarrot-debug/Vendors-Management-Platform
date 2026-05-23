@@ -413,6 +413,46 @@ export default function Vendors() {
 
   const totalPages = Math.ceil(data.total / limit);
 
+  const [importFile, setImportFile] = useState(null);
+  const [importing, setImporting] = useState(false);
+  const [showImportExport, setShowImportExport] = useState(false);
+  const fileInputRef = useRef(null);
+
+  const handleImport = async (file) => {
+    if (!file) return;
+    setImporting(true);
+    setShowImportExport(false);
+    try {
+      const text = await file.text();
+      const lines = text.trim().split('\n');
+      const headers = lines[0].replace(/"/g,'').split(',');
+      let created = 0;
+      for (let i = 1; i < lines.length; i++) {
+        const vals = lines[i].match(/(".*?"|[^,]+)(?=,|$)/g)?.map(v=>v.replace(/^"|"$/g,'').replace(/""/g,'"')) || [];
+        const row = {};
+        headers.forEach((h,idx) => row[h.trim()] = vals[idx]?.trim() || '');
+        if (!row['Distributor'] || row['Product']) continue; // skip product rows, only create distributors
+        if (row['Distributor']) {
+          try {
+            await api.createVendor({
+              name: row['Distributor'],
+              status: row['Status'] || 'Active',
+              contact: row['Contact'] || '',
+              email: row['Email'] || '',
+              phone: row['Phone'] || '',
+              mobile: row['Mobile'] || '',
+              website: row['Website'] || '',
+            });
+            created++;
+          } catch {}
+        }
+      }
+      alert(`Import complete! ${created} distributors imported.`);
+      load();
+    } catch (err) { alert('Import failed: ' + err.message); }
+    finally { setImporting(false); }
+  };
+
   return (
     <div style={{ padding:32, flex:1 }}>
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:24 }}>
@@ -420,20 +460,19 @@ export default function Vendors() {
           <h1 style={{ fontSize:24, fontWeight:700, marginBottom:4, color:'#1a1d23' }}>Vendors Management Platform</h1>
           <p style={{ color:'#6b7280', fontSize:14 }}>Manage your distributors and products</p>
         </div>
-        {!isViewer && (
-          <button onClick={()=>setModal({type:'addDist'})} style={{
-            display:'flex', alignItems:'center', gap:6, padding:'9px 18px',
-            borderRadius:8, border:'none', background:'#2563eb',
-            color:'#fff', fontSize:14, fontWeight:600, cursor:'pointer',
-            boxShadow:'0 2px 8px rgba(37,99,235,0.3)',
-          }}>
-            <Plus size={16}/> Add
-          </button>
-        )}
       </div>
 
       {/* Filters */}
-      <div style={{ display:'flex', gap:10, marginBottom:16, alignItems:'center' }}>
+      <div style={{ display:'flex', gap:10, marginBottom:16, alignItems:'center', flexWrap:'wrap' }}>
+        {!isViewer && (
+          <button onClick={()=>setModal({type:'addDist'})} style={{
+            display:'flex', alignItems:'center', gap:6, padding:'8px 16px',
+            borderRadius:8, border:'none', background:'#1a1d23',
+            color:'#fff', fontSize:13, fontWeight:600, cursor:'pointer',
+          }}>
+            <Plus size={15}/> Add
+          </button>
+        )}
         <div style={{ position:'relative', flex:1, maxWidth:280 }}>
           <Search size={14} style={{ position:'absolute', left:11, top:'50%', transform:'translateY(-50%)', color:'#9ca3af' }}/>
           <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search distributor…"
@@ -465,11 +504,37 @@ export default function Vendors() {
           {[10,25,50].map(n=><option key={n} value={n}>{n} / page</option>)}
         </select>
         {!isViewer && (
-          <button onClick={async()=>{ setExporting(true); try { await api.exportCSV(); } catch(e){ alert(e.message); } finally{ setExporting(false); } }}
-            disabled={exporting}
-            style={{...btnStyle, background:'#f0fdf4', color:'#16a34a', border:'1px solid #bbf7d0', padding:'7px 12px', fontSize:12}}>
-            {exporting ? 'Exporting…' : '⬇ Export CSV'}
-          </button>
+          <div style={{ position:'relative' }}>
+            <button onClick={()=>setShowImportExport(v=>!v)}
+              style={{...btnStyle, background:'#fff', color:'#374151', border:'1px solid #e2e6ed', padding:'7px 12px', fontSize:12}}>
+              ⇅ Export / Import <ChevronDown size={12} style={{ marginLeft:2 }}/>
+            </button>
+            {showImportExport && (
+              <div style={{
+                position:'absolute', top:'calc(100% + 6px)', right:0, zIndex:200,
+                background:'#fff', border:'1px solid #e2e6ed', borderRadius:8,
+                boxShadow:'0 8px 24px rgba(0,0,0,0.12)', minWidth:160, overflow:'hidden',
+              }}>
+                <button onClick={async()=>{ setShowImportExport(false); setExporting(true); try { await api.exportCSV(); } catch(e){ alert(e.message); } finally{ setExporting(false); } }}
+                  disabled={exporting}
+                  style={{ display:'flex', alignItems:'center', gap:8, width:'100%', padding:'10px 16px', background:'none', border:'none', fontSize:13, color:'#374151', cursor:'pointer', textAlign:'left' }}
+                  onMouseEnter={e=>e.currentTarget.style.background='#f4f6f9'}
+                  onMouseLeave={e=>e.currentTarget.style.background='none'}>
+                  ⬇ Export CSV
+                </button>
+                <div style={{ height:1, background:'#f1f5f9' }}/>
+                <button onClick={()=>{ setShowImportExport(false); fileInputRef.current?.click(); }}
+                  disabled={importing}
+                  style={{ display:'flex', alignItems:'center', gap:8, width:'100%', padding:'10px 16px', background:'none', border:'none', fontSize:13, color:'#374151', cursor:'pointer', textAlign:'left' }}
+                  onMouseEnter={e=>e.currentTarget.style.background='#f4f6f9'}
+                  onMouseLeave={e=>e.currentTarget.style.background='none'}>
+                  ⬆ Import CSV
+                </button>
+              </div>
+            )}
+            <input ref={fileInputRef} type="file" accept=".csv" style={{ display:'none' }}
+              onChange={e=>{ if(e.target.files[0]) handleImport(e.target.files[0]); e.target.value=''; }}/>
+          </div>
         )}
       </div>
 

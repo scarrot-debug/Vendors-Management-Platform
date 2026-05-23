@@ -1,3 +1,5 @@
+#!/bin/sh
+cat > backend/src/db/pool.js << 'POOLEOF'
 const { Pool } = require('pg');
 
 const pool = new Pool({
@@ -14,3 +16,6 @@ pool.on('error', (err) => {
 });
 
 module.exports = pool;
+POOLEOF
+git add backend/src/db/pool.js
+echo "SSL fix applied automatically"
