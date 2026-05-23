@@ -273,6 +273,9 @@ export default function Vendors() {
   const [sortField, setSortField] = useState('name');
   const [sortDir, setSortDir] = useState('asc');
   const [limit, setLimit] = useState(25);
+  const [categoryFilter, setCategoryFilter] = useState('All Categories');
+  const [categories, setCategories] = useState([]);
+  const [exporting, setExporting] = useState(false);
 
   const toggleRow = (id) => setOpenRows(prev => {
     const next = new Set(prev);
@@ -291,13 +294,15 @@ export default function Vendors() {
       const params = { page, limit };
       if (statusFilter !== 'All Status') params.status = statusFilter;
       if (search) params.search = search;
+      if (categoryFilter !== 'All Categories') params.category = categoryFilter;
       const res = await api.getVendors(params);
       setData(res);
     } finally { setLoading(false); }
-  }, [page, statusFilter, search]);
+  }, [page, statusFilter, search, categoryFilter, limit]);
 
   useEffect(() => { load(); }, [load]);
-  useEffect(() => { setPage(1); }, [search, statusFilter]);
+  useEffect(() => { setPage(1); }, [search, statusFilter, categoryFilter]);
+  useEffect(() => { api.getCategories().then(setCategories); }, []);
 
   // Client-side sort
   const sorted = [...(data.distributors || [])].sort((a, b) => {
@@ -380,6 +385,10 @@ export default function Vendors() {
           <option>All Status</option>
           {['Active','Pending','Inactive'].map(s=><option key={s}>{s}</option>)}
         </select>
+        <select value={categoryFilter} onChange={e=>setCategoryFilter(e.target.value)} style={{...inputStyle, width:'auto'}}>
+          <option>All Categories</option>
+          {categories.map(c=><option key={c}>{c}</option>)}
+        </select>
         <button onClick={load} style={{...btnStyle, background:'#fff', color:'#6b7280', border:'1px solid #e2e6ed', padding:'8px 12px'}}>
           <RefreshCw size={14}/>
         </button>
@@ -391,6 +400,13 @@ export default function Vendors() {
           style={{...inputStyle, width:'auto', fontSize:13}}>
           {[10,25,50].map(n=><option key={n} value={n}>{n} / page</option>)}
         </select>
+        {!isViewer && (
+          <button onClick={async()=>{ setExporting(true); try { await api.exportCSV(); } catch(e){ alert(e.message); } finally{ setExporting(false); } }}
+            disabled={exporting}
+            style={{...btnStyle, background:'#f0fdf4', color:'#16a34a', border:'1px solid #bbf7d0', padding:'7px 12px', fontSize:12}}>
+            {exporting ? 'Exporting…' : '⬇ Export CSV'}
+          </button>
+        )}
       </div>
 
       {/* Table */}

@@ -4,6 +4,7 @@ const pool = require('./db/pool');
 const vendorRoutes = require('./routes/vendors');
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
+const historyRoutes = require('./routes/history');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -75,6 +76,18 @@ async function initDB() {
       ON CONFLICT DO NOTHING
     `);
 
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS change_history (
+        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+        action VARCHAR(50) NOT NULL,
+        entity_type VARCHAR(50) NOT NULL,
+        entity_name VARCHAR(200),
+        details JSONB,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      )
+    `);
+
     console.log('DB initialized successfully');
   } catch (err) {
     console.error('DB init error:', err.message);
@@ -86,6 +99,7 @@ app.get('/api/health', (req, res) => res.json({ status: 'ok', version: 'v1.20260
 app.use('/api/auth', authRoutes);
 app.use('/api/vendors', vendorRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/history', historyRoutes);
 
 app.use((err, req, res, next) => {
   console.error(err.stack);

@@ -1,12 +1,18 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api/client.js';
 import { useAuth } from '../hooks/useAuth.jsx';
-import { Plus, Edit2, Trash2, KeyRound, Check, X, Shield, Eye, User } from 'lucide-react';
+import { Plus, Edit2, Trash2, KeyRound, Check, X, Shield, Eye, User, History } from 'lucide-react';
 
 const ROLE_STYLES = {
   admin:  { bg:'#eff6ff', color:'#1d4ed8', border:'#bfdbfe', icon: Shield },
   user:   { bg:'#f0fdf4', color:'#16a34a', border:'#bbf7d0', icon: User },
   viewer: { bg:'#f8f9fb', color:'#64748b', border:'#e2e8f0', icon: Eye },
+};
+
+const ACTION_STYLES = {
+  CREATE: { bg:'#f0fdf4', color:'#16a34a', label:'Created' },
+  UPDATE: { bg:'#eff6ff', color:'#2563eb', label:'Updated' },
+  DELETE: { bg:'#fef2f2', color:'#dc2626', label:'Deleted' },
 };
 
 const inputStyle = {
@@ -31,8 +37,7 @@ function RoleBadge({ role }) {
 
 function Modal({ title, onClose, children }) {
   return (
-    <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.4)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:1000 }}
-      onClick={e => e.target===e.currentTarget && onClose()}>
+    <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.4)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:1000 }}>
       <div style={{ background:'#fff', border:'1px solid #e2e6ed', borderRadius:12, padding:28, width:440, boxShadow:'0 20px 60px rgba(0,0,0,0.15)' }}>
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:22 }}>
           <h2 style={{ fontSize:17, fontWeight:600, color:'#1a1d23' }}>{title}</h2>
@@ -111,6 +116,82 @@ function ResetPasswordForm({ user, onSave, onCancel, saving }) {
   );
 }
 
+function HistorySection() {
+  const [history, setHistory] = useState([]);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const limit = 20;
+
+  useEffect(() => {
+    setLoading(true);
+    api.getHistory({ page, limit }).then(d => {
+      setHistory(d.history || []);
+      setTotal(d.total || 0);
+    }).catch(()=>{}).finally(()=>setLoading(false));
+  }, [page]);
+
+  const totalPages = Math.ceil(total / limit);
+
+  return (
+    <div style={{ background:'#fff', border:'1px solid #e2e6ed', borderRadius:10, overflow:'hidden', marginTop:24 }}>
+      <div style={{ padding:'16px 24px', borderBottom:'1px solid #e2e6ed', background:'#f8f9fb', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+        <div>
+          <h2 style={{ fontSize:16, fontWeight:600, color:'#1a1d23', marginBottom:2, display:'flex', alignItems:'center', gap:8 }}>
+            <History size={16} color="#2563eb"/> Change History
+          </h2>
+          <p style={{ fontSize:13, color:'#6b7280' }}>Track all changes made to the system</p>
+        </div>
+        <span style={{ fontSize:13, color:'#6b7280' }}>{total} records</span>
+      </div>
+      <table style={{ width:'100%', borderCollapse:'collapse', fontSize:13 }}>
+        <thead>
+          <tr style={{ borderBottom:'1px solid #e2e6ed', background:'#fafafa' }}>
+            {['Date & Time','User','Action','Type','Name'].map(h=>(
+              <th key={h} style={{ padding:'10px 20px', textAlign:'left', color:'#374151', fontWeight:600, fontSize:12, textTransform:'uppercase', letterSpacing:0.5 }}>{h}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {loading ? (
+            <tr><td colSpan={5} style={{ padding:32, textAlign:'center', color:'#9ca3af' }}>Loading…</td></tr>
+          ) : history.length === 0 ? (
+            <tr><td colSpan={5} style={{ padding:32, textAlign:'center', color:'#9ca3af' }}>No history yet</td></tr>
+          ) : history.map((h, i) => {
+            const s = ACTION_STYLES[h.action] || ACTION_STYLES.UPDATE;
+            return (
+              <tr key={h.id} style={{ borderBottom: i < history.length-1 ? '1px solid #f1f5f9' : 'none' }}>
+                <td style={{ padding:'11px 20px', color:'#6b7280', whiteSpace:'nowrap' }}>
+                  {new Date(h.created_at).toLocaleString('en-GB', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' })}
+                </td>
+                <td style={{ padding:'11px 20px', fontWeight:500, color:'#1a1d23' }}>{h.username || 'System'}</td>
+                <td style={{ padding:'11px 20px' }}>
+                  <span style={{ display:'inline-block', padding:'2px 9px', borderRadius:5, fontSize:11, fontWeight:600, background:s.bg, color:s.color }}>
+                    {s.label}
+                  </span>
+                </td>
+                <td style={{ padding:'11px 20px', color:'#6b7280', textTransform:'capitalize' }}>{h.entity_type}</td>
+                <td style={{ padding:'11px 20px', color:'#374151' }}>{h.entity_name}</td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+      {totalPages > 1 && (
+        <div style={{ padding:'12px 20px', borderTop:'1px solid #f1f5f9', display:'flex', gap:4, justifyContent:'flex-end' }}>
+          <button onClick={()=>setPage(p=>Math.max(1,p-1))} disabled={page===1}
+            style={{ padding:'4px 10px', borderRadius:6, border:'1px solid #e2e6ed', background:'#fff', cursor:'pointer', color: page===1?'#d1d5db':'#374151' }}>‹</button>
+          {Array.from({length:totalPages},(_,i)=>i+1).map(p=>(
+            <button key={p} onClick={()=>setPage(p)} style={{ padding:'4px 10px', borderRadius:6, border:'1px solid', borderColor:p===page?'#2563eb':'#e2e6ed', background:p===page?'#2563eb':'#fff', color:p===page?'#fff':'#374151', cursor:'pointer' }}>{p}</button>
+          ))}
+          <button onClick={()=>setPage(p=>Math.min(totalPages,p+1))} disabled={page>=totalPages}
+            style={{ padding:'4px 10px', borderRadius:6, border:'1px solid #e2e6ed', background:'#fff', cursor:'pointer', color:page>=totalPages?'#d1d5db':'#374151' }}>›</button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function Settings() {
   const { user: currentUser } = useAuth();
   const [users, setUsers] = useState([]);
@@ -167,7 +248,6 @@ export default function Settings() {
 
   return (
     <div style={{ padding:32, flex:1 }}>
-      {/* Toast */}
       {toast && (
         <div style={{
           position:'fixed', top:20, right:20, zIndex:2000,
@@ -182,9 +262,8 @@ export default function Settings() {
       <h1 style={{ fontSize:24, fontWeight:700, marginBottom:4, color:'#1a1d23' }}>Settings</h1>
       <p style={{ color:'#6b7280', fontSize:14, marginBottom:28 }}>System configuration and user management</p>
 
-      {/* User Management section */}
+      {/* User Management */}
       <div style={{ background:'#fff', border:'1px solid #e2e6ed', borderRadius:10, overflow:'hidden' }}>
-        {/* Section header */}
         <div style={{ padding:'16px 24px', borderBottom:'1px solid #e2e6ed', display:'flex', justifyContent:'space-between', alignItems:'center', background:'#f8f9fb' }}>
           <div>
             <h2 style={{ fontSize:16, fontWeight:600, color:'#1a1d23', marginBottom:2 }}>User Management</h2>
@@ -196,8 +275,6 @@ export default function Settings() {
             </button>
           )}
         </div>
-
-        {/* Users table */}
         <table style={{ width:'100%', borderCollapse:'collapse', fontSize:14 }}>
           <thead>
             <tr style={{ borderBottom:'1px solid #e2e6ed', background:'#fafafa' }}>
@@ -210,12 +287,9 @@ export default function Settings() {
             {loading ? (
               <tr><td colSpan={5} style={{ padding:32, textAlign:'center', color:'#9ca3af' }}>Loading…</td></tr>
             ) : users.map((u, i) => (
-              <tr key={u.id} style={{
-                borderBottom: i < users.length-1 ? '1px solid #f1f5f9' : 'none',
-                background: u.username === currentUser?.username ? '#fafeff' : '#fff',
-              }}
+              <tr key={u.id} style={{ borderBottom: i < users.length-1 ? '1px solid #f1f5f9' : 'none', background: u.username===currentUser?.username ? '#fafeff' : '#fff' }}
                 onMouseEnter={e=>e.currentTarget.style.background='#f8f9fb'}
-                onMouseLeave={e=>e.currentTarget.style.background= u.username===currentUser?.username ? '#fafeff' : '#fff'}
+                onMouseLeave={e=>e.currentTarget.style.background=u.username===currentUser?.username?'#fafeff':'#fff'}
               >
                 <td style={{ padding:'13px 20px' }}>
                   <div style={{ display:'flex', alignItems:'center', gap:9 }}>
@@ -227,7 +301,7 @@ export default function Settings() {
                     }}>{u.username[0].toUpperCase()}</div>
                     <div>
                       <div style={{ fontWeight:600, color:'#1a1d23' }}>{u.username}</div>
-                      {u.username === currentUser?.username && <div style={{ fontSize:11, color:'#2563eb' }}>You</div>}
+                      {u.username===currentUser?.username && <div style={{ fontSize:11, color:'#2563eb' }}>You</div>}
                     </div>
                   </div>
                 </td>
@@ -245,7 +319,7 @@ export default function Settings() {
                       <button onClick={()=>setModal({type:'reset', data:u})} style={{...btnStyle, padding:'5px 11px', background:'#fff', color:'#d97706', border:'1px solid #fde68a', fontSize:12}}>
                         <KeyRound size={12}/> Reset
                       </button>
-                      {u.username !== currentUser?.username && (
+                      {u.username!==currentUser?.username && (
                         <button onClick={()=>setDeleteConfirm(u)} style={{...btnStyle, padding:'5px 9px', background:'#fff', color:'#dc2626', border:'1px solid #fee2e2', fontSize:12}}>
                           <Trash2 size={12}/>
                         </button>
@@ -257,31 +331,28 @@ export default function Settings() {
             ))}
           </tbody>
         </table>
-
-        {/* Role legend */}
         <div style={{ padding:'12px 24px', borderTop:'1px solid #f1f5f9', background:'#fafafa', display:'flex', gap:20 }}>
           <span style={{ fontSize:12, color:'#9ca3af' }}>Roles:</span>
-          {Object.entries(ROLE_STYLES).map(([role]) => (
-            <RoleBadge key={role} role={role}/>
-          ))}
-          <span style={{ fontSize:12, color:'#9ca3af', marginLeft:'auto' }}>
-            {users.length} user{users.length!==1?'s':''}
-          </span>
+          {Object.keys(ROLE_STYLES).map(role=><RoleBadge key={role} role={role}/>)}
+          <span style={{ fontSize:12, color:'#9ca3af', marginLeft:'auto' }}>{users.length} user{users.length!==1?'s':''}</span>
         </div>
       </div>
 
+      {/* History */}
+      <HistorySection/>
+
       {/* Modals */}
-      {modal?.type === 'add' && (
+      {modal?.type==='add' && (
         <Modal title="Add New User" onClose={()=>setModal(null)}>
           <UserForm onSave={handleSaveUser} onCancel={()=>setModal(null)} saving={saving}/>
         </Modal>
       )}
-      {modal?.type === 'edit' && (
+      {modal?.type==='edit' && (
         <Modal title={`Edit User — ${modal.data.username}`} onClose={()=>setModal(null)}>
           <UserForm initial={modal.data} isEdit onSave={handleSaveUser} onCancel={()=>setModal(null)} saving={saving}/>
         </Modal>
       )}
-      {modal?.type === 'reset' && (
+      {modal?.type==='reset' && (
         <Modal title="Reset Password" onClose={()=>setModal(null)}>
           <ResetPasswordForm user={modal.data} onSave={handleResetPassword} onCancel={()=>setModal(null)} saving={saving}/>
         </Modal>
