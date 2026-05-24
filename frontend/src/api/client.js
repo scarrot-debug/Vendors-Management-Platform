@@ -47,6 +47,9 @@ export const api = {
   resetPassword: (id, password) => req(`/users/${id}/reset-password`, { method: 'POST', body: JSON.stringify({ password }) }),
   getHistory: (params = {}) => req(`/history?${new URLSearchParams(params)}`),
   getSettings: () => req('/settings'),
+  getMyPermissions: () => req('/settings/my-permissions'),
   setSessionTimeout: (value) => req('/settings/session-timeout', { method: 'PUT', body: JSON.stringify({ value }) }),
   setLogo: (logo) => req('/settings/logo', { method: 'PUT', body: JSON.stringify({ logo }) }),
+  getUserPermissions: (id) => req(`/users/${id}/permissions`),
+  updateUserPermissions: (id, perms) => req(`/users/${id}/permissions`, { method: 'PUT', body: JSON.stringify(perms) }),
 };

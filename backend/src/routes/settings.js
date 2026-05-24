@@ -9,6 +9,25 @@ function adminOnly(req, res, next) {
   next();
 }
 
+// GET /api/settings/my-permissions — for logged in user
+router.get('/my-permissions', auth, async (req, res) => {
+  try {
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!req.user?.id || !uuidRegex.test(req.user.id)) {
+      return res.json({ can_see_cost_price: true, can_see_customer_price: true });
+    }
+    const result = await pool.query(
+      'SELECT * FROM user_permissions WHERE user_id=$1', [req.user.id]
+    );
+    if (!result.rows.length) {
+      return res.json({ can_see_cost_price: true, can_see_customer_price: true });
+    }
+    res.json(result.rows[0]);
+  } catch (err) {
+    res.json({ can_see_cost_price: true, can_see_customer_price: true });
+  }
+});
+
 // GET /api/settings
 router.get('/', auth, async (req, res) => {
   try {

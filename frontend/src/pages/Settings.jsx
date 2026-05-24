@@ -116,7 +116,65 @@ function ResetPasswordForm({ user, onSave, onCancel, saving }) {
   );
 }
 
-function HistorySection() {
+function PermissionsModal({ user, onClose }) {
+  const [perms, setPerms] = useState({ can_see_cost_price: true, can_see_customer_price: true });
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    api.getUserPermissions(user.id).then(p => {
+      setPerms(p);
+      setLoading(false);
+    });
+  }, [user.id]);
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await api.updateUserPermissions(user.id, perms);
+      onClose();
+    } catch (err) { alert(err.message); }
+    finally { setSaving(false); }
+  };
+
+  return (
+    <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.4)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:1000 }}>
+      <div style={{ background:'#fff', border:'1px solid #e2e6ed', borderRadius:12, padding:28, width:420, boxShadow:'0 20px 60px rgba(0,0,0,0.15)' }}>
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:20 }}>
+          <h2 style={{ fontSize:16, fontWeight:600, color:'#1a1d23' }}>Field Permissions — {user.username}</h2>
+          <button onClick={onClose} style={{ background:'none', border:'none', color:'#6b7280', cursor:'pointer' }}><X size={20}/></button>
+        </div>
+        {loading ? <div style={{ textAlign:'center', color:'#9ca3af', padding:20 }}>Loading…</div> : (
+          <div style={{ display:'flex', flexDirection:'column', gap:16 }}>
+            <p style={{ fontSize:13, color:'#6b7280' }}>Choose which price fields this user can see:</p>
+            {[
+              { key:'can_see_cost_price', label:'Cost Price', desc:'Purchase/cost price of products' },
+              { key:'can_see_customer_price', label:'Customer Price', desc:'Selling price to customers' },
+            ].map(({ key, label, desc }) => (
+              <label key={key} style={{ display:'flex', alignItems:'center', gap:12, padding:'12px 16px', borderRadius:8, border:'1px solid #e2e6ed', cursor:'pointer', background: perms[key] ? '#f0fdf4' : '#fafafa' }}>
+                <input type="checkbox" checked={perms[key]} onChange={e => setPerms(p => ({...p, [key]: e.target.checked}))}
+                  style={{ width:16, height:16, cursor:'pointer' }}/>
+                <div>
+                  <div style={{ fontWeight:600, fontSize:14, color:'#1a1d23' }}>{label}</div>
+                  <div style={{ fontSize:12, color:'#6b7280' }}>{desc}</div>
+                </div>
+                <span style={{ marginLeft:'auto', fontSize:12, fontWeight:600, color: perms[key] ? '#16a34a' : '#9ca3af' }}>
+                  {perms[key] ? 'Visible ✓' : 'Hidden'}
+                </span>
+              </label>
+            ))}
+            <div style={{ display:'flex', gap:10, justifyContent:'flex-end', marginTop:8 }}>
+              <button onClick={onClose} style={{ padding:'8px 16px', borderRadius:7, border:'1px solid #e2e6ed', background:'#f4f6f9', color:'#6b7280', cursor:'pointer', fontSize:13 }}>Cancel</button>
+              <button onClick={handleSave} disabled={saving} style={{ padding:'8px 16px', borderRadius:7, border:'none', background:'#1a1d23', color:'#fff', cursor:'pointer', fontSize:13, fontWeight:500 }}>
+                {saving ? 'Saving…' : 'Save Permissions'}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
   const [history, setHistory] = useState([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -194,7 +252,7 @@ function HistorySection() {
 
 export default function Settings() {
   const { user: currentUser, sessionTimeout, updateSessionTimeout, logo, updateLogo } = useAuth();
-  const logoFileRef = useRef(null);
+  const [permissionsUser, setPermissionsUser] = useState(null);
   const [logoUploading, setLogoUploading] = useState(false);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -272,7 +330,7 @@ export default function Settings() {
             <p style={{ fontSize:13, color:'#6b7280' }}>Add, edit or remove system users</p>
           </div>
           {isAdmin && (
-            <button onClick={()=>setModal({type:'add'})} style={{...btnStyle, background:'#1a1d23', color:'#fff'}}>
+            <button onClick={()=>setModal({type:'add'})} style={{...btnStyle, background:'#1a1d23', color:'#fff'}>
               <Plus size={15}/> Add User
             </button>
           )}
@@ -317,6 +375,9 @@ export default function Settings() {
                     <div style={{ display:'flex', gap:5 }}>
                       <button onClick={()=>setModal({type:'edit', data:u})} style={{...btnStyle, padding:'5px 11px', background:'#fff', color:'#2563eb', border:'1px solid #e2e6ed', fontSize:12}}>
                         <Edit2 size={12}/> Edit
+                      </button>
+                      <button onClick={()=>setPermissionsUser(u)} style={{...btnStyle, padding:'5px 11px', background:'#fff', color:'#7c3aed', border:'1px solid #e9d5ff', fontSize:12}}>
+                        🔒 Permissions
                       </button>
                       <button onClick={()=>setModal({type:'reset', data:u})} style={{...btnStyle, padding:'5px 11px', background:'#fff', color:'#d97706', border:'1px solid #fde68a', fontSize:12}}>
                         <KeyRound size={12}/> Reset
@@ -435,6 +496,10 @@ export default function Settings() {
           </div>
         </div>
       </div>
+
+      {permissionsUser && (
+        <PermissionsModal user={permissionsUser} onClose={()=>setPermissionsUser(null)}/>
+      )}
 
       {/* History */}
       <HistorySection/>

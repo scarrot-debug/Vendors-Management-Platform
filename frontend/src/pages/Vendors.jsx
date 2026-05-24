@@ -287,14 +287,18 @@ function DistributorRow({ dist, isViewer, open, onToggle, columns, onEditDist, o
               <td style={{ padding:'10px 16px', color:'#6b7280', fontSize:13 }}>{p.category || '—'}</td>
               <td style={{ padding:'10px 16px', color:'#6b7280', fontSize:13 }}>{p.description || '—'}</td>
               <td style={{ padding:'10px 16px' }}>
-                <span style={{ fontWeight:700, color:'#1a1d23', fontVariantNumeric:'tabular-nums', fontSize:14 }}>
-                  {formatCost(p.cost, p.currency)}
-                </span>
+                {permissions?.can_see_cost_price !== false ? (
+                  <span style={{ fontWeight:700, color:'#1a1d23', fontVariantNumeric:'tabular-nums', fontSize:14 }}>
+                    {formatCost(p.cost, p.currency)}
+                  </span>
+                ) : <span style={{ color:'#d1d5db', fontSize:13 }}>—</span>}
               </td>
               <td style={{ padding:'10px 16px' }}>
-                <span style={{ fontWeight:700, color:'#16a34a', fontVariantNumeric:'tabular-nums', fontSize:14 }}>
-                  {formatCost(p.customer_price, p.currency)}
-                </span>
+                {permissions?.can_see_customer_price !== false ? (
+                  <span style={{ fontWeight:700, color:'#16a34a', fontVariantNumeric:'tabular-nums', fontSize:14 }}>
+                    {formatCost(p.customer_price, p.currency)}
+                  </span>
+                ) : <span style={{ color:'#d1d5db', fontSize:13 }}>—</span>}
               </td>
               <td style={{ padding:'10px 16px' }}>
                 {!isViewer && (
@@ -317,7 +321,7 @@ function DistributorRow({ dist, isViewer, open, onToggle, columns, onEditDist, o
 }
 
 export default function Vendors() {
-  const { user } = useAuth();
+  const { user, permissions } = useAuth();
   const isViewer = user?.role === 'viewer';
   const [data, setData] = useState({ distributors: [], total: 0 });
   const [loading, setLoading] = useState(true);

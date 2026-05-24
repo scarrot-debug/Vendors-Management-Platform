@@ -19,6 +19,7 @@ export function AuthProvider({ children }) {
   });
   const [sessionTimeout, setSessionTimeout] = useState(30);
   const [logo, setLogo] = useState('');
+  const [permissions, setPermissions] = useState({ can_see_cost_price: true, can_see_customer_price: true });
   const timer = useRef(null);
 
   // Load global settings from server
@@ -27,6 +28,9 @@ export function AuthProvider({ children }) {
     api.getSettings().then(s => {
       setSessionTimeout(parseInt(s.session_timeout) || 30);
       setLogo(s.logo || '');
+    }).catch(() => {});
+    api.getMyPermissions().then(p => {
+      setPermissions(p);
     }).catch(() => {});
   }, [user]);
 
@@ -82,7 +86,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, sessionTimeout, updateSessionTimeout, logo, updateLogo }}>
+    <AuthContext.Provider value={{ user, login, logout, sessionTimeout, updateSessionTimeout, logo, updateLogo, permissions }}>
       {children}
     </AuthContext.Provider>
   );

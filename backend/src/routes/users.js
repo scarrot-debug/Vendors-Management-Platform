@@ -88,3 +88,43 @@ router.delete('/:id', auth, adminOnly, async (req, res) => {
 });
 
 module.exports = router;
+
+// GET /api/users/:id/permissions
+router.get('/:id/permissions', auth, adminOnly, async (req, res) => {
+  try {
+    const result = await pool.query(
+      'SELECT * FROM user_permissions WHERE user_id=$1',
+      [req.params.id]
+    );
+    if (!result.rows.length) {
+      // Default: can see everything
+      return res.json({ can_see_cost_price: true, can_see_customer_price: true });
+    }
+    res.json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch permissions' });
+  }
+});
+
+// PUT /api/users/:id/permissions
+router.put('/:id/permissions', auth, adminOnly, async (req, res) => {
+  try {
+    const { can_see_cost_price, can_see_customer_price } = req.body;
+    const user = await pool.query('SELECT username FROM users WHERE id=$1', [req.params.id]);
+    await pool.query(
+      `INSERT INTO user_permissions (user_id, can_see_cost_price, can_see_customer_price)
+       VALUES ($1, $2, $3)
+       ON CONFLICT (user_id) DO UPDATE SET
+         can_see_cost_price=$2, can_see_customer_price=$3, updated_at=NOW()`,
+      [req.params.id, can_see_cost_price, can_see_customer_price]
+    );
+    await logHistory(req.user?.id, 'UPDATE', 'user', user.rows[0]?.username, {
+      action: 'Permissions updated',
+      can_see_cost_price,
+      can_see_customer_price
+    });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update permissions' });
+  }
+});
