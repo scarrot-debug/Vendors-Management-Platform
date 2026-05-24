@@ -3,8 +3,8 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const pool = require('../db/pool');
 const auth = require('../middleware/auth');
+const logHistory = require('../middleware/logHistory');
 
-// Only admins
 function adminOnly(req, res, next) {
   if (req.user?.role !== 'admin') return res.status(403).json({ error: 'Admin only' });
   next();
@@ -30,6 +30,7 @@ router.post('/', auth, adminOnly, async (req, res) => {
       `INSERT INTO users (username, email, password_hash, role) VALUES ($1,$2,$3,$4) RETURNING id, username, email, role, created_at`,
       [username, email, hash, role || 'viewer']
     );
+    await logHistory(req.user?.id, 'CREATE', 'user', username, { role, email });
     res.status(201).json(result.rows[0]);
   } catch (err) {
     if (err.code === '23505') return res.status(400).json({ error: 'Username or email already exists' });
@@ -46,6 +47,7 @@ router.put('/:id', auth, adminOnly, async (req, res) => {
       [username, email, role, req.params.id]
     );
     if (!result.rows.length) return res.status(404).json({ error: 'User not found' });
+    await logHistory(req.user?.id, 'UPDATE', 'user', username, { role, email });
     res.json(result.rows[0]);
   } catch (err) {
     if (err.code === '23505') return res.status(400).json({ error: 'Username or email already exists' });
@@ -60,10 +62,11 @@ router.post('/:id/reset-password', auth, adminOnly, async (req, res) => {
     if (!password || password.length < 6) return res.status(400).json({ error: 'Password must be at least 6 characters' });
     const hash = await bcrypt.hash(password, 10);
     const result = await pool.query(
-      `UPDATE users SET password_hash=$1 WHERE id=$2 RETURNING id`,
+      `UPDATE users SET password_hash=$1 WHERE id=$2 RETURNING id, username`,
       [hash, req.params.id]
     );
     if (!result.rows.length) return res.status(404).json({ error: 'User not found' });
+    await logHistory(req.user?.id, 'UPDATE', 'user', result.rows[0].username, { action: 'Password reset' });
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: 'Failed to reset password' });
@@ -73,10 +76,11 @@ router.post('/:id/reset-password', auth, adminOnly, async (req, res) => {
 // DELETE /api/users/:id
 router.delete('/:id', auth, adminOnly, async (req, res) => {
   try {
-    // prevent self-delete
     if (req.params.id === req.user.id) return res.status(400).json({ error: 'Cannot delete your own account' });
+    const user = await pool.query('SELECT username FROM users WHERE id=$1', [req.params.id]);
     const result = await pool.query('DELETE FROM users WHERE id=$1 RETURNING id', [req.params.id]);
     if (!result.rows.length) return res.status(404).json({ error: 'User not found' });
+    await logHistory(req.user?.id, 'DELETE', 'user', user.rows[0]?.username, {});
     res.json({ deleted: true });
   } catch (err) {
     res.status(500).json({ error: 'Failed to delete user' });

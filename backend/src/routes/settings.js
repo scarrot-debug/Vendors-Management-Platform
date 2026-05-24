@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../db/pool');
 const auth = require('../middleware/auth');
+const logHistory = require('../middleware/logHistory');
 
 function adminOnly(req, res, next) {
   if (req.user?.role !== 'admin') return res.status(403).json({ error: 'Admin only' });
@@ -32,6 +33,8 @@ router.put('/session-timeout', auth, adminOnly, async (req, res) => {
        ON CONFLICT (key) DO UPDATE SET value=$1, updated_at=NOW()`,
       [value.toString()]
     );
+    const label = value === 0 || value === '0' ? 'Never' : `${value} minutes`;
+    await logHistory(req.user?.id, 'UPDATE', 'setting', 'Session Timeout', { value: label });
     res.json({ success: true, session_timeout: value });
   } catch (err) {
     res.status(500).json({ error: 'Failed to save setting' });
@@ -41,8 +44,7 @@ router.put('/session-timeout', auth, adminOnly, async (req, res) => {
 // PUT /api/settings/logo
 router.put('/logo', auth, adminOnly, async (req, res) => {
   try {
-    const { logo } = req.body; // base64 string or empty string to remove
-    // Limit size to ~500KB base64
+    const { logo } = req.body;
     if (logo && logo.length > 700000) {
       return res.status(400).json({ error: 'Image too large. Max 500KB.' });
     }
@@ -51,6 +53,7 @@ router.put('/logo', auth, adminOnly, async (req, res) => {
        ON CONFLICT (key) DO UPDATE SET value=$1, updated_at=NOW()`,
       [logo || '']
     );
+    await logHistory(req.user?.id, logo ? 'UPDATE' : 'DELETE', 'setting', 'Sidebar Logo', { action: logo ? 'Logo uploaded' : 'Logo removed' });
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: 'Failed to save logo' });
