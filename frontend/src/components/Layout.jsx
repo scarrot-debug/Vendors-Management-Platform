@@ -19,11 +19,14 @@ const NAV = [
 ];
 
 export default function Layout() {
-  const { user, logout } = useAuth();
+  const { user, logout, logo } = useAuth();
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
 
   const handleLogout = () => { logout(); navigate('/login'); };
+
+  const DEFAULT_LOGO = "https://www.one1.co.il/wp-content/uploads/2024/11/dark_logo.webp";
+  const logoSrc = logo || DEFAULT_LOGO;
 
   return (
     <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
@@ -43,8 +46,8 @@ export default function Layout() {
           minHeight: 68,
         }}>
           <img
-            src="https://www.one1.co.il/wp-content/uploads/2024/11/dark_logo.webp"
-            alt="ONE Logo"
+            src={logoSrc}
+            alt="Logo"
             style={{
               height: 30, objectFit: 'contain',
               maxWidth: collapsed ? 32 : 160,

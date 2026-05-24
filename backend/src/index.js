@@ -103,6 +103,12 @@ async function initDB() {
       ON CONFLICT DO NOTHING
     `);
 
+    // Default logo: empty
+    await pool.query(`
+      INSERT INTO system_settings (key, value) VALUES ('logo', '')
+      ON CONFLICT DO NOTHING
+    `);
+
     console.log('DB initialized successfully');
   } catch (err) {
     console.error('DB init error:', err.message);

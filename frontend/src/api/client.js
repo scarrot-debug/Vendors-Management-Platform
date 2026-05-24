@@ -48,4 +48,5 @@ export const api = {
   getHistory: (params = {}) => req(`/history?${new URLSearchParams(params)}`),
   getSettings: () => req('/settings'),
   setSessionTimeout: (value) => req('/settings/session-timeout', { method: 'PUT', body: JSON.stringify({ value }) }),
+  setLogo: (logo) => req('/settings/logo', { method: 'PUT', body: JSON.stringify({ logo }) }),
 };

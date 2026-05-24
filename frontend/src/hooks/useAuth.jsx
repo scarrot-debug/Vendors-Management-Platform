@@ -18,13 +18,15 @@ export function AuthProvider({ children }) {
     try { return JSON.parse(localStorage.getItem('user')); } catch { return null; }
   });
   const [sessionTimeout, setSessionTimeout] = useState(30);
+  const [logo, setLogo] = useState('');
   const timer = useRef(null);
 
-  // Load global session timeout from server
+  // Load global settings from server
   useEffect(() => {
     if (!user) return;
     api.getSettings().then(s => {
       setSessionTimeout(parseInt(s.session_timeout) || 30);
+      setLogo(s.logo || '');
     }).catch(() => {});
   }, [user]);
 
@@ -37,7 +39,7 @@ export function AuthProvider({ children }) {
 
   const resetTimer = useCallback(() => {
     if (timer.current) clearTimeout(timer.current);
-    if (sessionTimeout === 0) return; // Never timeout
+    if (sessionTimeout === 0) return;
     timer.current = setTimeout(() => {
       logout();
       alert('Your session has expired. Please log in again.');
@@ -70,8 +72,17 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const updateLogo = async (base64) => {
+    try {
+      await api.setLogo(base64);
+      setLogo(base64);
+    } catch (err) {
+      alert('Failed to save logo: ' + err.message);
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, logout, sessionTimeout, updateSessionTimeout }}>
+    <AuthContext.Provider value={{ user, login, logout, sessionTimeout, updateSessionTimeout, logo, updateLogo }}>
       {children}
     </AuthContext.Provider>
   );

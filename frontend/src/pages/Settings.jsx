@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { api } from '../api/client.js';
 import { useAuth, SESSION_OPTIONS } from '../hooks/useAuth.jsx';
-import { Plus, Edit2, Trash2, KeyRound, Check, X, Shield, Eye, User, History, Clock } from 'lucide-react';
+import { Plus, Edit2, Trash2, KeyRound, Check, X, Shield, Eye, User, History, Clock, Image, Upload } from 'lucide-react';
 
 const ROLE_STYLES = {
   admin:  { bg:'#eff6ff', color:'#1d4ed8', border:'#bfdbfe', icon: Shield },
@@ -193,7 +193,9 @@ function HistorySection() {
 }
 
 export default function Settings() {
-  const { user: currentUser, sessionTimeout, updateSessionTimeout } = useAuth();
+  const { user: currentUser, sessionTimeout, updateSessionTimeout, logo, updateLogo } = useAuth();
+  const logoFileRef = useRef(null);
+  const [logoUploading, setLogoUploading] = useState(false);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState(null);
@@ -270,7 +272,7 @@ export default function Settings() {
             <p style={{ fontSize:13, color:'#6b7280' }}>Add, edit or remove system users</p>
           </div>
           {isAdmin && (
-            <button onClick={()=>setModal({type:'add'})} style={{...btnStyle, background:'#1a1d23', color:'#fff'}}>
+            <button onClick={()=>setModal({type:'add'})} style={{...btnStyle, background:'#1a1d23', color:'#fff'}>
               <Plus size={15}/> Add User
             </button>
           )}
@@ -337,6 +339,70 @@ export default function Settings() {
           <span style={{ fontSize:12, color:'#9ca3af', marginLeft:'auto' }}>{users.length} user{users.length!==1?'s':''}</span>
         </div>
       </div>
+
+      {/* Logo Settings */}
+      {isAdmin && (
+        <div style={{ background:'#fff', border:'1px solid #e2e6ed', borderRadius:10, overflow:'hidden', marginTop:24 }}>
+          <div style={{ padding:'16px 24px', borderBottom:'1px solid #e2e6ed', background:'#f8f9fb' }}>
+            <h2 style={{ fontSize:16, fontWeight:600, color:'#1a1d23', marginBottom:2, display:'flex', alignItems:'center', gap:8 }}>
+              <Image size={16} color="#2563eb"/> Sidebar Logo
+            </h2>
+            <p style={{ fontSize:13, color:'#6b7280' }}>Customize the logo displayed in the sidebar</p>
+          </div>
+          <div style={{ padding:'20px 24px' }}>
+            <div style={{ display:'flex', alignItems:'center', gap:24, marginBottom:20 }}>
+              {/* Current logo preview */}
+              <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:8 }}>
+                <div style={{ background:'#1a1d23', borderRadius:8, padding:'12px 20px', display:'flex', alignItems:'center', justifyContent:'center', minWidth:140, minHeight:52 }}>
+                  {logo ? (
+                    <img src={logo} alt="Current logo" style={{ maxHeight:32, maxWidth:120, objectFit:'contain' }}/>
+                  ) : (
+                    <img src="https://www.one1.co.il/wp-content/uploads/2024/11/dark_logo.webp" alt="Default logo" style={{ maxHeight:32, maxWidth:120, objectFit:'contain' }}/>
+                  )}
+                </div>
+                <span style={{ fontSize:11, color:'#9ca3af' }}>{logo ? 'Custom logo' : 'Default logo'}</span>
+              </div>
+              {/* Actions */}
+              <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+                <button onClick={()=>logoFileRef.current?.click()} disabled={logoUploading}
+                  style={{...btnStyle, background:'#1a1d23', color:'#fff', fontSize:13}}>
+                  <Upload size={14}/> {logoUploading ? 'Uploading…' : logo ? 'Change Logo' : 'Upload Logo'}
+                </button>
+                {logo && (
+                  <button onClick={async()=>{ setLogoUploading(true); await updateLogo(''); setLogoUploading(false); }}
+                    style={{...btnStyle, background:'#fff', color:'#dc2626', border:'1px solid #fee2e2', fontSize:13}}>
+                    <Trash2 size={14}/> Remove Logo
+                  </button>
+                )}
+                <input ref={logoFileRef} type="file" accept=".png,.jpg,.jpeg,.webp,.svg" style={{ display:'none' }}
+                  onChange={async e => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    if (file.size > 500 * 1024) { alert('File too large. Max 500KB.'); return; }
+                    setLogoUploading(true);
+                    const reader = new FileReader();
+                    reader.onload = async ev => {
+                      await updateLogo(ev.target.result);
+                      setLogoUploading(false);
+                    };
+                    reader.readAsDataURL(file);
+                    e.target.value = '';
+                  }}
+                />
+              </div>
+            </div>
+            {/* Guidelines */}
+            <div style={{ background:'#f8f9fb', border:'1px solid #e2e6ed', borderRadius:8, padding:'12px 16px', fontSize:12, color:'#6b7280' }}>
+              <div style={{ fontWeight:600, color:'#374151', marginBottom:6 }}>📋 Logo Guidelines</div>
+              <div>• <strong>Formats:</strong> PNG, JPG, JPEG, WebP, SVG</div>
+              <div>• <strong>Max size:</strong> 500KB</div>
+              <div>• <strong>Recommended dimensions:</strong> 160×40px or similar wide format</div>
+              <div>• <strong>Background:</strong> Transparent or dark — logo appears on dark sidebar</div>
+              <div>• <strong>Note:</strong> Same image is used for both expanded and collapsed sidebar</div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Session Timeout Settings */}
       <div style={{ background:'#fff', border:'1px solid #e2e6ed', borderRadius:10, overflow:'hidden', marginTop:24 }}>
