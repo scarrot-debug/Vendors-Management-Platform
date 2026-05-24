@@ -14,7 +14,7 @@ const NAV = [
   { to: '#',          icon: FileText,         label: 'Requests' },
   { to: '#',          icon: CheckSquare,      label: 'Approvals' },
   { to: '#',          icon: BarChart2,        label: 'Reports' },
-  { to: '/settings',  icon: SettingsIcon,    label: 'Settings' },
+  { to: '/settings',  icon: SettingsIcon,     label: 'Settings', adminOnly: true },
   { to: '#',          icon: ShieldCheck,      label: 'Admin' },
 ];
 
@@ -55,7 +55,7 @@ export default function Layout() {
 
         {/* Nav */}
         <nav style={{ flex: 1, padding: '10px 8px', display: 'flex', flexDirection: 'column', gap: 2 }}>
-          {NAV.map(({ to, icon: Icon, label }) => to === '#' ? (
+          {NAV.filter(item => !item.adminOnly || user?.role === 'admin').map(({ to, icon: Icon, label }) => to === '#' ? (
             <div key={label} style={{
               display: 'flex', alignItems: 'center', gap: 10,
               padding: '9px 10px', borderRadius: 7,

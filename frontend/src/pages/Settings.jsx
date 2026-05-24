@@ -78,7 +78,7 @@ function UserForm({ initial, onSave, onCancel, saving, isEdit }) {
       </div>
       <div style={{ display:'flex', gap:10, justifyContent:'flex-end', marginTop:6 }}>
         <button onClick={onCancel} style={{...btnStyle, background:'#f4f6f9', color:'#6b7280'}}>Cancel</button>
-        <button onClick={()=>onSave(form)} disabled={saving} style={{...btnStyle, background:'#2563eb', color:'#fff'}}>
+        <button onClick={()=>onSave(form)} disabled={saving} style={{...btnStyle, background:'#1a1d23', color:'#fff'}}>
           <Check size={15}/> {saving ? 'Saving…' : isEdit ? 'Save Changes' : 'Create User'}
         </button>
       </div>
@@ -108,7 +108,7 @@ function ResetPasswordForm({ user, onSave, onCancel, saving }) {
       <div style={{ display:'flex', gap:10, justifyContent:'flex-end', marginTop:6 }}>
         <button onClick={onCancel} style={{...btnStyle, background:'#f4f6f9', color:'#6b7280'}}>Cancel</button>
         <button onClick={()=>!mismatch && password.length>=6 && onSave(password)} disabled={saving||mismatch||password.length<6}
-          style={{...btnStyle, background: password.length>=6&&!mismatch ? '#2563eb' : '#e2e6ed', color:'#fff'}}>
+          style={{...btnStyle, background: password.length>=6&&!mismatch ? '#1a1d23' : '#e2e6ed', color:'#fff'}}>
           <KeyRound size={15}/> {saving ? 'Saving…' : 'Reset Password'}
         </button>
       </div>
@@ -270,7 +270,7 @@ export default function Settings() {
             <p style={{ fontSize:13, color:'#6b7280' }}>Add, edit or remove system users</p>
           </div>
           {isAdmin && (
-            <button onClick={()=>setModal({type:'add'})} style={{...btnStyle, background:'#2563eb', color:'#fff', boxShadow:'0 2px 8px rgba(37,99,235,0.25)'}}>
+            <button onClick={()=>setModal({type:'add'})} style={{...btnStyle, background:'#1a1d23', color:'#fff'}>
               <Plus size={15}/> Add User
             </button>
           )}
