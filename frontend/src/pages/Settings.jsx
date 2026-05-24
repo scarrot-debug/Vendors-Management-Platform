@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api/client.js';
-import { useAuth } from '../hooks/useAuth.jsx';
-import { Plus, Edit2, Trash2, KeyRound, Check, X, Shield, Eye, User, History } from 'lucide-react';
+import { useAuth, SESSION_OPTIONS } from '../hooks/useAuth.jsx';
+import { Plus, Edit2, Trash2, KeyRound, Check, X, Shield, Eye, User, History, Clock } from 'lucide-react';
 
 const ROLE_STYLES = {
   admin:  { bg:'#eff6ff', color:'#1d4ed8', border:'#bfdbfe', icon: Shield },
@@ -193,7 +193,7 @@ function HistorySection() {
 }
 
 export default function Settings() {
-  const { user: currentUser } = useAuth();
+  const { user: currentUser, sessionTimeout, updateSessionTimeout } = useAuth();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState(null);
@@ -270,7 +270,7 @@ export default function Settings() {
             <p style={{ fontSize:13, color:'#6b7280' }}>Add, edit or remove system users</p>
           </div>
           {isAdmin && (
-            <button onClick={()=>setModal({type:'add'})} style={{...btnStyle, background:'#1a1d23', color:'#fff'}}>
+            <button onClick={()=>setModal({type:'add'})} style={{...btnStyle, background:'#1a1d23', color:'#fff'}>
               <Plus size={15}/> Add User
             </button>
           )}
@@ -335,6 +335,38 @@ export default function Settings() {
           <span style={{ fontSize:12, color:'#9ca3af' }}>Roles:</span>
           {Object.keys(ROLE_STYLES).map(role=><RoleBadge key={role} role={role}/>)}
           <span style={{ fontSize:12, color:'#9ca3af', marginLeft:'auto' }}>{users.length} user{users.length!==1?'s':''}</span>
+        </div>
+      </div>
+
+      {/* Session Timeout Settings */}
+      <div style={{ background:'#fff', border:'1px solid #e2e6ed', borderRadius:10, overflow:'hidden', marginTop:24 }}>
+        <div style={{ padding:'16px 24px', borderBottom:'1px solid #e2e6ed', background:'#f8f9fb', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+          <div>
+            <h2 style={{ fontSize:16, fontWeight:600, color:'#1a1d23', marginBottom:2, display:'flex', alignItems:'center', gap:8 }}>
+              <Clock size={16} color="#2563eb"/> Session Timeout
+            </h2>
+            <p style={{ fontSize:13, color:'#6b7280' }}>Auto logout after inactivity</p>
+          </div>
+        </div>
+        <div style={{ padding:'20px 24px', display:'flex', alignItems:'center', gap:16 }}>
+          <span style={{ fontSize:14, color:'#374151', fontWeight:500 }}>Auto logout after:</span>
+          <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
+            {SESSION_OPTIONS.map(opt => (
+              <button
+                key={opt.value}
+                onClick={() => updateSessionTimeout(opt.value)}
+                style={{
+                  padding:'7px 14px', borderRadius:7, fontSize:13, fontWeight:500, cursor:'pointer',
+                  border: sessionTimeout === opt.value ? 'none' : '1px solid #e2e6ed',
+                  background: sessionTimeout === opt.value ? '#1a1d23' : '#fff',
+                  color: sessionTimeout === opt.value ? '#fff' : '#374151',
+                  transition:'all 0.15s',
+                }}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
