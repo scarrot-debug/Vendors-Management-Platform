@@ -1,4 +1,6 @@
 #!/bin/sh
+
+echo "Fixing SSL in pool.js..."
 cat > backend/src/db/pool.js << 'POOLEOF'
 const { Pool } = require('pg');
 
@@ -18,4 +20,17 @@ pool.on('error', (err) => {
 module.exports = pool;
 POOLEOF
 git add backend/src/db/pool.js
-echo "SSL fix applied automatically"
+
+echo "Checking frontend build for errors..."
+cd frontend
+npm run build > /dev/null 2>&1
+if [ $? -ne 0 ]; then
+  echo ""
+  echo "ERROR: Frontend build failed! Fix errors before pushing."
+  npm run build 2>&1 | grep "error\|ERROR" | head -20
+  cd ..
+  exit 1
+fi
+cd ..
+
+echo "All checks passed! Pushing..."
