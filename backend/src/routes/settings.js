@@ -34,7 +34,7 @@ router.put('/session-timeout', auth, adminOnly, async (req, res) => {
       [value.toString()]
     );
     const label = value === 0 || value === '0' ? 'Never' : `${value} minutes`;
-    await logHistory(req.user?.id, 'UPDATE', 'setting', 'Session Timeout', { value: label });
+    await logHistory(req.user?.id, 'UPDATE', 'setting', `Session Timeout → ${label}`, { value: label });
     res.json({ success: true, session_timeout: value });
   } catch (err) {
     res.status(500).json({ error: 'Failed to save setting' });
