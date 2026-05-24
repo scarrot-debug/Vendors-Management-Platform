@@ -44,6 +44,7 @@ async function initDB() {
         category VARCHAR(100),
         vendor VARCHAR(200),
         cost NUMERIC(12,2),
+        customer_price NUMERIC(12,2),
         currency VARCHAR(10) DEFAULT 'USD',
         status VARCHAR(20) NOT NULL DEFAULT 'Active' CHECK (status IN ('Active', 'Pending', 'Inactive')),
         description TEXT,
@@ -51,6 +52,8 @@ async function initDB() {
         updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
       )
     `);
+    // Add customer_price if not exists (for existing DBs)
+    await pool.query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS customer_price NUMERIC(12,2)`);
 
     await pool.query(`
       CREATE TABLE IF NOT EXISTS users (

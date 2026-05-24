@@ -5,15 +5,15 @@ import { Plus, Search, Edit2, Trash2, RefreshCw, X, Check, ChevronDown, ChevronR
 
 // Default column order — can be rearranged by drag & drop
 const DEFAULT_COLUMNS = [
-  { key: 'status',   label: 'Status' },
-  { key: 'name',     label: 'Distributor Name' },
-  { key: 'contact',  label: 'Contact' },
-  { key: 'email',    label: 'Email' },
-  { key: 'phone',    label: 'Phone' },
-  { key: 'mobile',   label: 'Mobile' },
-  { key: 'website',  label: 'Website' },
-  { key: 'products', label: 'Products' },
-  { key: 'actions',  label: 'Actions' },
+  { key: 'status',         label: 'Status' },
+  { key: 'name',           label: 'Distributor Name' },
+  { key: 'contact',        label: 'Contact' },
+  { key: 'email',          label: 'Email' },
+  { key: 'phone',          label: 'Phone' },
+  { key: 'mobile',         label: 'Mobile' },
+  { key: 'website',        label: 'Website' },
+  { key: 'products',       label: 'Products' },
+  { key: 'actions',        label: 'Actions' },
 ];
 
 const STATUS_STYLES = {
@@ -95,7 +95,7 @@ function DistributorForm({ initial, onSave, onCancel, saving }) {
 }
 
 function ProductForm({ initial, onSave, onCancel, saving }) {
-  const [form, setForm] = useState(initial || { name:'', category:'', vendor:'', cost:'', currency:'USD', status:'Active', description:'' });
+  const [form, setForm] = useState(initial || { name:'', category:'', vendor:'', cost:'', customer_price:'', currency:'USD', status:'Active', description:'' });
   const set = (k,v) => setForm(f=>({...f,[k]:v}));
   return (
     <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
@@ -107,13 +107,20 @@ function ProductForm({ initial, onSave, onCancel, saving }) {
           </div>
         ))}
         <div>
-          <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>Cost</label>
-          <div style={{ display:'flex', gap:6 }}>
-            <input type="number" value={form.cost||''} onChange={e=>set('cost',e.target.value)} style={{...inputStyle, flex:1}} placeholder="0.00"/>
-            <select value={form.currency} onChange={e=>set('currency',e.target.value)} style={{...inputStyle, width:80}}>
-              {CURRENCIES.map(c=><option key={c}>{c}</option>)}
-            </select>
-          </div>
+          <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>Currency</label>
+          <select value={form.currency} onChange={e=>set('currency',e.target.value)} style={inputStyle}>
+            {CURRENCIES.map(c=><option key={c}>{c}</option>)}
+          </select>
+        </div>
+      </div>
+      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:14 }}>
+        <div>
+          <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>Cost Price</label>
+          <input type="number" value={form.cost||''} onChange={e=>set('cost',e.target.value)} style={inputStyle} placeholder="0.00"/>
+        </div>
+        <div>
+          <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>Customer Price</label>
+          <input type="number" value={form.customer_price||''} onChange={e=>set('customer_price',e.target.value)} style={inputStyle} placeholder="0.00"/>
         </div>
       </div>
       <div>
@@ -128,7 +135,7 @@ function ProductForm({ initial, onSave, onCancel, saving }) {
       </div>
       <div style={{ display:'flex', gap:10, justifyContent:'flex-end', marginTop:6 }}>
         <button onClick={onCancel} style={{...btnStyle, background:'#f4f6f9', color:'#6b7280'}}>Cancel</button>
-        <button onClick={()=>onSave(form)} disabled={saving} style={{...btnStyle, background:'#2563eb', color:'#fff'}}>
+        <button onClick={()=>onSave(form)} disabled={saving} style={{...btnStyle, background:'#1a1d23', color:'#fff'}}>
           <Check size={15}/> {saving ? 'Saving…' : 'Save Product'}
         </button>
       </div>
@@ -260,7 +267,8 @@ function DistributorRow({ dist, isViewer, open, onToggle, columns, onEditDist, o
             <td style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#2563eb', textTransform:'uppercase', letterSpacing:1 }}>Manufacturer</td>
             <td style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#2563eb', textTransform:'uppercase', letterSpacing:1 }}>Category</td>
             <td style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#2563eb', textTransform:'uppercase', letterSpacing:1 }}>Description</td>
-            <td style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#2563eb', textTransform:'uppercase', letterSpacing:1 }}>Cost</td>
+            <td style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#2563eb', textTransform:'uppercase', letterSpacing:1 }}>Cost Price</td>
+            <td style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#2563eb', textTransform:'uppercase', letterSpacing:1 }}>Customer Price</td>
             <td style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#2563eb', textTransform:'uppercase', letterSpacing:1 }}>Actions</td>
           </tr>
           {dist.products?.length === 0 ? (
@@ -281,6 +289,11 @@ function DistributorRow({ dist, isViewer, open, onToggle, columns, onEditDist, o
               <td style={{ padding:'10px 16px' }}>
                 <span style={{ fontWeight:700, color:'#1a1d23', fontVariantNumeric:'tabular-nums', fontSize:14 }}>
                   {formatCost(p.cost, p.currency)}
+                </span>
+              </td>
+              <td style={{ padding:'10px 16px' }}>
+                <span style={{ fontWeight:700, color:'#16a34a', fontVariantNumeric:'tabular-nums', fontSize:14 }}>
+                  {formatCost(p.customer_price, p.currency)}
                 </span>
               </td>
               <td style={{ padding:'10px 16px' }}>

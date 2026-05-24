@@ -80,16 +80,16 @@ router.get('/export', auth, async (req, res) => {
     const rows = [];
 
     // Header
-    rows.push(['Distributor', 'Status', 'Contact', 'Email', 'Phone', 'Mobile', 'Website', 'Product', 'Manufacturer', 'Category', 'Cost', 'Currency', 'Product Status', 'Description']);
+    rows.push(['Distributor', 'Status', 'Contact', 'Email', 'Phone', 'Mobile', 'Website', 'Product', 'Manufacturer', 'Category', 'Cost Price', 'Customer Price', 'Currency', 'Product Status', 'Description']);
 
     distRes.rows.forEach(d => {
       const distProds = products.filter(p => p.distributor_id === d.id);
       if (distProds.length === 0) {
-        rows.push([d.name, d.status, d.contact || '', d.email || '', d.phone || '', d.mobile || '', d.website || '', '', '', '', '', '', '', '']);
+        rows.push([d.name, d.status, d.contact || '', d.email || '', d.phone || '', d.mobile || '', d.website || '', '', '', '', '', '', '', '', '']);
       } else {
         distProds.forEach(p => {
           rows.push([d.name, d.status, d.contact || '', d.email || '', d.phone || '', d.mobile || '', d.website || '',
-            p.name, p.vendor || '', p.category || '', p.cost || '', p.currency || '', p.status, p.description || '']);
+            p.name, p.vendor || '', p.category || '', p.cost || '', p.customer_price || '', p.currency || '', p.status, p.description || '']);
         });
       }
     });
@@ -165,15 +165,15 @@ router.delete('/:id', auth, async (req, res) => {
 // POST /api/vendors/:id/products
 router.post('/:id/products', auth, async (req, res) => {
   try {
-    const { name, category, vendor, cost, currency, status, description } = req.body;
+    const { name, category, vendor, cost, customer_price, currency, status, description } = req.body;
     if (!name) return res.status(400).json({ error: 'name is required' });
     const dist = await pool.query('SELECT name FROM distributors WHERE id=$1', [req.params.id]);
     const result = await pool.query(
-      `INSERT INTO products (distributor_id, name, category, vendor, cost, currency, status, description)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
-      [req.params.id, name, category, vendor, cost || null, currency || 'USD', status || 'Active', description]
+      `INSERT INTO products (distributor_id, name, category, vendor, cost, customer_price, currency, status, description)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *`,
+      [req.params.id, name, category, vendor, cost || null, customer_price || null, currency || 'USD', status || 'Active', description]
     );
-    await logHistory(req.user?.id, 'CREATE', 'product', name, { distributor: dist.rows[0]?.name, category, cost, currency });
+    await logHistory(req.user?.id, 'CREATE', 'product', name, { distributor: dist.rows[0]?.name, category, cost, customer_price, currency });
     res.status(201).json(result.rows[0]);
   } catch (err) {
     res.status(500).json({ error: 'Failed to create product' });
@@ -183,15 +183,15 @@ router.post('/:id/products', auth, async (req, res) => {
 // PUT /api/vendors/:id/products/:pid
 router.put('/:id/products/:pid', auth, async (req, res) => {
   try {
-    const { name, category, vendor, cost, currency, status, description } = req.body;
+    const { name, category, vendor, cost, customer_price, currency, status, description } = req.body;
     const dist = await pool.query('SELECT name FROM distributors WHERE id=$1', [req.params.id]);
     const result = await pool.query(
-      `UPDATE products SET name=$1, category=$2, vendor=$3, cost=$4, currency=$5, status=$6, description=$7, updated_at=NOW()
-       WHERE id=$8 AND distributor_id=$9 RETURNING *`,
-      [name, category, vendor, cost || null, currency || 'USD', status, description, req.params.pid, req.params.id]
+      `UPDATE products SET name=$1, category=$2, vendor=$3, cost=$4, customer_price=$5, currency=$6, status=$7, description=$8, updated_at=NOW()
+       WHERE id=$9 AND distributor_id=$10 RETURNING *`,
+      [name, category, vendor, cost || null, customer_price || null, currency || 'USD', status, description, req.params.pid, req.params.id]
     );
     if (!result.rows.length) return res.status(404).json({ error: 'Product not found' });
-    await logHistory(req.user?.id, 'UPDATE', 'product', name, { distributor: dist.rows[0]?.name, category, cost, currency });
+    await logHistory(req.user?.id, 'UPDATE', 'product', name, { distributor: dist.rows[0]?.name, category, cost, customer_price, currency });
     res.json(result.rows[0]);
   } catch (err) {
     res.status(500).json({ error: 'Failed to update product' });
