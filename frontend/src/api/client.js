@@ -46,4 +46,6 @@ export const api = {
   deleteUser: (id) => req(`/users/${id}`, { method: 'DELETE' }),
   resetPassword: (id, password) => req(`/users/${id}/reset-password`, { method: 'POST', body: JSON.stringify({ password }) }),
   getHistory: (params = {}) => req(`/history?${new URLSearchParams(params)}`),
+  getSettings: () => req('/settings'),
+  setSessionTimeout: (value) => req('/settings/session-timeout', { method: 'PUT', body: JSON.stringify({ value }) }),
 };

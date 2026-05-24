@@ -5,6 +5,7 @@ const vendorRoutes = require('./routes/vendors');
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
 const historyRoutes = require('./routes/history');
+const settingsRoutes = require('./routes/settings');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -88,6 +89,20 @@ async function initDB() {
       )
     `);
 
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS system_settings (
+        key VARCHAR(100) PRIMARY KEY,
+        value TEXT NOT NULL,
+        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      )
+    `);
+
+    // Default session timeout: 30 minutes
+    await pool.query(`
+      INSERT INTO system_settings (key, value) VALUES ('session_timeout', '30')
+      ON CONFLICT DO NOTHING
+    `);
+
     console.log('DB initialized successfully');
   } catch (err) {
     console.error('DB init error:', err.message);
@@ -100,6 +115,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/vendors', vendorRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/history', historyRoutes);
+app.use('/api/settings', settingsRoutes);
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
@@ -110,3 +126,4 @@ app.listen(PORT, async () => {
   console.log(`ONE Vendor Management API running on port ${PORT}`);
   await initDB();
 });
+// Settings routes added below
