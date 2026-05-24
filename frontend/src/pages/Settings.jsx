@@ -270,7 +270,7 @@ export default function Settings() {
             <p style={{ fontSize:13, color:'#6b7280' }}>Add, edit or remove system users</p>
           </div>
           {isAdmin && (
-            <button onClick={()=>setModal({type:'add'})} style={{...btnStyle, background:'#1a1d23', color:'#fff'}>
+            <button onClick={()=>setModal({type:'add'})} style={{...btnStyle, background:'#1a1d23', color:'#fff'}}>
               <Plus size={15}/> Add User
             </button>
           )}
