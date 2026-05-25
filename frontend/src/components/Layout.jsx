@@ -106,11 +106,10 @@ export default function Layout() {
 
       {/* Main content */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#f4f6f9' }}>
-        {/* Top bar - transparent, floating */}
+        {/* Top bar - part of page flow */}
         <div style={{
-          height: 48, background: 'transparent',
           display: 'flex', alignItems: 'center', justifyContent: 'flex-end',
-          padding: '0 24px', gap: 16, flexShrink: 0,
+          padding: '12px 24px', gap: 16, flexShrink: 0,
         }}>
           {/* User info */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
