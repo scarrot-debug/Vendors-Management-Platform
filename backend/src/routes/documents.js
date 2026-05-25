@@ -7,6 +7,19 @@ const logHistory = require('../middleware/logHistory');
 // GET /api/documents/:distributorId
 router.get('/:distributorId', auth, async (req, res) => {
   try {
+    // Ensure table exists
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS documents (
+        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        distributor_id UUID NOT NULL REFERENCES distributors(id) ON DELETE CASCADE,
+        name VARCHAR(200) NOT NULL,
+        mime_type VARCHAR(100),
+        size_bytes INTEGER,
+        data TEXT NOT NULL,
+        uploaded_by UUID REFERENCES users(id) ON DELETE SET NULL,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      )
+    `);
     const result = await pool.query(
       `SELECT id, name, mime_type, size_bytes, created_at,
               u.username as uploaded_by
