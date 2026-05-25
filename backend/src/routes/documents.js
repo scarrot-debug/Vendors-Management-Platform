@@ -29,11 +29,13 @@ router.post('/:distributorId', auth, async (req, res) => {
     if (!name || !data) return res.status(400).json({ error: 'name and data are required' });
     // Max 10MB base64
     if (data.length > 14000000) return res.status(400).json({ error: 'File too large. Max 10MB.' });
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    const uploadedBy = req.user?.id && uuidRegex.test(req.user.id) ? req.user.id : null;
     const dist = await pool.query('SELECT name FROM distributors WHERE id=$1', [req.params.distributorId]);
     const result = await pool.query(
       `INSERT INTO documents (distributor_id, name, mime_type, size_bytes, data, uploaded_by)
        VALUES ($1,$2,$3,$4,$5,$6) RETURNING id, name, mime_type, size_bytes, created_at`,
-      [req.params.distributorId, name, mime_type, size_bytes, data, req.user?.id || null]
+      [req.params.distributorId, name, mime_type, size_bytes, data, uploadedBy]
     );
     await logHistory(req.user?.id, 'CREATE', 'document', name, { distributor: dist.rows[0]?.name });
     res.status(201).json(result.rows[0]);
