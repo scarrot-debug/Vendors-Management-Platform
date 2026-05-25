@@ -176,6 +176,94 @@ function PermissionsModal({ user, onClose }) {
   );
 }
 
+function CategoriesSection() {
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [newCat, setNewCat] = useState('');
+  const [editIdx, setEditIdx] = useState(null);
+  const [editVal, setEditVal] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    api.getSystemCategories().then(c => { setCategories(c); setLoading(false); }).catch(()=>setLoading(false));
+  }, []);
+
+  const save = async (cats) => {
+    setSaving(true);
+    try { await api.setSystemCategories(cats); setCategories(cats); } catch(e){ alert(e.message); }
+    finally { setSaving(false); }
+  };
+
+  const handleAdd = async () => {
+    if (!newCat.trim()) return;
+    const updated = [...categories, newCat.trim()];
+    await save(updated);
+    setNewCat('');
+  };
+
+  const handleDelete = async (idx) => {
+    const updated = categories.filter((_,i)=>i!==idx);
+    await save(updated);
+  };
+
+  const handleEdit = async (idx) => {
+    if (!editVal.trim()) return;
+    const updated = categories.map((c,i)=>i===idx ? editVal.trim() : c);
+    await save(updated);
+    setEditIdx(null);
+  };
+
+  return (
+    <div style={{ background:'#fff', border:'1px solid #e2e6ed', borderRadius:10, overflow:'hidden', marginTop:24 }}>
+      <div style={{ padding:'16px 24px', borderBottom:'1px solid #e2e6ed', background:'#f8f9fb', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+        <div>
+          <h2 style={{ fontSize:16, fontWeight:600, color:'#1a1d23', marginBottom:2 }}>Categories</h2>
+          <p style={{ fontSize:13, color:'#6b7280' }}>Manage product categories used across the system</p>
+        </div>
+        <span style={{ fontSize:13, color:'#6b7280' }}>{categories.length} categories</span>
+      </div>
+      <div style={{ padding:'16px 24px' }}>
+        {/* Add new */}
+        <div style={{ display:'flex', gap:8, marginBottom:16 }}>
+          <input value={newCat} onChange={e=>setNewCat(e.target.value)}
+            onKeyDown={e=>e.key==='Enter'&&handleAdd()}
+            placeholder="New category name…"
+            style={{...inputStyle, flex:1}}/>
+          <button onClick={handleAdd} disabled={saving||!newCat.trim()}
+            style={{ padding:'8px 16px', borderRadius:7, border:'none', background:'#1a1d23', color:'#fff', fontSize:13, cursor:'pointer', fontWeight:500 }}>
+            Add
+          </button>
+        </div>
+        {/* List */}
+        {loading ? <div style={{ color:'#9ca3af', fontSize:13 }}>Loading…</div> :
+          categories.length === 0 ? <div style={{ color:'#9ca3af', fontSize:13, fontStyle:'italic' }}>No categories yet</div> :
+          <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
+            {categories.map((cat, idx) => (
+              <div key={idx} style={{ display:'flex', alignItems:'center', gap:8, padding:'8px 12px', background:'#f8f9fb', borderRadius:7, border:'1px solid #e2e6ed' }}>
+                {editIdx === idx ? (
+                  <>
+                    <input value={editVal} onChange={e=>setEditVal(e.target.value)}
+                      onKeyDown={e=>e.key==='Enter'&&handleEdit(idx)}
+                      style={{...inputStyle, flex:1, padding:'5px 10px'}} autoFocus/>
+                    <button onClick={()=>handleEdit(idx)} style={{ padding:'5px 12px', borderRadius:6, border:'none', background:'#1a1d23', color:'#fff', fontSize:12, cursor:'pointer' }}>Save</button>
+                    <button onClick={()=>setEditIdx(null)} style={{ padding:'5px 12px', borderRadius:6, border:'1px solid #e2e6ed', background:'#fff', color:'#6b7280', fontSize:12, cursor:'pointer' }}>Cancel</button>
+                  </>
+                ) : (
+                  <>
+                    <span style={{ flex:1, fontSize:14, color:'#1a1d23' }}>{cat}</span>
+                    <button onClick={()=>{setEditIdx(idx);setEditVal(cat);}} style={{ padding:'4px 10px', borderRadius:6, border:'1px solid #e2e6ed', background:'#fff', color:'#2563eb', fontSize:12, cursor:'pointer' }}>Edit</button>
+                    <button onClick={()=>handleDelete(idx)} style={{ padding:'4px 10px', borderRadius:6, border:'1px solid #fee2e2', background:'#fff', color:'#dc2626', fontSize:12, cursor:'pointer' }}>Delete</button>
+                  </>
+                )}
+              </div>
+            ))}
+          </div>
+        }
+      </div>
+    </div>
+  );
+}
+
 function HistorySection() {
   const [history, setHistory] = useState([]);
   const [total, setTotal] = useState(0);
@@ -310,7 +398,7 @@ export default function Settings() {
   const isAdmin = currentUser?.role === 'admin';
 
   return (
-    <div style={{ padding:32, flex:1 }}>
+    <div style={{ padding:'16px 24px', flex:1 }}>
       {toast && (
         <div style={{
           position:'fixed', top:20, right:20, zIndex:2000,
@@ -502,6 +590,9 @@ export default function Settings() {
       {permissionsUser && (
         <PermissionsModal user={permissionsUser} onClose={()=>setPermissionsUser(null)}/>
       )}
+
+      {/* Categories Management */}
+      <CategoriesSection/>
 
       {/* History */}
       <HistorySection/>

@@ -142,7 +142,7 @@ export default function Dashboard() {
   );
 
   return (
-    <div style={{ padding:32, flex:1 }}>
+    <div style={{ padding:'16px 24px', flex:1 }}>
       <h1 style={{ fontSize:24, fontWeight:700, marginBottom:4, color:'#1a1d23' }}>Dashboard</h1>
       <p style={{ color:'#6b7280', fontSize:14, marginBottom:24 }}>Overview of your vendor ecosystem</p>
 

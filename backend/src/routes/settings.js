@@ -79,4 +79,31 @@ router.put('/logo', auth, adminOnly, async (req, res) => {
   }
 });
 
+// GET /api/settings/categories
+router.get('/categories', auth, async (req, res) => {
+  try {
+    const result = await pool.query("SELECT value FROM system_settings WHERE key='categories'");
+    const cats = result.rows[0]?.value ? JSON.parse(result.rows[0].value) : [];
+    res.json(cats);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch categories' });
+  }
+});
+
+// PUT /api/settings/categories
+router.put('/categories', auth, adminOnly, async (req, res) => {
+  try {
+    const { categories } = req.body;
+    await pool.query(
+      `INSERT INTO system_settings (key, value) VALUES ('categories', $1)
+       ON CONFLICT (key) DO UPDATE SET value=$1, updated_at=NOW()`,
+      [JSON.stringify(categories)]
+    );
+    await logHistory(req.user?.id, 'UPDATE', 'setting', 'Categories', { count: categories.length });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to save categories' });
+  }
+});
+
 module.exports = router;

@@ -383,7 +383,12 @@ export default function Vendors() {
 
   useEffect(() => { load(); }, [load]);
   useEffect(() => { setPage(1); }, [search, statusFilter, categoryFilter]);
-  useEffect(() => { api.getCategories().then(setCategories); }, []);
+  useEffect(() => { 
+    api.getSystemCategories().then(cats => {
+      if (cats && cats.length > 0) setCategories(cats);
+      else api.getCategories().then(setCategories);
+    }).catch(() => api.getCategories().then(setCategories)); 
+  }, []);
 
   // Client-side sort
   const sorted = [...(data.distributors || [])].sort((a, b) => {
@@ -442,16 +447,19 @@ export default function Vendors() {
     try {
       const text = await file.text();
       const lines = text.trim().split('\n');
-      const headers = lines[0].replace(/"/g,'').split(',');
-      let created = 0;
+      const headers = lines[0].replace(/"/g,'').split(',').map(h=>h.trim());
+      let distCreated = 0, prodCreated = 0;
+      const distMap = {}; // name → id
+
+      // First pass: create distributors
       for (let i = 1; i < lines.length; i++) {
-        const vals = lines[i].match(/(".*?"|[^,]+)(?=,|$)/g)?.map(v=>v.replace(/^"|"$/g,'').replace(/""/g,'"')) || [];
+        const vals = lines[i].match(/(".*?"|[^,]+)(?=,|$)/g)?.map(v=>v.replace(/^"|"$/g,'').replace(/""/g,'"').trim()) || [];
         const row = {};
-        headers.forEach((h,idx) => row[h.trim()] = vals[idx]?.trim() || '');
-        if (!row['Distributor'] || row['Product']) continue; // skip product rows, only create distributors
-        if (row['Distributor']) {
+        headers.forEach((h,idx) => row[h] = vals[idx] || '');
+        if (!row['Distributor']) continue;
+        if (!distMap[row['Distributor']]) {
           try {
-            await api.createVendor({
+            const res = await api.createVendor({
               name: row['Distributor'],
               status: row['Status'] || 'Active',
               contact: row['Contact'] || '',
@@ -460,27 +468,52 @@ export default function Vendors() {
               mobile: row['Mobile'] || '',
               website: row['Website'] || '',
             });
-            created++;
+            distMap[row['Distributor']] = res.id;
+            distCreated++;
           } catch {}
         }
       }
-      alert(`Import complete! ${created} distributors imported.`);
+
+      // Second pass: create products
+      for (let i = 1; i < lines.length; i++) {
+        const vals = lines[i].match(/(".*?"|[^,]+)(?=,|$)/g)?.map(v=>v.replace(/^"|"$/g,'').replace(/""/g,'"').trim()) || [];
+        const row = {};
+        headers.forEach((h,idx) => row[h] = vals[idx] || '');
+        if (!row['Distributor'] || !row['Product']) continue;
+        const distId = distMap[row['Distributor']];
+        if (!distId) continue;
+        try {
+          await api.addProduct(distId, {
+            name: row['Product'],
+            vendor: row['Manufacturer'] || '',
+            category: row['Category'] || '',
+            cost: row['Cost Price'] || '',
+            customer_price: row['Customer Price'] || '',
+            currency: row['Currency'] || 'USD',
+            status: row['Product Status'] || 'Active',
+            description: row['Description'] || '',
+          });
+          prodCreated++;
+        } catch {}
+      }
+
+      alert(`Import complete!\n${distCreated} distributors + ${prodCreated} products imported.`);
       load();
     } catch (err) { alert('Import failed: ' + err.message); }
     finally { setImporting(false); }
   };
 
   return (
-    <div style={{ padding:32, flex:1 }}>
-      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:24 }}>
+    <div style={{ padding:'16px 24px', flex:1, minWidth:0 }}>
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:12 }}>
         <div>
-          <h1 style={{ fontSize:24, fontWeight:700, marginBottom:4, color:'#1a1d23' }}>Vendors Management Platform</h1>
-          <p style={{ color:'#6b7280', fontSize:14 }}>Manage your distributors and products</p>
+          <h1 style={{ fontSize:20, fontWeight:700, marginBottom:2, color:'#1a1d23' }}>Vendors Management Platform</h1>
+          <p style={{ color:'#6b7280', fontSize:13 }}>Manage your distributors and products</p>
         </div>
       </div>
 
       {/* Filters */}
-      <div style={{ display:'flex', gap:10, marginBottom:16, alignItems:'center', flexWrap:'wrap' }}>
+      <div style={{ display:'flex', gap:8, marginBottom:12, alignItems:'center', flexWrap:'wrap' }}>
         {!isViewer && (
           <button onClick={()=>setModal({type:'addDist'})} style={{
             display:'flex', alignItems:'center', gap:6, padding:'8px 16px',
@@ -557,7 +590,8 @@ export default function Vendors() {
 
       {/* Table */}
       <div style={{ background:'#fff', border:'1px solid #e2e6ed', borderRadius:10, overflow:'hidden' }}>
-        <table style={{ width:'100%', borderCollapse:'collapse', fontSize:14 }}>
+        <div style={{ overflowX:'auto', width:'100%' }}>
+        <table style={{ width:'100%', borderCollapse:'collapse', fontSize:14, minWidth:700 }}>
           <thead>
             <tr style={{ borderBottom:'1px solid #e2e6ed', background:'#f8f9fb' }} onDragLeave={()=>setDragOver(null)}>
               <th style={{ width:36, padding:'11px 16px' }}/>
@@ -599,6 +633,7 @@ export default function Vendors() {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
 
       {/* Pagination */}

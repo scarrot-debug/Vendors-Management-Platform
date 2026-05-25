@@ -50,6 +50,8 @@ export const api = {
   getMyPermissions: () => req('/settings/my-permissions'),
   setSessionTimeout: (value) => req('/settings/session-timeout', { method: 'PUT', body: JSON.stringify({ value }) }),
   setLogo: (logo) => req('/settings/logo', { method: 'PUT', body: JSON.stringify({ logo }) }),
+  getSystemCategories: () => req('/settings/categories'),
+  setSystemCategories: (categories) => req('/settings/categories', { method: 'PUT', body: JSON.stringify({ categories }) }),
   getUserPermissions: (id) => req(`/users/${id}/permissions`),
   updateUserPermissions: (id, perms) => req(`/users/${id}/permissions`, { method: 'PUT', body: JSON.stringify(perms) }),
 };
