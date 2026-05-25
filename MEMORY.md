@@ -8,59 +8,52 @@
 - **Local:** http://localhost (Docker)
 
 ## Stack
-- **Frontend:** React 18 + Vite, lucide-react icons, no UI library
-- **Backend:** Node.js + Express, JWT auth, bcryptjs
-- **Database:** PostgreSQL 16
-- **Local:** Docker Compose (4 containers: frontend, backend, db, nginx)
-- **Cloud:** Render.com (Static Site + Web Service + PostgreSQL Free)
-- **DNS:** Cloudflare → vendors.191.co.il CNAME → vendor-frontend-68gz.onrender.com
+- Frontend: React 18 + Vite, lucide-react
+- Backend: Node.js + Express, JWT, bcryptjs
+- DB: PostgreSQL 16
+- Local: Docker Compose (4 containers)
+- Cloud: Render.com (Static Site + Web Service + PostgreSQL Free)
+- DNS: Cloudflare → vendors.191.co.il
 
 ## Project Structure
 ```
 vendor-management/
-├── frontend/
-│   ├── src/
-│   │   ├── api/client.js          ← API calls — MUST include addProduct!
-│   │   ├── components/Layout.jsx  ← Sidebar navigation
-│   │   ├── pages/
-│   │   │   ├── Vendors.jsx        ← Main vendors table with drag&drop columns
-│   │   │   ├── Dashboard.jsx      ← Charts and stats
-│   │   │   ├── Settings.jsx       ← User management + change history
-│   │   │   └── Login.jsx
-│   │   ├── hooks/useAuth.jsx
-│   │   └── version.js             ← Auto version from build date
-│   ├── Dockerfile
-│   └── nginx.conf
-├── backend/
-│   ├── src/
-│   │   ├── index.js               ← App entry + DB auto-init on startup
-│   │   ├── db/pool.js             ← ⚠️ CRITICAL: must have SSL line!
-│   │   ├── routes/
-│   │   │   ├── vendors.js         ← Distributors + products + export/history logging
-│   │   │   ├── auth.js            ← Login (admin/admin123, viewer/viewer123)
-│   │   │   ├── users.js           ← User management (admin only)
-│   │   │   └── history.js         ← Change history endpoint
-│   │   └── middleware/
-│   │       ├── auth.js            ← JWT middleware
-│   │       └── logHistory.js      ← Logs all changes to change_history table
-│   ├── Dockerfile
-│   └── package.json
-├── db/
-│   └── init.sql                   ← Local Docker DB seed only
-├── nginx/
-│   └── nginx.conf
-├── docker-compose.yml
-├── setup-hooks.ps1                ← Run ONCE to activate git hooks
-├── fix-ssl.ps1                    ← Manual SSL fix (backup)
-└── .git-hooks/
-    └── pre-push                   ← Auto-fixes pool.js SSL before every push
+├── frontend/src/
+│   ├── api/client.js          ← ALL API calls — must stay complete!
+│   ├── components/Layout.jsx  ← Sidebar + top bar + user dropdown
+│   ├── hooks/useAuth.jsx      ← Auth + session + logo + permissions
+│   ├── pages/
+│   │   ├── Vendors.jsx        ← Main table + docs panel + bulk actions
+│   │   ├── Dashboard.jsx      ← Charts
+│   │   ├── Settings.jsx       ← Users + categories + logo + history
+│   │   ├── Profile.jsx        ← User profile
+│   │   └── Login.jsx
+│   ├── App.jsx                ← Routes
+│   └── version.js             ← Auto version UTC+3
+├── backend/src/
+│   ├── index.js               ← DB auto-init + all table creation
+│   ├── db/pool.js             ← ⚠️ CRITICAL: must have SSL line!
+│   └── routes/
+│       ├── vendors.js         ← Distributors + products + export + history
+│       ├── auth.js            ← Login
+│       ├── users.js           ← Users + /me routes BEFORE /:id
+│       ├── history.js         ← Change history
+│       ├── settings.js        ← Logo + timeout + categories + permissions
+│       └── documents.js       ← File upload/download/delete
+├── .git-hooks/pre-push        ← Auto SSL fix before every push
+├── setup-hooks.ps1            ← Run ONCE to activate hooks
+├── MEMORY.md
+└── README.md
 ```
 
 ## Database Tables
 - **distributors** — id, name, contact, email, phone, mobile, website, status, notes
-- **products** — id, distributor_id (FK), name, category, vendor, cost, currency, status, description
-- **users** — id, username, email, password_hash, role (admin/user/viewer)
+- **products** — id, distributor_id, name, category, vendor, cost, customer_price, currency, status, description
+- **users** — id, username, email, password_hash, role, first_name, last_name, mobile, created_at
+- **user_permissions** — user_id, can_see_cost_price, can_see_customer_price, can_see_documents
+- **documents** — id, distributor_id, name, mime_type, size_bytes, data (base64), uploaded_by, created_at
 - **change_history** — id, user_id, action, entity_type, entity_name, details, created_at
+- **system_settings** — key (session_timeout, logo, categories), value, updated_at
 
 ## ⚠️ Critical Known Issues
 
@@ -69,25 +62,30 @@ vendor-management/
 ```javascript
 ssl: process.env.DB_HOST ? { rejectUnauthorized: false } : false,
 ```
-**Symptom:** "Failed to create distributor" / SSL/TLS required in logs
-**Fix:** Edit pool.js, add SSL line, git push, deploy Backend only
+The pre-push hook fixes this automatically. If it fails, run `.\fix-ssl.ps1` manually.
 
-### 2. addProduct missing from client.js
-`frontend/src/api/client.js` MUST contain:
+### 2. settings.js confusion
+`backend/src/routes/settings.js` must be Node.js/Express code starting with `const express = require('express')`.
+NOT the React Settings.jsx frontend file! This has happened multiple times.
+
+### 3. /me routes must be BEFORE /:id in users.js
+`GET /api/users/me` and `PUT /api/users/me` must be defined BEFORE `/:id` routes or Express interprets "me" as an ID.
+
+### 4. Express JSON limit
+`app.use(express.json({ limit: '15mb' }))` — required for document uploads.
+
+### 5. Brace balance in JSX
+Before pushing frontend changes, verify:
 ```javascript
-addProduct: (distId, data) => req(`/vendors/${distId}/products`, { method: 'POST', body: JSON.stringify(data) }),
+// Open braces must equal close braces
+// Settings.jsx and Vendors.jsx are most prone to this
 ```
-**Symptom:** "addProduct is not a function" error
-**Fix:** Add line to client.js, git push, deploy Frontend only
 
-### 3. Git hooks not activated
-After extracting archive, run ONCE:
-```powershell
-.\setup-hooks.ps1
-```
-Then SSL is fixed automatically before every push.
+### 6. duplicate module.exports in pool.js
+The pre-push hook sometimes writes `module.exports = pool;` twice.
+Fix: manually edit pool.js and remove the duplicate line.
 
-## Render.com Environment Variables (Backend)
+## Render Environment Variables (Backend)
 ```
 DB_HOST     = dpg-d887kaojo6nc73d93f90-a.frankfurt-postgres.render.com
 DB_PORT     = 5432
@@ -99,58 +97,62 @@ NODE_ENV    = production
 PORT        = 3001
 ```
 
-## Render.com Environment Variables (Frontend)
+## Render Environment Variables (Frontend)
 ```
 VITE_API_URL = https://vendor-backend-6gpd.onrender.com/api
 ```
 
 ## Default Users
-| Username | Password  | Role   |
-|----------|-----------|--------|
-| admin    | admin123  | admin  |
-| viewer   | viewer123 | viewer |
+| Username | Password | Role |
+|----------|----------|------|
+| admin | admin123 | Admin |
+| viewer | viewer123 | Viewer |
 
 ## Deploy Process
 ```powershell
-# After making changes:
 git add .
 git commit -m "description"
 git push
-
-# Then on Render:
 # Backend changes  → Render > vendor-backend > Manual Deploy
-# Frontend changes → Render > vendor-frontend > Manual Deploy > Clear build cache & deploy
-# Both changed     → Deploy both
+# Frontend changes → Render > vendor-frontend > Manual Deploy > Clear build cache
+# Both changed     → deploy both
 ```
 
 ## Features Implemented
-- ✅ Distributor management (CRUD) with website field
-- ✅ Product management (CRUD) nested under distributors
-- ✅ Hierarchical expandable table with Expand All / Collapse All
+- ✅ Distributor + product CRUD with all fields
+- ✅ Cost Price + Customer Price per product
+- ✅ Hierarchical table with expand/collapse
 - ✅ Drag & Drop column reordering
-- ✅ Sort by any column (click header)
-- ✅ Global search (searches inside products too)
-- ✅ Filter by status and category
-- ✅ Page size selector: 10 / 25 / 50
-- ✅ Export CSV / Import CSV
-- ✅ Role-based access: Admin / User / Viewer
-- ✅ User management in Settings
-- ✅ Change history (all CREATE/UPDATE/DELETE)
-- ✅ Analytics Dashboard with 5 chart types
-- ✅ JWT authentication
+- ✅ Sort by any column
+- ✅ Global search (including products)
+- ✅ Filter by status + category
+- ✅ Page size: 10/25/50
+- ✅ Bulk Actions (select, change status, delete)
+- ✅ Export CSV + Import CSV (distributors + products)
+- ✅ Documents Panel per distributor (PDF/Word/Excel/Images, 10MB)
+- ✅ Notes displayed as yellow row when distributor expanded
+- ✅ Role-based access: Admin/User/Viewer
+- ✅ Field-level permissions: Cost Price, Customer Price, Documents
+- ✅ User management + profile (first/last name, mobile)
+- ✅ User dropdown → My Profile / Logout
+- ✅ Change History (all actions logged)
+- ✅ Session Timeout (global DB setting, 15min-Never)
+- ✅ Sidebar Logo (Base64, 500KB max)
+- ✅ Categories management in Settings
+- ✅ Dashboard with 5 chart types
 - ✅ Custom domain vendors.191.co.il
-- ✅ Auto-deploy from GitHub
-- ✅ Auto version number in sidebar
+- ✅ Auto version UTC+3 in sidebar
+- ✅ Viewer: no Settings access, Docs read-only
+
+## TODO
+- [ ] Remove DB_HOST from docker-compose.yml backend environment to fix local SSL issue
+- [ ] Toast notifications in Vendors page (replace alert() with nice toasts)
+- [ ] Notes field shown in distributor table (yellow row — DONE in Vendors.jsx)
 
 ## Local Docker Commands
 ```powershell
-# Start
 docker compose up --build
-
-# Reset DB completely
-docker compose down -v
-docker compose up --build
-
-# Check DB tables
-docker exec vendor_db psql -U vendoruser -d vendordb -c "\dt"
+docker compose down -v && docker compose up --build  # reset DB
+docker logs vendor_backend  # check errors
+docker exec vendor_backend printenv DB_HOST  # should be empty locally
 ```
