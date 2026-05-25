@@ -41,6 +41,20 @@ router.post('/:distributorId', auth, async (req, res) => {
   try {
     const { name, mime_type, size_bytes, data } = req.body;
     if (!name || !data) return res.status(400).json({ error: 'name and data are required' });
+    
+    // Validate file type
+    const allowedTypes = [
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/vnd.ms-excel',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif',
+    ];
+    if (mime_type && !allowedTypes.includes(mime_type)) {
+      return res.status(400).json({ error: 'File type not allowed. Only PDF, Word, Excel and images are accepted.' });
+    }
+    
     // Max 10MB base64
     if (data.length > 14000000) return res.status(400).json({ error: 'File too large. Max 10MB.' });
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;

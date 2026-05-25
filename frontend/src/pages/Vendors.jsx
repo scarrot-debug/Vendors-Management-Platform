@@ -454,7 +454,8 @@ function DocumentsPanel({ dist, onClose }) {
             fontSize:13, fontWeight:500, cursor:'pointer', justifyContent:'center' }}>
           <Plus size={15}/> {uploading ? 'Uploading…' : 'Upload Document'}
         </button>
-        <input ref={fileRef} type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.webp"
+        <input ref={fileRef} type="file" 
+          accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.webp,.gif,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,image/*"
           style={{ display:'none' }} onChange={e=>{ if(e.target.files[0]) handleUpload(e.target.files[0]); e.target.value=''; }}/>
         <div style={{ fontSize:11, color:'#9ca3af', textAlign:'center', marginTop:6 }}>
           PDF, Word, Excel, Images · Max 10MB
