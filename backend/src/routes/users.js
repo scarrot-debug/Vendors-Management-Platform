@@ -73,12 +73,12 @@ router.get('/', auth, adminOnly, async (req, res) => {
 // POST /api/users
 router.post('/', auth, adminOnly, async (req, res) => {
   try {
-    const { username, email, password, role } = req.body;
+    const { username, email, password, role, first_name, last_name, mobile } = req.body;
     if (!username || !email || !password) return res.status(400).json({ error: 'username, email and password are required' });
     const hash = await bcrypt.hash(password, 10);
     const result = await pool.query(
-      `INSERT INTO users (username, email, password_hash, role) VALUES ($1,$2,$3,$4) RETURNING id, username, email, role, created_at`,
-      [username, email, hash, role || 'viewer']
+      `INSERT INTO users (username, email, password_hash, role, first_name, last_name, mobile) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING id, username, email, role, first_name, last_name, mobile, created_at`,
+      [username, email, hash, role || 'viewer', first_name||null, last_name||null, mobile||null]
     );
     await logHistory(req.user?.id, 'CREATE', 'user', username, { role, email });
     res.status(201).json(result.rows[0]);
