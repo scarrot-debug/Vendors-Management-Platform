@@ -12,7 +12,7 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '15mb' }));
 
 // Initialize DB tables on startup
 async function initDB() {
@@ -111,6 +111,9 @@ async function initDB() {
         created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
       )
     `);
+
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS user_permissions (
         user_id UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
         can_see_cost_price BOOLEAN NOT NULL DEFAULT true,
         can_see_customer_price BOOLEAN NOT NULL DEFAULT true,
