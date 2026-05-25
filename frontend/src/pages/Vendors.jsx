@@ -85,7 +85,7 @@ function DistributorForm({ initial, onSave, onCancel, saving }) {
       </div>
       <div style={{ display:'flex', gap:10, justifyContent:'flex-end', marginTop:6 }}>
         <button onClick={onCancel} style={{...btnStyle, background:'#f4f6f9', color:'#6b7280'}}>Cancel</button>
-        <button onClick={()=>onSave(form)} disabled={saving} style={{...btnStyle, background:'#2563eb', color:'#fff'}}>
+        <button onClick={()=>onSave(form)} disabled={saving} style={{...btnStyle, background:'#1a1d23', color:'#fff'}}>
           <Check size={15}/> {saving ? 'Saving…' : 'Save'}
         </button>
       </div>
@@ -417,9 +417,11 @@ function DocumentsPanel({ dist, onClose }) {
 
   return (
     <div style={{
-      position:'fixed', top:0, right:0, bottom:0, width:360,
-      background:'#fff', boxShadow:'-4px 0 24px rgba(0,0,0,0.12)',
+      position:'fixed', top:60, right:16, bottom:60,
+      width:340, maxWidth:'90vw',
+      background:'#fff', boxShadow:'-4px 0 24px rgba(0,0,0,0.15)',
       zIndex:500, display:'flex', flexDirection:'column',
+      borderRadius:12, border:'1px solid #e2e6ed', overflow:'hidden',
     }}>
       {/* Header */}
       <div style={{ padding:'20px 20px 16px', background:'#1a1d23', flexShrink:0 }}>

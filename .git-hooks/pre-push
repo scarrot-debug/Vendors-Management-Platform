@@ -1,4 +1,5 @@
 #!/bin/sh
+# Fix SSL in pool.js before every push
 cat > backend/src/db/pool.js << 'POOLEOF'
 const { Pool } = require('pg');
 
