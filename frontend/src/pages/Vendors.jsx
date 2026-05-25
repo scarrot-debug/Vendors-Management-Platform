@@ -1,5 +1,4 @@
-import { useEffect, useState, useCallback, useRef } from 'react';
-import { api } from '../api/client.js';
+import { useEffect, useState, useCallback, useRef } from 'react';import { api } from '../api/client.js';
 import { useAuth } from '../hooks/useAuth.jsx';
 import { Plus, Search, Edit2, Trash2, RefreshCw, X, Check, ChevronDown, ChevronRight, Package, ChevronsDownUp, ChevronsUpDown, ArrowUpDown, GripVertical } from 'lucide-react';
 
@@ -96,16 +95,29 @@ function DistributorForm({ initial, onSave, onCancel, saving }) {
 
 function ProductForm({ initial, onSave, onCancel, saving }) {
   const [form, setForm] = useState(initial || { name:'', category:'', vendor:'', cost:'', customer_price:'', currency:'USD', status:'Active', description:'' });
+  const [categories, setCategories] = useState([]);
   const set = (k,v) => setForm(f=>({...f,[k]:v}));
+
+  useEffect(() => {
+    api.getSystemCategories().then(c => setCategories(c || [])).catch(()=>{});
+  }, []);
+
   return (
     <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
       <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:14 }}>
-        {[{k:'name',l:'Product Name *'},{k:'vendor',l:'Manufacturer'},{k:'category',l:'Category'}].map(({k,l})=>(
+        {[{k:'name',l:'Product Name *'},{k:'vendor',l:'Manufacturer'}].map(({k,l})=>(
           <div key={k}>
             <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>{l}</label>
             <input value={form[k]||''} onChange={e=>set(k,e.target.value)} style={inputStyle}/>
           </div>
         ))}
+        <div>
+          <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>Category</label>
+          <select value={form.category||''} onChange={e=>set('category',e.target.value)} style={inputStyle}>
+            <option value="">— Select category —</option>
+            {categories.map(c=><option key={c} value={c}>{c}</option>)}
+          </select>
+        </div>
         <div>
           <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>Currency</label>
           <select value={form.currency} onChange={e=>set('currency',e.target.value)} style={inputStyle}>

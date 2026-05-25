@@ -50,10 +50,20 @@ function Modal({ title, onClose, children }) {
 }
 
 function UserForm({ initial, onSave, onCancel, saving, isEdit }) {
-  const [form, setForm] = useState(initial || { username:'', email:'', password:'', role:'viewer' });
+  const [form, setForm] = useState(initial || { username:'', email:'', password:'', role:'viewer', first_name:'', last_name:'', mobile:'' });
   const set = (k,v) => setForm(f=>({...f,[k]:v}));
   return (
     <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
+      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:14 }}>
+        <div>
+          <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>First Name</label>
+          <input value={form.first_name||''} onChange={e=>set('first_name',e.target.value)} style={inputStyle} autoComplete="off"/>
+        </div>
+        <div>
+          <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>Last Name</label>
+          <input value={form.last_name||''} onChange={e=>set('last_name',e.target.value)} style={inputStyle} autoComplete="off"/>
+        </div>
+      </div>
       <div>
         <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>Username *</label>
         <input value={form.username||''} onChange={e=>set('username',e.target.value)} style={inputStyle} autoComplete="off"/>
@@ -61,6 +71,10 @@ function UserForm({ initial, onSave, onCancel, saving, isEdit }) {
       <div>
         <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>Email *</label>
         <input type="email" value={form.email||''} onChange={e=>set('email',e.target.value)} style={inputStyle} autoComplete="off"/>
+      </div>
+      <div>
+        <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>Mobile</label>
+        <input value={form.mobile||''} onChange={e=>set('mobile',e.target.value)} style={inputStyle} placeholder="+972 50 000 0000"/>
       </div>
       {!isEdit && (
         <div>

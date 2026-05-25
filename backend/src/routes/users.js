@@ -13,7 +13,7 @@ function adminOnly(req, res, next) {
 // GET /api/users
 router.get('/', auth, adminOnly, async (req, res) => {
   try {
-    const result = await pool.query('SELECT id, username, email, role, created_at FROM users ORDER BY created_at ASC');
+    const result = await pool.query('SELECT id, username, email, role, first_name, last_name, mobile, created_at FROM users ORDER BY created_at ASC');
     res.json(result.rows);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch users' });
@@ -41,10 +41,10 @@ router.post('/', auth, adminOnly, async (req, res) => {
 // PUT /api/users/:id
 router.put('/:id', auth, adminOnly, async (req, res) => {
   try {
-    const { username, email, role } = req.body;
+    const { username, email, role, first_name, last_name, mobile } = req.body;
     const result = await pool.query(
-      `UPDATE users SET username=$1, email=$2, role=$3 WHERE id=$4 RETURNING id, username, email, role, created_at`,
-      [username, email, role, req.params.id]
+      `UPDATE users SET username=$1, email=$2, role=$3, first_name=$4, last_name=$5, mobile=$6 WHERE id=$7 RETURNING id, username, email, role, first_name, last_name, mobile, created_at`,
+      [username, email, role, first_name||null, last_name||null, mobile||null, req.params.id]
     );
     if (!result.rows.length) return res.status(404).json({ error: 'User not found' });
     await logHistory(req.user?.id, 'UPDATE', 'user', username, { role, email });
