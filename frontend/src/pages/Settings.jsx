@@ -379,7 +379,7 @@ export default function Settings() {
                         <Edit2 size={12}/> Edit
                       </button>
                       <button onClick={()=>setPermissionsUser(u)} style={{...btnStyle, padding:'5px 11px', background:'#fff', color:'#7c3aed', border:'1px solid #e9d5ff', fontSize:12}}>
-                        🔒 Permissions
+                        🔒 Role
                       </button>
                       <button onClick={()=>setModal({type:'reset', data:u})} style={{...btnStyle, padding:'5px 11px', background:'#fff', color:'#d97706', border:'1px solid #fde68a', fontSize:12}}>
                         <KeyRound size={12}/> Reset

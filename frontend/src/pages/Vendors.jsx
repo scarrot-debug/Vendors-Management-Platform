@@ -186,7 +186,7 @@ function DraggableHeader({ col, sortField, sortDir, onSort, onDragStart, onDragO
   );
 }
 
-function DistributorRow({ dist, isViewer, open, onToggle, columns, onEditDist, onDeleteDist, onAddProduct, onEditProduct, onDeleteProduct }) {
+function DistributorRow({ dist, isViewer, open, onToggle, columns, permissions, onEditDist, onDeleteDist, onAddProduct, onEditProduct, onDeleteProduct }) {
   const productCount = dist.products?.length || 0;
 
   const renderCell = (key) => {
@@ -589,6 +589,7 @@ export default function Vendors() {
                 open={openRows.has(dist.id)}
                 onToggle={() => toggleRow(dist.id)}
                 columns={columns}
+                permissions={permissions}
                 onEditDist={d => setModal({type:'editDist', data:d})}
                 onDeleteDist={d => setDeleteConfirm({type:'dist', data:d})}
                 onAddProduct={d => setModal({type:'addProduct', dist:d})}
