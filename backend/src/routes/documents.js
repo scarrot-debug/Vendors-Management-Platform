@@ -21,7 +21,7 @@ router.get('/:distributorId', auth, async (req, res) => {
       )
     `);
     const result = await pool.query(
-      `SELECT id, name, mime_type, size_bytes, created_at,
+      `SELECT d.id, d.name, d.mime_type, d.size_bytes, d.created_at,
               u.username as uploaded_by
        FROM documents d
        LEFT JOIN users u ON d.uploaded_by = u.id
