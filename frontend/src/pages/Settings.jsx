@@ -254,6 +254,7 @@ function HistorySection() {
 
 export default function Settings() {
   const { user: currentUser, sessionTimeout, updateSessionTimeout, logo, updateLogo } = useAuth();
+  const logoFileRef = useRef(null);
   const [permissionsUser, setPermissionsUser] = useState(null);
   const [logoUploading, setLogoUploading] = useState(false);
   const [users, setUsers] = useState([]);
