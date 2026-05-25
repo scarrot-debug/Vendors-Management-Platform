@@ -175,6 +175,8 @@ function PermissionsModal({ user, onClose }) {
     </div>
   );
 }
+
+function HistorySection() {
   const [history, setHistory] = useState([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
