@@ -890,7 +890,7 @@ export default function Vendors() {
             style={{...btnStyle, padding:'5px 10px', background:'#fff', border:'1px solid #e2e6ed', color:page===1?'#d1d5db':'#374151'}}>‹</button>
           {Array.from({length:totalPages},(_,i)=>i+1).map(p=>(
             <button key={p} onClick={()=>setPage(p)} style={{...btnStyle, padding:'5px 12px', border:'1px solid',
-              borderColor:p===page?'#2563eb':'#e2e6ed', background:p===page?'#2563eb':'#fff', color:p===page?'#fff':'#374151'}}>{p}</button>
+              borderColor:p===page?'#1a1d23':'#e2e6ed', background:p===page?'#1a1d23':'#fff', color:p===page?'#fff':'#374151'}}>{p}</button>
           ))}
           <button onClick={()=>setPage(p=>Math.min(totalPages,p+1))} disabled={page>=totalPages}
             style={{...btnStyle, padding:'5px 10px', background:'#fff', border:'1px solid #e2e6ed', color:page>=totalPages?'#d1d5db':'#374151'}}>›</button>

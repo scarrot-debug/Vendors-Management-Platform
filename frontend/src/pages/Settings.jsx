@@ -344,7 +344,7 @@ function HistorySection() {
           <button onClick={()=>setPage(p=>Math.max(1,p-1))} disabled={page===1}
             style={{ padding:'4px 10px', borderRadius:6, border:'1px solid #e2e6ed', background:'#fff', cursor:'pointer', color: page===1?'#d1d5db':'#374151' }}>‹</button>
           {Array.from({length:totalPages},(_,i)=>i+1).map(p=>(
-            <button key={p} onClick={()=>setPage(p)} style={{ padding:'4px 10px', borderRadius:6, border:'1px solid', borderColor:p===page?'#2563eb':'#e2e6ed', background:p===page?'#2563eb':'#fff', color:p===page?'#fff':'#374151', cursor:'pointer' }}>{p}</button>
+            <button key={p} onClick={()=>setPage(p)} style={{ padding:'4px 10px', borderRadius:6, border:'1px solid', borderColor:p===page?'#1a1d23':'#e2e6ed', background:p===page?'#1a1d23':'#fff', color:p===page?'#fff':'#374151', cursor:'pointer' }}>{p}</button>
           ))}
           <button onClick={()=>setPage(p=>Math.min(totalPages,p+1))} disabled={page>=totalPages}
             style={{ padding:'4px 10px', borderRadius:6, border:'1px solid #e2e6ed', background:'#fff', cursor:'pointer', color:page>=totalPages?'#d1d5db':'#374151' }}>›</button>
