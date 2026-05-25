@@ -128,3 +128,53 @@ router.put('/:id/permissions', auth, adminOnly, async (req, res) => {
     res.status(500).json({ error: 'Failed to update permissions' });
   }
 });
+
+// GET /api/users/me
+router.get('/me', auth, async (req, res) => {
+  try {
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!req.user?.id || !uuidRegex.test(req.user.id)) {
+      return res.json({ username: req.user?.username, email: '', first_name: '', last_name: '', mobile: '' });
+    }
+    const result = await pool.query('SELECT id, username, email, first_name, last_name, mobile, role FROM users WHERE id=$1', [req.user.id]);
+    if (!result.rows.length) return res.status(404).json({ error: 'User not found' });
+    res.json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch profile' });
+  }
+});
+
+// PUT /api/users/me
+router.put('/me', auth, async (req, res) => {
+  try {
+    const { first_name, last_name, mobile, email } = req.body;
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!req.user?.id || !uuidRegex.test(req.user.id)) return res.status(400).json({ error: 'Invalid user' });
+    await pool.query(
+      `UPDATE users SET first_name=$1, last_name=$2, mobile=$3, email=$4 WHERE id=$5`,
+      [first_name, last_name, mobile, email, req.user.id]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update profile' });
+  }
+});
+
+// POST /api/users/me/change-password
+router.post('/me/change-password', auth, async (req, res) => {
+  try {
+    const { current, new: newPw } = req.body;
+    if (!newPw || newPw.length < 6) return res.status(400).json({ error: 'Password must be at least 6 characters' });
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!req.user?.id || !uuidRegex.test(req.user.id)) return res.status(400).json({ error: 'Invalid user' });
+    const result = await pool.query('SELECT password_hash FROM users WHERE id=$1', [req.user.id]);
+    if (!result.rows.length) return res.status(404).json({ error: 'User not found' });
+    const valid = await bcrypt.compare(current, result.rows[0].password_hash);
+    if (!valid) return res.status(401).json({ error: 'Current password is incorrect' });
+    const hash = await bcrypt.hash(newPw, 10);
+    await pool.query('UPDATE users SET password_hash=$1 WHERE id=$2', [hash, req.user.id]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to change password' });
+  }
+});

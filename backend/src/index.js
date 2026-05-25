@@ -62,9 +62,15 @@ async function initDB() {
         email VARCHAR(200) UNIQUE NOT NULL,
         password_hash VARCHAR(255) NOT NULL,
         role VARCHAR(50) NOT NULL DEFAULT 'viewer' CHECK (role IN ('admin', 'user', 'viewer')),
+        first_name VARCHAR(100),
+        last_name VARCHAR(100),
+        mobile VARCHAR(50),
         created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
       )
     `);
+    await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS first_name VARCHAR(100)`);
+    await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS last_name VARCHAR(100)`);
+    await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS mobile VARCHAR(50)`);
 
     // Seed admin user (password: admin123)
     await pool.query(`

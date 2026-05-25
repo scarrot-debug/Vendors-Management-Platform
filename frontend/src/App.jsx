@@ -5,6 +5,7 @@ import Login from './pages/Login.jsx';
 import Vendors from './pages/Vendors.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import Settings from './pages/Settings.jsx';
+import Profile from './pages/Profile.jsx';
 
 function Protected({ children }) {
   const { user } = useAuth();
@@ -22,6 +23,7 @@ export default function App() {
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="vendors" element={<Vendors />} />
             <Route path="settings" element={<Settings />} />
+            <Route path="profile" element={<Profile />} />
           </Route>
         </Routes>
       </BrowserRouter>

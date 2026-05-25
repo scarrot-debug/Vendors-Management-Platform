@@ -186,7 +186,7 @@ function DraggableHeader({ col, sortField, sortDir, onSort, onDragStart, onDragO
   );
 }
 
-function DistributorRow({ dist, isViewer, open, onToggle, columns, permissions, onEditDist, onDeleteDist, onAddProduct, onEditProduct, onDeleteProduct }) {
+function DistributorRow({ dist, isViewer, open, onToggle, columns, permissions, selected, onSelect, onEditDist, onDeleteDist, onAddProduct, onEditProduct, onDeleteProduct }) {
   const productCount = dist.products?.length || 0;
 
   const renderCell = (key) => {
@@ -250,12 +250,18 @@ function DistributorRow({ dist, isViewer, open, onToggle, columns, permissions, 
 
   return (
     <>
-      <tr style={{ background:'#fff', borderBottom: open ? 'none' : '1px solid #e2e6ed' }}>
-        <td style={{ padding:'13px 12px 13px 16px', width:36 }}>
+      <tr style={{ background: selected ? '#eff6ff' : '#fff', borderBottom: open ? 'none' : '1px solid #e2e6ed' }}>
+        <td style={{ padding:'13px 8px 13px 12px', width:36 }}>
           <button onClick={onToggle} style={{ background:'none', border:'none', cursor:'pointer', color:'#6b7280', display:'flex', alignItems:'center', padding:2 }}>
             {open ? <ChevronDown size={16}/> : <ChevronRight size={16}/>}
           </button>
         </td>
+        {!isViewer && (
+          <td style={{ padding:'13px 8px', width:32 }}>
+            <input type="checkbox" checked={selected} onChange={e=>onSelect(dist.id, e.target.checked)}
+              style={{ width:15, height:15, cursor:'pointer', accentColor:'#2563eb' }}/>
+          </td>
+        )}
         {columns.map(col => renderCell(col.key))}
       </tr>
       {open && (
@@ -341,6 +347,27 @@ export default function Vendors() {
   const [columns, setColumns] = useState(DEFAULT_COLUMNS);
   const [dragOver, setDragOver] = useState(null);
   const dragKey = useRef(null);
+  const [selected, setSelected] = useState(new Set());
+  const [bulkStatus, setBulkStatus] = useState('');
+  const [bulkConfirm, setBulkConfirm] = useState(null);
+
+  const handleSelect = (id, checked) => {
+    setSelected(prev => { const n = new Set(prev); checked ? n.add(id) : n.delete(id); return n; });
+  };
+  const handleSelectAll = (checked) => {
+    setSelected(checked ? new Set(sorted.map(d=>d.id)) : new Set());
+  };
+  const handleBulkDelete = async () => {
+    for (const id of selected) { try { await api.deleteVendor(id); } catch {} }
+    setSelected(new Set()); setBulkConfirm(null); load();
+  };
+  const handleBulkStatus = async (status) => {
+    for (const id of selected) {
+      const dist = sorted.find(d=>d.id===id);
+      if (dist) { try { await api.updateVendor(id, {...dist, status}); } catch {} }
+    }
+    setSelected(new Set()); setBulkConfirm(null); load();
+  };
 
   const handleDragStart = (e, key) => { dragKey.current = key; };
   const handleDragOver = (key) => { setDragOver(key); };
@@ -588,6 +615,26 @@ export default function Vendors() {
         )}
       </div>
 
+      {/* Bulk Actions Toolbar */}
+      {selected.size > 0 && !isViewer && (
+        <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:10, padding:'10px 16px', background:'#eff6ff', borderRadius:8, border:'1px solid #bfdbfe' }}>
+          <span style={{ fontSize:13, fontWeight:600, color:'#1d4ed8' }}>{selected.size} selected</span>
+          <div style={{ display:'flex', gap:6, marginLeft:8 }}>
+            {['Active','Pending','Inactive'].map(s=>(
+              <button key={s} onClick={()=>setBulkConfirm({type:'status', status:s})}
+                style={{ padding:'5px 12px', borderRadius:6, border:'1px solid #bfdbfe', background:'#fff', color:'#1d4ed8', fontSize:12, cursor:'pointer', fontWeight:500 }}>
+                → {s}
+              </button>
+            ))}
+            <button onClick={()=>setBulkConfirm({type:'delete'})}
+              style={{ padding:'5px 12px', borderRadius:6, border:'1px solid #fecaca', background:'#fff', color:'#dc2626', fontSize:12, cursor:'pointer', fontWeight:500 }}>
+              🗑 Delete
+            </button>
+          </div>
+          <button onClick={()=>setSelected(new Set())} style={{ marginLeft:'auto', background:'none', border:'none', color:'#6b7280', cursor:'pointer', fontSize:12 }}>✕ Clear</button>
+        </div>
+      )}
+
       {/* Table */}
       <div style={{ background:'#fff', border:'1px solid #e2e6ed', borderRadius:10, overflow:'hidden' }}>
         <div style={{ overflowX:'auto', width:'100%' }}>
@@ -595,6 +642,14 @@ export default function Vendors() {
           <thead>
             <tr style={{ borderBottom:'1px solid #e2e6ed', background:'#f8f9fb' }} onDragLeave={()=>setDragOver(null)}>
               <th style={{ width:36, padding:'11px 16px' }}/>
+              {!isViewer && (
+                <th style={{ width:32, padding:'11px 8px' }}>
+                  <input type="checkbox"
+                    checked={sorted.length > 0 && sorted.every(d=>selected.has(d.id))}
+                    onChange={e=>handleSelectAll(e.target.checked)}
+                    style={{ width:15, height:15, cursor:'pointer', accentColor:'#2563eb' }}/>
+                </th>
+              )}
               {columns.map(col => (
                 <DraggableHeader
                   key={col.key}
@@ -624,6 +679,8 @@ export default function Vendors() {
                 onToggle={() => toggleRow(dist.id)}
                 columns={columns}
                 permissions={permissions}
+                selected={selected.has(dist.id)}
+                onSelect={handleSelect}
                 onEditDist={d => setModal({type:'editDist', data:d})}
                 onDeleteDist={d => setDeleteConfirm({type:'dist', data:d})}
                 onAddProduct={d => setModal({type:'addProduct', dist:d})}
@@ -674,7 +731,22 @@ export default function Vendors() {
           <ProductForm initial={modal.data} onSave={handleSaveProduct} onCancel={()=>setModal(null)} saving={saving}/>
         </Modal>
       )}
-      {deleteConfirm && (
+      {bulkConfirm && (
+        <Modal title={bulkConfirm.type==='delete' ? 'Delete Selected' : `Change Status to ${bulkConfirm.status}`} onClose={()=>setBulkConfirm(null)}>
+          <p style={{ color:'#6b7280', marginBottom:20 }}>
+            {bulkConfirm.type==='delete'
+              ? `Delete ${selected.size} distributor${selected.size>1?'s':''}? This cannot be undone.`
+              : `Change ${selected.size} distributor${selected.size>1?'s':''} to "${bulkConfirm.status}"?`}
+          </p>
+          <div style={{ display:'flex', gap:10, justifyContent:'flex-end' }}>
+            <button onClick={()=>setBulkConfirm(null)} style={{...btnStyle, background:'#f4f6f9', color:'#6b7280'}}>Cancel</button>
+            <button onClick={bulkConfirm.type==='delete' ? handleBulkDelete : ()=>handleBulkStatus(bulkConfirm.status)}
+              style={{...btnStyle, background: bulkConfirm.type==='delete' ? '#dc2626' : '#1a1d23', color:'#fff'}}>
+              Confirm
+            </button>
+          </div>
+        </Modal>
+      )}
         <Modal title="Confirm Delete" onClose={()=>setDeleteConfirm(null)}>
           <p style={{ color:'#6b7280', marginBottom:20 }}>
             Delete <strong style={{ color:'#1a1d23' }}>{deleteConfirm.data.name}</strong>?

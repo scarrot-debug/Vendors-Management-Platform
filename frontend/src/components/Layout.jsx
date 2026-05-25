@@ -2,7 +2,7 @@ import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth.jsx';
 import {
   LayoutDashboard, Users, BookOpen, FileText, CheckSquare,
-  BarChart2, Settings as SettingsIcon, ShieldCheck, LogOut, ChevronLeft
+  BarChart2, Settings as SettingsIcon, ShieldCheck, LogOut, ChevronLeft, User, ChevronDown
 } from 'lucide-react';
 import { useState } from 'react';
 import { VERSION } from '../version.js';
@@ -23,6 +23,7 @@ export default function Layout() {
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
 
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const handleLogout = () => { logout(); navigate('/login'); };
 
   const DEFAULT_LOGO = "https://www.one1.co.il/wp-content/uploads/2024/11/dark_logo.webp";
@@ -106,36 +107,66 @@ export default function Layout() {
 
       {/* Main content */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#f4f6f9' }}>
-        {/* Top bar - part of page flow */}
+        {/* Top bar with user dropdown */}
         <div style={{
           display: 'flex', alignItems: 'center', justifyContent: 'flex-end',
           padding: '12px 24px', gap: 16, flexShrink: 0,
         }}>
-          {/* User info */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div style={{
-              width: 28, height: 28, borderRadius: '50%',
-              background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 12, fontWeight: 600, color: '#fff', flexShrink: 0,
-            }}>{user?.username?.[0]?.toUpperCase() || 'A'}</div>
-            <div>
-              <div style={{ fontSize: 13, fontWeight: 500, color: '#1a1d23' }}>{user?.username}</div>
-              <div style={{ fontSize: 11, color: '#9ca3af', textTransform: 'capitalize' }}>{user?.role}</div>
-            </div>
+          {/* User dropdown */}
+          <div style={{ position:'relative' }}>
+            <button onClick={()=>setUserMenuOpen(v=>!v)} style={{
+              display:'flex', alignItems:'center', gap:8, padding:'6px 12px',
+              borderRadius:8, border:'1px solid #e2e6ed', background:'#fff',
+              cursor:'pointer', transition:'all 0.15s',
+            }}
+              onMouseEnter={e=>e.currentTarget.style.background='#f8f9fb'}
+              onMouseLeave={e=>e.currentTarget.style.background='#fff'}
+            >
+              <div style={{
+                width:28, height:28, borderRadius:'50%',
+                background:'linear-gradient(135deg,#6366f1,#8b5cf6)',
+                display:'flex', alignItems:'center', justifyContent:'center',
+                fontSize:12, fontWeight:600, color:'#fff',
+              }}>{user?.username?.[0]?.toUpperCase()}</div>
+              <div style={{ textAlign:'left' }}>
+                <div style={{ fontSize:13, fontWeight:500, color:'#1a1d23' }}>{user?.username}</div>
+                <div style={{ fontSize:11, color:'#9ca3af', textTransform:'capitalize' }}>{user?.role}</div>
+              </div>
+              <ChevronDown size={14} style={{ color:'#9ca3af', transform: userMenuOpen ? 'rotate(180deg)' : 'none', transition:'transform 0.15s' }}/>
+            </button>
+
+            {userMenuOpen && (
+              <div style={{
+                position:'absolute', top:'calc(100% + 8px)', right:0, zIndex:200,
+                background:'#fff', border:'1px solid #e2e6ed', borderRadius:10,
+                boxShadow:'0 8px 24px rgba(0,0,0,0.12)', minWidth:180, overflow:'hidden',
+              }} onMouseLeave={()=>setUserMenuOpen(false)}>
+                <div style={{ padding:'12px 16px', borderBottom:'1px solid #f1f5f9' }}>
+                  <div style={{ fontSize:13, fontWeight:600, color:'#1a1d23' }}>{user?.username}</div>
+                  <div style={{ fontSize:12, color:'#9ca3af', textTransform:'capitalize' }}>{user?.role}</div>
+                </div>
+                <button onClick={()=>{ navigate('/profile'); setUserMenuOpen(false); }} style={{
+                  display:'flex', alignItems:'center', gap:8, width:'100%', padding:'10px 16px',
+                  background:'none', border:'none', fontSize:13, color:'#374151', cursor:'pointer', textAlign:'left',
+                }}
+                  onMouseEnter={e=>e.currentTarget.style.background='#f8f9fb'}
+                  onMouseLeave={e=>e.currentTarget.style.background='none'}
+                >
+                  <User size={14}/> My Profile
+                </button>
+                <div style={{ height:1, background:'#f1f5f9' }}/>
+                <button onClick={handleLogout} style={{
+                  display:'flex', alignItems:'center', gap:8, width:'100%', padding:'10px 16px',
+                  background:'none', border:'none', fontSize:13, color:'#dc2626', cursor:'pointer', textAlign:'left',
+                }}
+                  onMouseEnter={e=>e.currentTarget.style.background='#fef2f2'}
+                  onMouseLeave={e=>e.currentTarget.style.background='none'}
+                >
+                  <LogOut size={14}/> Logout
+                </button>
+              </div>
+            )}
           </div>
-          <div style={{ width: 1, height: 24, background: '#d1d5db' }}/>
-          <button onClick={handleLogout} style={{
-            display: 'flex', alignItems: 'center', gap: 6,
-            padding: '6px 14px', borderRadius: 7, border: '1px solid #e2e6ed',
-            background: '#fff', color: '#374151', fontSize: 13, cursor: 'pointer',
-            transition: 'all 0.15s', boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
-          }}
-            onMouseEnter={e => { e.currentTarget.style.color = '#ef4444'; e.currentTarget.style.borderColor = '#fca5a5'; e.currentTarget.style.background = '#fef2f2'; }}
-            onMouseLeave={e => { e.currentTarget.style.color = '#374151'; e.currentTarget.style.borderColor = '#e2e6ed'; e.currentTarget.style.background = '#fff'; }}
-          >
-            <LogOut size={14}/> Logout
-          </button>
         </div>
         <main style={{ flex: 1, overflow: 'auto', display: 'flex', flexDirection: 'column' }}>
           <Outlet/>
