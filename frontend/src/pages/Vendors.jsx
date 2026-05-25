@@ -198,7 +198,7 @@ function DraggableHeader({ col, sortField, sortDir, onSort, onDragStart, onDragO
   );
 }
 
-function DistributorRow({ dist, isViewer, open, onToggle, columns, permissions, selected, onSelect, onEditDist, onDeleteDist, onAddProduct, onEditProduct, onDeleteProduct }) {
+function DistributorRow({ dist, isViewer, open, onToggle, columns, permissions, selected, onSelect, onEditDist, onDeleteDist, onAddProduct, onEditProduct, onDeleteProduct, onOpenDocs }) {
   const productCount = dist.products?.length || 0;
 
   const renderCell = (key) => {
@@ -241,19 +241,24 @@ function DistributorRow({ dist, isViewer, open, onToggle, columns, permissions, 
       );
       case 'actions': return (
         <td key={key} style={{ padding:'13px 16px' }}>
-          {!isViewer && (
-            <div style={{ display:'flex', gap:5 }}>
-              <button onClick={()=>onAddProduct(dist)} style={{...btnStyle, padding:'4px 10px', background:'#f0fdf4', color:'#16a34a', border:'1px solid #bbf7d0', fontSize:12}}>
-                <Plus size={12}/> Product
-              </button>
-              <button onClick={()=>onEditDist(dist)} style={{...btnStyle, padding:'4px 10px', background:'#fff', color:'#2563eb', border:'1px solid #e2e6ed', fontSize:12}}>
-                <Edit2 size={12}/> Edit
-              </button>
-              <button onClick={()=>onDeleteDist(dist)} style={{...btnStyle, padding:'4px 10px', background:'#fff', color:'#dc2626', border:'1px solid #fee2e2', fontSize:12}}>
-                <Trash2 size={12}/>
-              </button>
-            </div>
-          )}
+          <div style={{ display:'flex', gap:5 }}>
+            <button onClick={()=>onOpenDocs(dist)} style={{...btnStyle, padding:'4px 10px', background:'#f5f3ff', color:'#7c3aed', border:'1px solid #e9d5ff', fontSize:12}}>
+              📄 Docs
+            </button>
+            {!isViewer && (
+              <>
+                <button onClick={()=>onAddProduct(dist)} style={{...btnStyle, padding:'4px 10px', background:'#f0fdf4', color:'#16a34a', border:'1px solid #bbf7d0', fontSize:12}}>
+                  <Plus size={12}/> Product
+                </button>
+                <button onClick={()=>onEditDist(dist)} style={{...btnStyle, padding:'4px 10px', background:'#fff', color:'#2563eb', border:'1px solid #e2e6ed', fontSize:12}}>
+                  <Edit2 size={12}/> Edit
+                </button>
+                <button onClick={()=>onDeleteDist(dist)} style={{...btnStyle, padding:'4px 10px', background:'#fff', color:'#dc2626', border:'1px solid #fee2e2', fontSize:12}}>
+                  <Trash2 size={12}/>
+                </button>
+              </>
+            )}
+          </div>
         </td>
       );
       default: return <td key={key}/>;
@@ -338,6 +343,156 @@ function DistributorRow({ dist, isViewer, open, onToggle, columns, permissions, 
   );
 }
 
+function DocumentsPanel({ dist, onClose }) {
+  const [docs, setDocs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef(null);
+  const token = localStorage.getItem('token');
+
+  const loadDocs = () => {
+    setLoading(true);
+    api.getDocuments(dist.id).then(d => { setDocs(d); setLoading(false); }).catch(()=>setLoading(false));
+  };
+
+  useEffect(() => { loadDocs(); }, [dist.id]);
+
+  const handleUpload = async (file) => {
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) { alert('File too large. Max 10MB.'); return; }
+    setUploading(true);
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      try {
+        await api.uploadDocument(dist.id, {
+          name: file.name,
+          mime_type: file.type,
+          size_bytes: file.size,
+          data: e.target.result,
+        });
+        loadDocs();
+      } catch(err) { alert(err.message); }
+      finally { setUploading(false); }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleDelete = async (docId) => {
+    if (!confirm('Delete this document?')) return;
+    try { await api.deleteDocument(dist.id, docId); loadDocs(); }
+    catch(err) { alert(err.message); }
+  };
+
+  const handleDownload = (docId, name) => {
+    const url = api.downloadDocument(dist.id, docId);
+    const a = document.createElement('a');
+    a.href = url;
+    a.setAttribute('Authorization', `Bearer ${token}`);
+    // Fetch with auth header
+    fetch(url, { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => r.blob())
+      .then(blob => {
+        const burl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = burl; a.download = name; a.click();
+        URL.revokeObjectURL(burl);
+      });
+  };
+
+  const formatSize = (bytes) => {
+    if (!bytes) return '';
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024*1024) return `${(bytes/1024).toFixed(0)} KB`;
+    return `${(bytes/(1024*1024)).toFixed(1)} MB`;
+  };
+
+  const getIcon = (mime) => {
+    if (!mime) return '📄';
+    if (mime.includes('pdf')) return '📕';
+    if (mime.includes('word') || mime.includes('document')) return '📘';
+    if (mime.includes('sheet') || mime.includes('excel')) return '📗';
+    if (mime.includes('image')) return '🖼';
+    return '📄';
+  };
+
+  return (
+    <div style={{
+      position:'fixed', top:0, right:0, bottom:0, width:360,
+      background:'#fff', boxShadow:'-4px 0 24px rgba(0,0,0,0.12)',
+      zIndex:500, display:'flex', flexDirection:'column',
+    }}>
+      {/* Header */}
+      <div style={{ padding:'20px 20px 16px', background:'#1a1d23', flexShrink:0 }}>
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:4 }}>
+          <div>
+            <div style={{ fontSize:14, fontWeight:600, color:'#fff' }}>📄 Documents</div>
+            <div style={{ fontSize:12, color:'rgba(255,255,255,0.5)', marginTop:2 }}>{dist.name}</div>
+          </div>
+          <button onClick={onClose} style={{ background:'none', border:'none', color:'rgba(255,255,255,0.6)', cursor:'pointer', padding:4 }}>
+            <X size={18}/>
+          </button>
+        </div>
+      </div>
+
+      {/* Upload button */}
+      <div style={{ padding:'16px 20px', borderBottom:'1px solid #e2e6ed', flexShrink:0 }}>
+        <button onClick={()=>fileRef.current?.click()} disabled={uploading}
+          style={{ display:'flex', alignItems:'center', gap:8, width:'100%', padding:'10px 16px',
+            borderRadius:8, border:'1px dashed #bfdbfe', background:'#f0f7ff', color:'#2563eb',
+            fontSize:13, fontWeight:500, cursor:'pointer', justifyContent:'center' }}>
+          <Plus size={15}/> {uploading ? 'Uploading…' : 'Upload Document'}
+        </button>
+        <input ref={fileRef} type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.webp"
+          style={{ display:'none' }} onChange={e=>{ if(e.target.files[0]) handleUpload(e.target.files[0]); e.target.value=''; }}/>
+        <div style={{ fontSize:11, color:'#9ca3af', textAlign:'center', marginTop:8 }}>
+          PDF, Word, Excel, Images · Max 10MB
+        </div>
+      </div>
+
+      {/* Document list */}
+      <div style={{ flex:1, overflowY:'auto', padding:'12px 20px' }}>
+        {loading ? (
+          <div style={{ textAlign:'center', color:'#9ca3af', padding:32, fontSize:13 }}>Loading…</div>
+        ) : docs.length === 0 ? (
+          <div style={{ textAlign:'center', color:'#9ca3af', padding:32, fontSize:13 }}>
+            <div style={{ fontSize:32, marginBottom:8 }}>📁</div>
+            No documents yet
+          </div>
+        ) : docs.map(doc => (
+          <div key={doc.id} style={{
+            display:'flex', alignItems:'center', gap:10, padding:'12px',
+            background:'#f8f9fb', borderRadius:8, border:'1px solid #e2e6ed', marginBottom:8,
+          }}>
+            <div style={{ fontSize:22, flexShrink:0 }}>{getIcon(doc.mime_type)}</div>
+            <div style={{ flex:1, minWidth:0 }}>
+              <div style={{ fontSize:13, fontWeight:500, color:'#1a1d23', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+                {doc.name}
+              </div>
+              <div style={{ fontSize:11, color:'#9ca3af', marginTop:2 }}>
+                {formatSize(doc.size_bytes)} · {new Date(doc.created_at).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' })}
+                {doc.uploaded_by && ` · ${doc.uploaded_by}`}
+              </div>
+            </div>
+            <div style={{ display:'flex', gap:4, flexShrink:0 }}>
+              <button onClick={()=>handleDownload(doc.id, doc.name)}
+                style={{ padding:'5px 8px', borderRadius:6, border:'1px solid #e2e6ed', background:'#fff', color:'#374151', cursor:'pointer', fontSize:12 }}
+                title="Download">⬇</button>
+              <button onClick={()=>handleDelete(doc.id)}
+                style={{ padding:'5px 8px', borderRadius:6, border:'1px solid #fee2e2', background:'#fff', color:'#dc2626', cursor:'pointer', fontSize:12 }}
+                title="Delete">🗑</button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Footer */}
+      <div style={{ padding:'12px 20px', borderTop:'1px solid #e2e6ed', fontSize:12, color:'#9ca3af', flexShrink:0 }}>
+        {docs.length} document{docs.length !== 1 ? 's' : ''}
+      </div>
+    </div>
+  );
+}
+
 export default function Vendors() {
   const { user, permissions = { can_see_cost_price: true, can_see_customer_price: true } } = useAuth();
   const isViewer = user?.role === 'viewer';
@@ -362,6 +517,7 @@ export default function Vendors() {
   const [selected, setSelected] = useState(new Set());
   const [bulkStatus, setBulkStatus] = useState('');
   const [bulkConfirm, setBulkConfirm] = useState(null);
+  const [docsPanel, setDocsPanel] = useState(null);
 
   const handleSelect = (id, checked) => {
     setSelected(prev => { const n = new Set(prev); checked ? n.add(id) : n.delete(id); return n; });
@@ -698,6 +854,7 @@ export default function Vendors() {
                 onAddProduct={d => setModal({type:'addProduct', dist:d})}
                 onEditProduct={(d,p) => setModal({type:'editProduct', dist:d, data:p})}
                 onDeleteProduct={(d,p) => setDeleteConfirm({type:'product', dist:d, data:p})}
+                onOpenDocs={d => setDocsPanel(d)}
               />
             ))}
           </tbody>
@@ -743,6 +900,10 @@ export default function Vendors() {
           <ProductForm initial={modal.data} onSave={handleSaveProduct} onCancel={()=>setModal(null)} saving={saving}/>
         </Modal>
       )}
+      {docsPanel && (
+        <DocumentsPanel dist={docsPanel} onClose={()=>setDocsPanel(null)}/>
+      )}
+
       {bulkConfirm && (
         <Modal title={bulkConfirm.type==='delete' ? 'Delete Selected' : `Change Status to ${bulkConfirm.status}`} onClose={()=>setBulkConfirm(null)}>
           <p style={{ color:'#6b7280', marginBottom:20 }}>

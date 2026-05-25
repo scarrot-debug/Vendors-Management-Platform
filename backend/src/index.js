@@ -6,6 +6,7 @@ const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
 const historyRoutes = require('./routes/history');
 const settingsRoutes = require('./routes/settings');
+const documentsRoutes = require('./routes/documents');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -99,7 +100,17 @@ async function initDB() {
     `);
 
     await pool.query(`
-      CREATE TABLE IF NOT EXISTS user_permissions (
+      CREATE TABLE IF NOT EXISTS documents (
+        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        distributor_id UUID NOT NULL REFERENCES distributors(id) ON DELETE CASCADE,
+        name VARCHAR(200) NOT NULL,
+        mime_type VARCHAR(100),
+        size_bytes INTEGER,
+        data TEXT NOT NULL,
+        uploaded_by UUID REFERENCES users(id) ON DELETE SET NULL,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      )
+    `);
         user_id UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
         can_see_cost_price BOOLEAN NOT NULL DEFAULT true,
         can_see_customer_price BOOLEAN NOT NULL DEFAULT true,
@@ -140,6 +151,7 @@ app.use('/api/vendors', vendorRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/history', historyRoutes);
 app.use('/api/settings', settingsRoutes);
+app.use('/api/documents', documentsRoutes);
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
