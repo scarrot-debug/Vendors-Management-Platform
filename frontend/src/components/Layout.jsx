@@ -38,22 +38,18 @@ export default function Layout() {
         flexShrink: 0,
         overflow: 'hidden',
       }}>
-        {/* Logo — centered */}
+        {/* Logo */}
         <div style={{
           padding: '20px 16px',
           borderBottom: '1px solid rgba(255,255,255,0.07)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           minHeight: 68,
         }}>
-          <img
-            src={logoSrc}
-            alt="Logo"
-            style={{
-              height: 30, objectFit: 'contain',
-              maxWidth: collapsed ? 32 : 160,
-              transition: 'max-width 0.2s ease',
-            }}
-          />
+          <img src={logoSrc} alt="Logo" style={{
+            height: 30, objectFit: 'contain',
+            maxWidth: collapsed ? 32 : 160,
+            transition: 'max-width 0.2s ease',
+          }}/>
         </div>
 
         {/* Nav */}
@@ -62,12 +58,10 @@ export default function Layout() {
             <div key={label} style={{
               display: 'flex', alignItems: 'center', gap: 10,
               padding: '9px 10px', borderRadius: 7,
-              color: 'rgba(255,255,255,0.35)',
-              fontSize: 14, whiteSpace: 'nowrap',
-              borderLeft: '3px solid transparent',
-              cursor: 'default',
+              color: 'rgba(255,255,255,0.35)', fontSize: 14, whiteSpace: 'nowrap',
+              borderLeft: '3px solid transparent', cursor: 'default',
             }}>
-              <Icon size={17} style={{ flexShrink: 0, color: 'rgba(255,255,255,0.35)' }} />
+              <Icon size={17} style={{ flexShrink: 0, color: 'rgba(255,255,255,0.35)' }}/>
               {!collapsed && label}
             </div>
           ) : (
@@ -75,8 +69,7 @@ export default function Layout() {
               style={({ isActive }) => ({
                 display: 'flex', alignItems: 'center', gap: 10,
                 padding: '9px 10px', borderRadius: 7,
-                color: '#ffffff',
-                background: 'transparent',
+                color: '#ffffff', background: 'transparent',
                 textDecoration: 'none', fontSize: 14, fontWeight: isActive ? 600 : 400,
                 transition: 'all 0.15s', whiteSpace: 'nowrap',
                 borderLeft: isActive ? '3px solid #fff' : '3px solid transparent',
@@ -85,42 +78,16 @@ export default function Layout() {
               onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; }}
               onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
             >
-              <Icon size={17} style={{ flexShrink: 0, color: '#fff' }} />
+              <Icon size={17} style={{ flexShrink: 0, color: '#fff' }}/>
               {!collapsed && label}
             </NavLink>
           ))}
         </nav>
 
-        {/* User */}
+        {/* Version at bottom */}
         <div style={{ padding: '10px 8px', borderTop: '1px solid rgba(255,255,255,0.07)' }}>
           {!collapsed && (
-            <div style={{ padding: '8px 10px', display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-              <div style={{
-                width: 30, height: 30, borderRadius: '50%',
-                background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 12, fontWeight: 600, color: '#fff', flexShrink: 0,
-              }}>{user?.username?.[0]?.toUpperCase() || 'A'}</div>
-              <div>
-                <div style={{ fontSize: 13, fontWeight: 500, color: '#fff' }}>{user?.username || 'Admin User'}</div>
-                <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', textTransform: 'capitalize' }}>{user?.role || 'Administrator'}</div>
-              </div>
-            </div>
-          )}
-          <button onClick={handleLogout} style={{
-            display: 'flex', alignItems: 'center', gap: 10, width: '100%',
-            padding: '8px 10px', borderRadius: 7, border: 'none',
-            background: 'transparent', color: 'rgba(255,255,255,0.55)', fontSize: 13,
-            cursor: 'pointer', transition: 'all 0.15s',
-          }}
-            onMouseEnter={e => { e.currentTarget.style.color = '#ef4444'; e.currentTarget.style.background = 'rgba(239,68,68,0.1)'; }}
-            onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.55)'; e.currentTarget.style.background = 'transparent'; }}
-          >
-            <LogOut size={16} style={{ flexShrink: 0 }} />
-            {!collapsed && 'Logout'}
-          </button>
-          {!collapsed && (
-            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)', textAlign: 'center', marginTop: 8 }}>
+            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', textAlign: 'center', padding: '4px 0' }}>
               {VERSION}
             </div>
           )}
@@ -134,12 +101,47 @@ export default function Layout() {
         background: '#fff', color: '#6b7280', display: 'flex', alignItems: 'center', justifyContent: 'center',
         cursor: 'pointer', transition: 'left 0.2s ease', boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
       }}>
-        <ChevronLeft size={12} style={{ transform: collapsed ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+        <ChevronLeft size={12} style={{ transform: collapsed ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}/>
       </button>
 
-      <main style={{ flex: 1, overflow: 'auto', display: 'flex', flexDirection: 'column', background: '#f4f6f9' }}>
-        <Outlet />
-      </main>
+      {/* Main content */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#f4f6f9' }}>
+        {/* Top bar with user info and Logout */}
+        <div style={{
+          height: 48, background: '#fff', borderBottom: '1px solid #e2e6ed',
+          display: 'flex', alignItems: 'center', justifyContent: 'flex-end',
+          padding: '0 24px', gap: 16, flexShrink: 0,
+        }}>
+          {/* User info */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{
+              width: 28, height: 28, borderRadius: '50%',
+              background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 12, fontWeight: 600, color: '#fff', flexShrink: 0,
+            }}>{user?.username?.[0]?.toUpperCase() || 'A'}</div>
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 500, color: '#1a1d23' }}>{user?.username}</div>
+              <div style={{ fontSize: 11, color: '#9ca3af', textTransform: 'capitalize' }}>{user?.role}</div>
+            </div>
+          </div>
+          <div style={{ width: 1, height: 24, background: '#e2e6ed' }}/>
+          <button onClick={handleLogout} style={{
+            display: 'flex', alignItems: 'center', gap: 6,
+            padding: '6px 14px', borderRadius: 7, border: '1px solid #e2e6ed',
+            background: '#fff', color: '#374151', fontSize: 13, cursor: 'pointer',
+            transition: 'all 0.15s',
+          }}
+            onMouseEnter={e => { e.currentTarget.style.color = '#ef4444'; e.currentTarget.style.borderColor = '#fca5a5'; e.currentTarget.style.background = '#fef2f2'; }}
+            onMouseLeave={e => { e.currentTarget.style.color = '#374151'; e.currentTarget.style.borderColor = '#e2e6ed'; e.currentTarget.style.background = '#fff'; }}
+          >
+            <LogOut size={14}/> Logout
+          </button>
+        </div>
+        <main style={{ flex: 1, overflow: 'auto', display: 'flex', flexDirection: 'column' }}>
+          <Outlet/>
+        </main>
+      </div>
     </div>
   );
 }

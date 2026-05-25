@@ -119,9 +119,9 @@ router.put('/:id/permissions', auth, adminOnly, async (req, res) => {
       [req.params.id, can_see_cost_price, can_see_customer_price]
     );
     await logHistory(req.user?.id, 'UPDATE', 'user', user.rows[0]?.username, {
-      action: 'Permissions updated',
-      can_see_cost_price,
-      can_see_customer_price
+      action: 'Field permissions updated',
+      cost_price: can_see_cost_price ? 'visible' : 'hidden',
+      customer_price: can_see_customer_price ? 'visible' : 'hidden',
     });
     res.json({ success: true });
   } catch (err) {

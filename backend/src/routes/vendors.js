@@ -124,7 +124,7 @@ router.post('/', auth, async (req, res) => {
       `INSERT INTO distributors (name, contact, email, phone, mobile, website, status, notes) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
       [name, contact, email, phone, mobile, website, status || 'Active', notes]
     );
-    await logHistory(req.user?.id, 'CREATE', 'distributor', name, { status });
+    await logHistory(req.user?.id, 'CREATE', 'distributor', name, { status, contact, email, phone, website });
     res.status(201).json({ ...result.rows[0], products: [] });
   } catch (err) {
     res.status(500).json({ error: 'Failed to create distributor' });
@@ -141,7 +141,7 @@ router.put('/:id', auth, async (req, res) => {
       [name, contact, email, phone, mobile, website, status, notes, req.params.id]
     );
     if (!result.rows.length) return res.status(404).json({ error: 'Not found' });
-    await logHistory(req.user?.id, 'UPDATE', 'distributor', name, { status });
+    await logHistory(req.user?.id, 'UPDATE', 'distributor', name, { status, contact, email, phone, website });
     const prods = await pool.query('SELECT * FROM products WHERE distributor_id=$1 ORDER BY name', [req.params.id]);
     res.json({ ...result.rows[0], products: prods.rows });
   } catch (err) {
