@@ -747,6 +747,7 @@ export default function Vendors() {
           </div>
         </Modal>
       )}
+      {deleteConfirm && (
         <Modal title="Confirm Delete" onClose={()=>setDeleteConfirm(null)}>
           <p style={{ color:'#6b7280', marginBottom:20 }}>
             Delete <strong style={{ color:'#1a1d23' }}>{deleteConfirm.data.name}</strong>?
