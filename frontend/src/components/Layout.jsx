@@ -106,9 +106,9 @@ export default function Layout() {
 
       {/* Main content */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#f4f6f9' }}>
-        {/* Top bar with user info and Logout */}
+        {/* Top bar - transparent, floating */}
         <div style={{
-          height: 48, background: '#fff', borderBottom: '1px solid #e2e6ed',
+          height: 48, background: 'transparent',
           display: 'flex', alignItems: 'center', justifyContent: 'flex-end',
           padding: '0 24px', gap: 16, flexShrink: 0,
         }}>
@@ -125,12 +125,12 @@ export default function Layout() {
               <div style={{ fontSize: 11, color: '#9ca3af', textTransform: 'capitalize' }}>{user?.role}</div>
             </div>
           </div>
-          <div style={{ width: 1, height: 24, background: '#e2e6ed' }}/>
+          <div style={{ width: 1, height: 24, background: '#d1d5db' }}/>
           <button onClick={handleLogout} style={{
             display: 'flex', alignItems: 'center', gap: 6,
             padding: '6px 14px', borderRadius: 7, border: '1px solid #e2e6ed',
             background: '#fff', color: '#374151', fontSize: 13, cursor: 'pointer',
-            transition: 'all 0.15s',
+            transition: 'all 0.15s', boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
           }}
             onMouseEnter={e => { e.currentTarget.style.color = '#ef4444'; e.currentTarget.style.borderColor = '#fca5a5'; e.currentTarget.style.background = '#fef2f2'; }}
             onMouseLeave={e => { e.currentTarget.style.color = '#374151'; e.currentTarget.style.borderColor = '#e2e6ed'; e.currentTarget.style.background = '#fff'; }}
