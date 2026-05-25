@@ -327,7 +327,7 @@ function DistributorRow({ dist, isViewer, open, onToggle, columns, permissions, 
 }
 
 export default function Vendors() {
-  const { user, permissions } = useAuth();
+  const { user, permissions = { can_see_cost_price: true, can_see_customer_price: true } } = useAuth();
   const isViewer = user?.role === 'viewer';
   const [data, setData] = useState({ distributors: [], total: 0 });
   const [loading, setLoading] = useState(true);
