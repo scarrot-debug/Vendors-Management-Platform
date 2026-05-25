@@ -31,7 +31,8 @@ router.get('/:distributorId', auth, async (req, res) => {
     );
     res.json(result.rows);
   } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch documents' });
+    console.error('Documents GET error:', err.message, err.stack);
+    res.status(500).json({ error: 'Failed to fetch documents', detail: err.message });
   }
 });
 
