@@ -347,6 +347,7 @@ function DocumentsPanel({ dist, onClose }) {
   const [docs, setDocs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [minimized, setMinimized] = useState(false);
   const fileRef = useRef(null);
   const token = localStorage.getItem('token');
 
@@ -417,27 +418,36 @@ function DocumentsPanel({ dist, onClose }) {
 
   return (
     <div style={{
-      position:'fixed', top:60, right:16, bottom:60,
+      position:'fixed', bottom:16, right:16,
       width:340, maxWidth:'90vw',
-      background:'#fff', boxShadow:'-4px 0 24px rgba(0,0,0,0.15)',
+      height: minimized ? 'auto' : 480,
+      background:'#fff', boxShadow:'0 8px 32px rgba(0,0,0,0.18)',
       zIndex:500, display:'flex', flexDirection:'column',
       borderRadius:12, border:'1px solid #e2e6ed', overflow:'hidden',
+      transition:'height 0.2s ease',
     }}>
       {/* Header */}
-      <div style={{ padding:'20px 20px 16px', background:'#1a1d23', flexShrink:0 }}>
-        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:4 }}>
+      <div style={{ padding:'14px 16px', background:'#1a1d23', flexShrink:0 }}>
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
           <div>
-            <div style={{ fontSize:14, fontWeight:600, color:'#fff' }}>📄 Documents</div>
-            <div style={{ fontSize:12, color:'rgba(255,255,255,0.5)', marginTop:2 }}>{dist.name}</div>
+            <div style={{ fontSize:13, fontWeight:600, color:'#fff' }}>📄 Documents</div>
+            <div style={{ fontSize:11, color:'rgba(255,255,255,0.5)', marginTop:1 }}>{dist.name}</div>
           </div>
-          <button onClick={onClose} style={{ background:'none', border:'none', color:'rgba(255,255,255,0.6)', cursor:'pointer', padding:4 }}>
-            <X size={18}/>
-          </button>
+          <div style={{ display:'flex', gap:6 }}>
+            <button onClick={()=>setMinimized(v=>!v)} style={{ background:'none', border:'none', color:'rgba(255,255,255,0.6)', cursor:'pointer', padding:4, fontSize:16, lineHeight:1 }}
+              title={minimized ? 'Expand' : 'Minimize'}>
+              {minimized ? '▲' : '▼'}
+            </button>
+            <button onClick={onClose} style={{ background:'none', border:'none', color:'rgba(255,255,255,0.6)', cursor:'pointer', padding:4 }}>
+              <X size={16}/>
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Upload button */}
-      <div style={{ padding:'16px 20px', borderBottom:'1px solid #e2e6ed', flexShrink:0 }}>
+      {!minimized && (
+      <div style={{ padding:'12px 16px', borderBottom:'1px solid #e2e6ed', flexShrink:0 }}>
         <button onClick={()=>fileRef.current?.click()} disabled={uploading}
           style={{ display:'flex', alignItems:'center', gap:8, width:'100%', padding:'10px 16px',
             borderRadius:8, border:'1px dashed #bfdbfe', background:'#f0f7ff', color:'#2563eb',
@@ -446,13 +456,15 @@ function DocumentsPanel({ dist, onClose }) {
         </button>
         <input ref={fileRef} type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.webp"
           style={{ display:'none' }} onChange={e=>{ if(e.target.files[0]) handleUpload(e.target.files[0]); e.target.value=''; }}/>
-        <div style={{ fontSize:11, color:'#9ca3af', textAlign:'center', marginTop:8 }}>
+        <div style={{ fontSize:11, color:'#9ca3af', textAlign:'center', marginTop:6 }}>
           PDF, Word, Excel, Images · Max 10MB
         </div>
       </div>
+      )}
 
       {/* Document list */}
-      <div style={{ flex:1, overflowY:'auto', padding:'12px 20px' }}>
+      {!minimized && (
+      <div style={{ flex:1, overflowY:'auto', padding:'10px 16px' }}>
         {loading ? (
           <div style={{ textAlign:'center', color:'#9ca3af', padding:32, fontSize:13 }}>Loading…</div>
         ) : docs.length === 0 ? (
@@ -486,11 +498,14 @@ function DocumentsPanel({ dist, onClose }) {
           </div>
         ))}
       </div>
+      )}
 
       {/* Footer */}
-      <div style={{ padding:'12px 20px', borderTop:'1px solid #e2e6ed', fontSize:12, color:'#9ca3af', flexShrink:0 }}>
+      {!minimized && (
+      <div style={{ padding:'10px 16px', borderTop:'1px solid #e2e6ed', fontSize:12, color:'#9ca3af', flexShrink:0 }}>
         {docs.length} document{docs.length !== 1 ? 's' : ''}
       </div>
+      )}
     </div>
   );
 }
