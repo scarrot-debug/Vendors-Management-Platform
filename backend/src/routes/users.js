@@ -141,7 +141,7 @@ router.delete('/:id', auth, adminOnly, async (req, res) => {
 router.get('/:id/permissions', auth, adminOnly, async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM user_permissions WHERE user_id=$1', [req.params.id]);
-    if (!result.rows.length) return res.json({ can_see_cost_price: true, can_see_customer_price: true });
+    if (!result.rows.length) return res.json({ can_see_cost_price: true, can_see_customer_price: true, can_see_documents: true });
     res.json(result.rows[0]);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch permissions' });
@@ -151,19 +151,20 @@ router.get('/:id/permissions', auth, adminOnly, async (req, res) => {
 // PUT /api/users/:id/permissions
 router.put('/:id/permissions', auth, adminOnly, async (req, res) => {
   try {
-    const { can_see_cost_price, can_see_customer_price } = req.body;
+    const { can_see_cost_price, can_see_customer_price, can_see_documents } = req.body;
     const user = await pool.query('SELECT username FROM users WHERE id=$1', [req.params.id]);
     await pool.query(
-      `INSERT INTO user_permissions (user_id, can_see_cost_price, can_see_customer_price)
-       VALUES ($1, $2, $3)
+      `INSERT INTO user_permissions (user_id, can_see_cost_price, can_see_customer_price, can_see_documents)
+       VALUES ($1, $2, $3, $4)
        ON CONFLICT (user_id) DO UPDATE SET
-         can_see_cost_price=$2, can_see_customer_price=$3, updated_at=NOW()`,
-      [req.params.id, can_see_cost_price, can_see_customer_price]
+         can_see_cost_price=$2, can_see_customer_price=$3, can_see_documents=$4, updated_at=NOW()`,
+      [req.params.id, can_see_cost_price, can_see_customer_price, can_see_documents ?? true]
     );
     await logHistory(req.user?.id, 'UPDATE', 'user', user.rows[0]?.username, {
       action: 'Field permissions updated',
       cost_price: can_see_cost_price ? 'visible' : 'hidden',
       customer_price: can_see_customer_price ? 'visible' : 'hidden',
+      documents: can_see_documents ? 'visible' : 'hidden',
     });
     res.json({ success: true });
   } catch (err) {

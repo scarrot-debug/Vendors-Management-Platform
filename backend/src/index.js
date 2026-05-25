@@ -117,9 +117,11 @@ async function initDB() {
         user_id UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
         can_see_cost_price BOOLEAN NOT NULL DEFAULT true,
         can_see_customer_price BOOLEAN NOT NULL DEFAULT true,
+        can_see_documents BOOLEAN NOT NULL DEFAULT true,
         updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
       )
     `);
+    await pool.query(`ALTER TABLE user_permissions ADD COLUMN IF NOT EXISTS can_see_documents BOOLEAN NOT NULL DEFAULT true`);
 
     await pool.query(`
       CREATE TABLE IF NOT EXISTS system_settings (

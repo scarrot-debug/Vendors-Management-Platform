@@ -242,9 +242,11 @@ function DistributorRow({ dist, isViewer, open, onToggle, columns, permissions, 
       case 'actions': return (
         <td key={key} style={{ padding:'13px 16px' }}>
           <div style={{ display:'flex', gap:5 }}>
-            <button onClick={()=>onOpenDocs(dist)} style={{...btnStyle, padding:'4px 10px', background:'#f5f3ff', color:'#7c3aed', border:'1px solid #e9d5ff', fontSize:12}}>
-              📄 Docs
-            </button>
+            {permissions?.can_see_documents !== false && (
+              <button onClick={()=>onOpenDocs(dist)} style={{...btnStyle, padding:'4px 10px', background:'#f5f3ff', color:'#7c3aed', border:'1px solid #e9d5ff', fontSize:12}}>
+                📄 Docs
+              </button>
+            )}
             {!isViewer && (
               <>
                 <button onClick={()=>onAddProduct(dist)} style={{...btnStyle, padding:'4px 10px', background:'#f0fdf4', color:'#16a34a', border:'1px solid #bbf7d0', fontSize:12}}>
@@ -343,7 +345,7 @@ function DistributorRow({ dist, isViewer, open, onToggle, columns, permissions, 
   );
 }
 
-function DocumentsPanel({ dist, onClose }) {
+function DocumentsPanel({ dist, onClose, isViewer }) {
   const [docs, setDocs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
@@ -445,21 +447,30 @@ function DocumentsPanel({ dist, onClose }) {
         </div>
       </div>
 
-      {/* Upload button */}
+      {/* Upload button - hidden for viewer */}
       {!minimized && (
       <div style={{ padding:'12px 16px', borderBottom:'1px solid #e2e6ed', flexShrink:0 }}>
-        <button onClick={()=>fileRef.current?.click()} disabled={uploading}
-          style={{ display:'flex', alignItems:'center', gap:8, width:'100%', padding:'10px 16px',
-            borderRadius:8, border:'1px dashed #bfdbfe', background:'#f0f7ff', color:'#2563eb',
-            fontSize:13, fontWeight:500, cursor:'pointer', justifyContent:'center' }}>
-          <Plus size={15}/> {uploading ? 'Uploading…' : 'Upload Document'}
-        </button>
-        <input ref={fileRef} type="file" 
-          accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.webp,.gif,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,image/*"
-          style={{ display:'none' }} onChange={e=>{ if(e.target.files[0]) handleUpload(e.target.files[0]); e.target.value=''; }}/>
-        <div style={{ fontSize:11, color:'#9ca3af', textAlign:'center', marginTop:6 }}>
-          PDF, Word, Excel, Images · Max 10MB
-        </div>
+        {!isViewer && (
+          <>
+            <button onClick={()=>fileRef.current?.click()} disabled={uploading}
+              style={{ display:'flex', alignItems:'center', gap:8, width:'100%', padding:'10px 16px',
+                borderRadius:8, border:'1px dashed #bfdbfe', background:'#f0f7ff', color:'#2563eb',
+                fontSize:13, fontWeight:500, cursor:'pointer', justifyContent:'center' }}>
+              <Plus size={15}/> {uploading ? 'Uploading…' : 'Upload Document'}
+            </button>
+            <input ref={fileRef} type="file"
+              accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.webp,.gif,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,image/*"
+              style={{ display:'none' }} onChange={e=>{ if(e.target.files[0]) handleUpload(e.target.files[0]); e.target.value=''; }}/>
+            <div style={{ fontSize:11, color:'#9ca3af', textAlign:'center', marginTop:6 }}>
+              PDF, Word, Excel, Images · Max 10MB
+            </div>
+          </>
+        )}
+        {isViewer && (
+          <div style={{ fontSize:12, color:'#9ca3af', textAlign:'center', padding:'8px 0' }}>
+            View only — upload not permitted
+          </div>
+        )}
       </div>
       )}
 
@@ -492,9 +503,11 @@ function DocumentsPanel({ dist, onClose }) {
               <button onClick={()=>handleDownload(doc.id, doc.name)}
                 style={{ padding:'5px 8px', borderRadius:6, border:'1px solid #e2e6ed', background:'#fff', color:'#374151', cursor:'pointer', fontSize:12 }}
                 title="Download">⬇</button>
-              <button onClick={()=>handleDelete(doc.id)}
-                style={{ padding:'5px 8px', borderRadius:6, border:'1px solid #fee2e2', background:'#fff', color:'#dc2626', cursor:'pointer', fontSize:12 }}
-                title="Delete">🗑</button>
+              {!isViewer && (
+                <button onClick={()=>handleDelete(doc.id)}
+                  style={{ padding:'5px 8px', borderRadius:6, border:'1px solid #fee2e2', background:'#fff', color:'#dc2626', cursor:'pointer', fontSize:12 }}
+                  title="Delete">🗑</button>
+              )}
             </div>
           </div>
         ))}
@@ -919,7 +932,7 @@ export default function Vendors() {
         </Modal>
       )}
       {docsPanel && (
-        <DocumentsPanel dist={docsPanel} onClose={()=>setDocsPanel(null)}/>
+        <DocumentsPanel dist={docsPanel} onClose={()=>setDocsPanel(null)} isViewer={isViewer}/>
       )}
 
       {bulkConfirm && (

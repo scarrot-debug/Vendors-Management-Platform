@@ -131,7 +131,7 @@ function ResetPasswordForm({ user, onSave, onCancel, saving }) {
 }
 
 function PermissionsModal({ user, onClose }) {
-  const [perms, setPerms] = useState({ can_see_cost_price: true, can_see_customer_price: true });
+  const [perms, setPerms] = useState({ can_see_cost_price: true, can_see_customer_price: true, can_see_documents: true });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -164,6 +164,7 @@ function PermissionsModal({ user, onClose }) {
             {[
               { key:'can_see_cost_price', label:'Cost Price', desc:'Purchase/cost price of products' },
               { key:'can_see_customer_price', label:'Customer Price', desc:'Selling price to customers' },
+              { key:'can_see_documents', label:'Documents', desc:'Access to distributor documents panel' },
             ].map(({ key, label, desc }) => (
               <label key={key} style={{ display:'flex', alignItems:'center', gap:12, padding:'12px 16px', borderRadius:8, border:'1px solid #e2e6ed', cursor:'pointer', background: perms[key] ? '#f0fdf4' : '#fafafa' }}>
                 <input type="checkbox" checked={perms[key]} onChange={e => setPerms(p => ({...p, [key]: e.target.checked}))}
