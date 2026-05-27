@@ -10,7 +10,7 @@ import { VERSION } from '../version.js';
 const NAV = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/vendors',   icon: Users,           label: 'Vendors' },
-  { to: '#',          icon: BookOpen,         label: 'Catalog' },
+  { to: '/catalog',   icon: BookOpen,         label: 'Catalog' },
   { to: '#',          icon: FileText,         label: 'Requests' },
   { to: '#',          icon: CheckSquare,      label: 'Approvals' },
   { to: '#',          icon: BarChart2,        label: 'Reports' },

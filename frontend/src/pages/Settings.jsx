@@ -687,12 +687,6 @@ export default function Settings() {
         <PermissionsModal user={permissionsUser} onClose={()=>setPermissionsUser(null)}/>
       )}
 
-      {/* Categories Management */}
-      <CategoriesSection/>
-
-      {/* Manufacturers Management */}
-      <ManufacturersSection/>
-
       {/* History */}
       <HistorySection/>
 

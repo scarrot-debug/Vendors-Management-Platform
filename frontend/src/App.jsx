@@ -6,6 +6,7 @@ import Vendors from './pages/Vendors.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import Settings from './pages/Settings.jsx';
 import Profile from './pages/Profile.jsx';
+import Catalog from './pages/Catalog.jsx';
 
 function Protected({ children }) {
   const { user } = useAuth();
@@ -22,6 +23,7 @@ export default function App() {
             <Route index element={<Navigate to="/dashboard" replace />} />
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="vendors" element={<Vendors />} />
+            <Route path="catalog" element={<Catalog />} />
             <Route path="settings" element={<Settings />} />
             <Route path="profile" element={<Profile />} />
           </Route>
