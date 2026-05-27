@@ -96,21 +96,30 @@ function DistributorForm({ initial, onSave, onCancel, saving }) {
 function ProductForm({ initial, onSave, onCancel, saving }) {
   const [form, setForm] = useState(initial || { name:'', category:'', vendor:'', cost:'', customer_price:'', currency:'USD', status:'Active', description:'' });
   const [categories, setCategories] = useState([]);
+  const [manufacturers, setManufacturers] = useState([]);
   const set = (k,v) => setForm(f=>({...f,[k]:v}));
 
   useEffect(() => {
     api.getSystemCategories().then(c => setCategories(c || [])).catch(()=>{});
+    api.getSystemManufacturers().then(m => setManufacturers(m || [])).catch(()=>{});
   }, []);
 
   return (
     <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
       <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:14 }}>
-        {[{k:'name',l:'Product Name *'},{k:'vendor',l:'Manufacturer'}].map(({k,l})=>(
+        {[{k:'name',l:'Product Name *'}].map(({k,l})=>(
           <div key={k}>
             <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>{l}</label>
             <input value={form[k]||''} onChange={e=>set(k,e.target.value)} style={inputStyle}/>
           </div>
         ))}
+        <div>
+          <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>Manufacturer</label>
+          <select value={form.vendor||''} onChange={e=>set('vendor',e.target.value)} style={inputStyle}>
+            <option value="">— Select manufacturer —</option>
+            {manufacturers.map(m=><option key={m} value={m}>{m}</option>)}
+          </select>
+        </div>
         <div>
           <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>Category</label>
           <select value={form.category||''} onChange={e=>set('category',e.target.value)} style={inputStyle}>

@@ -191,6 +191,87 @@ function PermissionsModal({ user, onClose }) {
   );
 }
 
+function ManufacturersSection() {
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [newItem, setNewItem] = useState('');
+  const [editIdx, setEditIdx] = useState(null);
+  const [editVal, setEditVal] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    api.getSystemManufacturers().then(m => { setItems(m || []); setLoading(false); }).catch(()=>setLoading(false));
+  }, []);
+
+  const save = async (list) => {
+    setSaving(true);
+    try { await api.setSystemManufacturers(list); setItems(list); } catch(e){ alert(e.message); }
+    finally { setSaving(false); }
+  };
+
+  const handleAdd = async () => {
+    if (!newItem.trim()) return;
+    await save([...items, newItem.trim()]);
+    setNewItem('');
+  };
+
+  const handleDelete = async (idx) => save(items.filter((_,i)=>i!==idx));
+
+  const handleEdit = async (idx) => {
+    if (!editVal.trim()) return;
+    await save(items.map((c,i)=>i===idx ? editVal.trim() : c));
+    setEditIdx(null);
+  };
+
+  return (
+    <div style={{ background:'#fff', border:'1px solid #e2e6ed', borderRadius:10, overflow:'hidden', marginTop:24 }}>
+      <div style={{ padding:'16px 24px', borderBottom:'1px solid #e2e6ed', background:'#f8f9fb', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+        <div>
+          <h2 style={{ fontSize:16, fontWeight:600, color:'#1a1d23', marginBottom:2 }}>Manufacturers</h2>
+          <p style={{ fontSize:13, color:'#6b7280' }}>Manage manufacturer list used in products</p>
+        </div>
+        <span style={{ fontSize:13, color:'#6b7280' }}>{items.length} manufacturers</span>
+      </div>
+      <div style={{ padding:'16px 24px' }}>
+        <div style={{ display:'flex', gap:8, marginBottom:16 }}>
+          <input value={newItem} onChange={e=>setNewItem(e.target.value)}
+            onKeyDown={e=>e.key==='Enter'&&handleAdd()}
+            placeholder="New manufacturer name…"
+            style={{...inputStyle, flex:1}}/>
+          <button onClick={handleAdd} disabled={saving||!newItem.trim()}
+            style={{ padding:'8px 16px', borderRadius:7, border:'none', background:'#1a1d23', color:'#fff', fontSize:13, cursor:'pointer', fontWeight:500 }}>
+            Add
+          </button>
+        </div>
+        {loading ? <div style={{ color:'#9ca3af', fontSize:13 }}>Loading…</div> :
+          items.length === 0 ? <div style={{ color:'#9ca3af', fontSize:13, fontStyle:'italic' }}>No manufacturers yet</div> :
+          <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
+            {items.map((item, idx) => (
+              <div key={idx} style={{ display:'flex', alignItems:'center', gap:8, padding:'8px 12px', background:'#f8f9fb', borderRadius:7, border:'1px solid #e2e6ed' }}>
+                {editIdx === idx ? (
+                  <>
+                    <input value={editVal} onChange={e=>setEditVal(e.target.value)}
+                      onKeyDown={e=>e.key==='Enter'&&handleEdit(idx)}
+                      style={{...inputStyle, flex:1, padding:'5px 10px'}} autoFocus/>
+                    <button onClick={()=>handleEdit(idx)} style={{ padding:'5px 12px', borderRadius:6, border:'none', background:'#1a1d23', color:'#fff', fontSize:12, cursor:'pointer' }}>Save</button>
+                    <button onClick={()=>setEditIdx(null)} style={{ padding:'5px 12px', borderRadius:6, border:'1px solid #e2e6ed', background:'#fff', color:'#6b7280', fontSize:12, cursor:'pointer' }}>Cancel</button>
+                  </>
+                ) : (
+                  <>
+                    <span style={{ flex:1, fontSize:14, color:'#1a1d23' }}>{item}</span>
+                    <button onClick={()=>{setEditIdx(idx);setEditVal(item);}} style={{ padding:'4px 10px', borderRadius:6, border:'1px solid #e2e6ed', background:'#fff', color:'#2563eb', fontSize:12, cursor:'pointer' }}>Edit</button>
+                    <button onClick={()=>handleDelete(idx)} style={{ padding:'4px 10px', borderRadius:6, border:'1px solid #fee2e2', background:'#fff', color:'#dc2626', fontSize:12, cursor:'pointer' }}>Delete</button>
+                  </>
+                )}
+              </div>
+            ))}
+          </div>
+        }
+      </div>
+    </div>
+  );
+}
+
 function CategoriesSection() {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -608,6 +689,9 @@ export default function Settings() {
 
       {/* Categories Management */}
       <CategoriesSection/>
+
+      {/* Manufacturers Management */}
+      <ManufacturersSection/>
 
       {/* History */}
       <HistorySection/>

@@ -106,4 +106,31 @@ router.put('/categories', auth, adminOnly, async (req, res) => {
   }
 });
 
+// GET /api/settings/manufacturers
+router.get('/manufacturers', auth, async (req, res) => {
+  try {
+    const result = await pool.query("SELECT value FROM system_settings WHERE key='manufacturers'");
+    const mfrs = result.rows[0]?.value ? JSON.parse(result.rows[0].value) : [];
+    res.json(mfrs);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch manufacturers' });
+  }
+});
+
+// PUT /api/settings/manufacturers
+router.put('/manufacturers', auth, adminOnly, async (req, res) => {
+  try {
+    const { manufacturers } = req.body;
+    await pool.query(
+      `INSERT INTO system_settings (key, value) VALUES ('manufacturers', $1)
+       ON CONFLICT (key) DO UPDATE SET value=$1, updated_at=NOW()`,
+      [JSON.stringify(manufacturers)]
+    );
+    await logHistory(req.user?.id, 'UPDATE', 'setting', 'Manufacturers', { count: manufacturers.length });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to save manufacturers' });
+  }
+});
+
 module.exports = router;
