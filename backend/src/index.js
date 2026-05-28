@@ -7,6 +7,7 @@ const userRoutes = require('./routes/users');
 const historyRoutes = require('./routes/history');
 const settingsRoutes = require('./routes/settings');
 const documentsRoutes = require('./routes/documents');
+const requestsRoutes = require('./routes/requests');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -100,7 +101,43 @@ async function initDB() {
     `);
 
     await pool.query(`
-      CREATE TABLE IF NOT EXISTS documents (
+      CREATE TABLE IF NOT EXISTS requests (
+        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        title VARCHAR(200) NOT NULL,
+        distributor_id UUID REFERENCES distributors(id) ON DELETE SET NULL,
+        requested_by UUID REFERENCES users(id) ON DELETE SET NULL,
+        status VARCHAR(20) NOT NULL DEFAULT 'Draft' CHECK (status IN ('Draft','Pending','Approved','Rejected')),
+        notes TEXT,
+        reviewer_notes TEXT,
+        reviewed_by UUID REFERENCES users(id) ON DELETE SET NULL,
+        reviewed_at TIMESTAMPTZ,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      )
+    `);
+
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS request_items (
+        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        request_id UUID NOT NULL REFERENCES requests(id) ON DELETE CASCADE,
+        product_id UUID REFERENCES products(id) ON DELETE SET NULL,
+        product_name VARCHAR(200),
+        quantity INTEGER NOT NULL DEFAULT 1,
+        notes TEXT
+      )
+    `);
+
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS request_documents (
+        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        request_id UUID NOT NULL REFERENCES requests(id) ON DELETE CASCADE,
+        name VARCHAR(200) NOT NULL,
+        mime_type VARCHAR(100),
+        size_bytes INTEGER,
+        data TEXT NOT NULL,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      )
+    `);
         id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
         distributor_id UUID NOT NULL REFERENCES distributors(id) ON DELETE CASCADE,
         name VARCHAR(200) NOT NULL,
@@ -131,7 +168,44 @@ async function initDB() {
       )
     `);
 
-    // Default session timeout: 30 minutes
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS requests (
+        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        title VARCHAR(200) NOT NULL,
+        distributor_id UUID REFERENCES distributors(id) ON DELETE SET NULL,
+        requested_by UUID REFERENCES users(id) ON DELETE SET NULL,
+        status VARCHAR(20) NOT NULL DEFAULT 'Draft' CHECK (status IN ('Draft','Pending','Approved','Rejected')),
+        notes TEXT,
+        reviewer_notes TEXT,
+        reviewed_by UUID REFERENCES users(id) ON DELETE SET NULL,
+        reviewed_at TIMESTAMPTZ,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      )
+    `);
+
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS request_items (
+        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        request_id UUID NOT NULL REFERENCES requests(id) ON DELETE CASCADE,
+        product_name VARCHAR(200) NOT NULL,
+        quantity INTEGER NOT NULL DEFAULT 1,
+        notes TEXT,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      )
+    `);
+
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS request_documents (
+        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        request_id UUID NOT NULL REFERENCES requests(id) ON DELETE CASCADE,
+        name VARCHAR(200) NOT NULL,
+        mime_type VARCHAR(100),
+        size_bytes INTEGER,
+        data TEXT NOT NULL,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      )
+    `);
     await pool.query(`
       INSERT INTO system_settings (key, value) VALUES ('session_timeout', '30')
       ON CONFLICT DO NOTHING
@@ -157,6 +231,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/history', historyRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/documents', documentsRoutes);
+app.use('/api/requests', requestsRoutes);
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
