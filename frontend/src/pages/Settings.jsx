@@ -210,7 +210,9 @@ function EditUserForm({ initial, onSave, onCancel, saving }) {
       </div>
     </div>
   );
-} user, onSave, onCancel, saving }) {
+}
+
+function ResetPasswordForm({ user, onSave, onCancel, saving }) {
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const mismatch = confirm && password !== confirm;
