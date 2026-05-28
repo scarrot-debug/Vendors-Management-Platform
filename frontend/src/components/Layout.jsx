@@ -224,7 +224,7 @@ export default function Layout() {
   );
 
   return (
-    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
+    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', direction: isRTL ? 'rtl' : 'ltr' }}>
       {/* Collapse toggle */}
       <button onClick={() => setCollapsed(c => !c)} style={{
         position: 'fixed',
@@ -238,8 +238,8 @@ export default function Layout() {
         <CollapseIcon size={12}/>
       </button>
 
-      {/* RTL: main first (left), sidebar second (right) */}
-      {isRTL ? <>{mainEl}{sidebarEl}</> : <>{sidebarEl}{mainEl}</>}
+      {sidebarEl}
+      {mainEl}
     </div>
   );
 }
