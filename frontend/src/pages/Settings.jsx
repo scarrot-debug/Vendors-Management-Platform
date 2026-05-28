@@ -529,6 +529,7 @@ function HistorySection() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const limit = 20;
+  const { t } = useTranslation();
 
   useEffect(() => {
     setLoading(true);
