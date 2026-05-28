@@ -524,39 +524,47 @@ export default function Settings() {
         <table style={{ width:'100%', borderCollapse:'collapse', fontSize:14 }}>
           <thead>
             <tr style={{ borderBottom:'1px solid #e2e6ed', background:'#fafafa' }}>
-              {['Username','Email','Role','Created','Actions'].map(h => (
-                <th key={h} style={{ padding:'10px 20px', textAlign:'left', color:'#374151', fontWeight:600, fontSize:12, textTransform:'uppercase', letterSpacing:0.5 }}>{h}</th>
+              {['','First Name','Last Name','Username','Email','Role','Created','Actions'].map(h => (
+                <th key={h} style={{ padding:'10px 16px', textAlign:'left', color:'#374151', fontWeight:600, fontSize:12, textTransform:'uppercase', letterSpacing:0.5 }}>{h}</th>
               ))}
             </tr>
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={5} style={{ padding:32, textAlign:'center', color:'#9ca3af' }}>Loading…</td></tr>
+              <tr><td colSpan={8} style={{ padding:32, textAlign:'center', color:'#9ca3af' }}>Loading…</td></tr>
             ) : users.map((u, i) => (
               <tr key={u.id} style={{ borderBottom: i < users.length-1 ? '1px solid #f1f5f9' : 'none', background: u.username===currentUser?.username ? '#fafeff' : '#fff' }}
                 onMouseEnter={e=>e.currentTarget.style.background='#f8f9fb'}
                 onMouseLeave={e=>e.currentTarget.style.background=u.username===currentUser?.username?'#fafeff':'#fff'}
               >
-                <td style={{ padding:'13px 20px' }}>
-                  <div style={{ display:'flex', alignItems:'center', gap:9 }}>
-                    <div style={{
-                      width:32, height:32, borderRadius:'50%',
-                      background: u.role==='admin' ? 'linear-gradient(135deg,#3b82f6,#1d4ed8)' : u.role==='user' ? 'linear-gradient(135deg,#34d399,#16a34a)' : 'linear-gradient(135deg,#94a3b8,#64748b)',
-                      display:'flex', alignItems:'center', justifyContent:'center',
-                      fontSize:13, fontWeight:700, color:'#fff', flexShrink:0,
-                    }}>{u.username[0].toUpperCase()}</div>
-                    <div>
-                      <div style={{ fontWeight:600, color:'#1a1d23' }}>{u.username}</div>
-                      {u.username===currentUser?.username && <div style={{ fontSize:11, color:'#2563eb' }}>You</div>}
-                    </div>
+                {/* Avatar */}
+                <td style={{ padding:'13px 16px', width:52 }}>
+                  <div style={{
+                    width:36, height:36, borderRadius:'50%',
+                    background: u.role==='admin' ? 'linear-gradient(135deg,#3b82f6,#1d4ed8)' : u.role==='user' ? 'linear-gradient(135deg,#34d399,#16a34a)' : 'linear-gradient(135deg,#94a3b8,#64748b)',
+                    display:'flex', alignItems:'center', justifyContent:'center',
+                    fontSize:14, fontWeight:700, color:'#fff', flexShrink:0, position:'relative',
+                  }}>
+                    {u.username[0].toUpperCase()}
+                    {u.username===currentUser?.username && (
+                      <div style={{ position:'absolute', bottom:-2, right:-2, width:12, height:12, background:'#2563eb', borderRadius:'50%', border:'2px solid #fff' }}/>
+                    )}
                   </div>
                 </td>
-                <td style={{ padding:'13px 20px', color:'#6b7280' }}>{u.email}</td>
-                <td style={{ padding:'13px 20px' }}><RoleBadge role={u.role}/></td>
-                <td style={{ padding:'13px 20px', color:'#9ca3af', fontSize:13 }}>
+                {/* First Name */}
+                <td style={{ padding:'13px 16px', color:'#1a1d23', fontWeight:500 }}>{u.first_name || <span style={{ color:'#d1d5db' }}>—</span>}</td>
+                {/* Last Name */}
+                <td style={{ padding:'13px 16px', color:'#1a1d23', fontWeight:500 }}>{u.last_name || <span style={{ color:'#d1d5db' }}>—</span>}</td>
+                {/* Username */}
+                <td style={{ padding:'13px 16px' }}>
+                  <div style={{ fontWeight:600, color:'#374151' }}>{u.username}</div>
+                </td>
+                <td style={{ padding:'13px 16px', color:'#6b7280' }}>{u.email}</td>
+                <td style={{ padding:'13px 16px' }}><RoleBadge role={u.role}/></td>
+                <td style={{ padding:'13px 16px', color:'#9ca3af', fontSize:13 }}>
                   {new Date(u.created_at).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' })}
                 </td>
-                <td style={{ padding:'13px 20px' }}>
+                <td style={{ padding:'13px 16px' }}>
                   {isAdmin && (
                     <div style={{ display:'flex', gap:5 }}>
                       <button onClick={()=>setModal({type:'edit', data:u})} style={{...btnStyle, padding:'5px 11px', background:'#fff', color:'#2563eb', border:'1px solid #e2e6ed', fontSize:12}}>
