@@ -25,26 +25,23 @@ export default function Layout() {
   const [collapsed, setCollapsed] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const { t, i18n } = useTranslation();
-  const [isRTL, setIsRTL] = useState(i18n.language === 'he');
+  // Read from localStorage directly — synchronous, no flash
+  const [isRTL, setIsRTL] = useState(() => localStorage.getItem('language') === 'he');
 
   const handleLogout = () => { logout(); navigate('/login'); };
 
   const switchLanguage = (lang) => {
     localStorage.setItem('language', lang);
+    i18n.changeLanguage(lang);
     document.documentElement.dir = lang === 'he' ? 'rtl' : 'ltr';
+    setIsRTL(lang === 'he');
     setUserMenuOpen(false);
-    i18n.changeLanguage(lang).then(() => {
-      window.location.reload();
-    });
   };
 
-  // Set RTL on mount from saved preference
+  // Set document direction on mount
   useEffect(() => {
-    const saved = localStorage.getItem('language');
-    const rtl = saved === 'he';
-    setIsRTL(rtl);
-    document.documentElement.dir = rtl ? 'rtl' : 'ltr';
-  }, []);
+    document.documentElement.dir = isRTL ? 'rtl' : 'ltr';
+  }, [isRTL]);
 
   const DEFAULT_LOGO = "https://www.one1.co.il/wp-content/uploads/2024/11/dark_logo.webp";
   const logoSrc = logo || DEFAULT_LOGO;
