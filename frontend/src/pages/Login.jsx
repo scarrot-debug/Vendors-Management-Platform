@@ -48,7 +48,7 @@ export default function Login() {
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           {[
             { label: 'Username', value: username, set: setUsername, type: 'text', placeholder: 'Enter username' },
-            { label: 'Password', value: password, set: setPassword, type: 'password', placeholder: '••••••••' },
+            { label: 'Password', value: password, set: setPassword, type: 'password', placeholder: 'Enter password' },
           ].map(({ label, value, set, type, placeholder }) => (
             <div key={label}>
               <label style={{ fontSize: 13, color: '#374151', fontWeight: 500, display: 'block', marginBottom: 6 }}>{label}</label>
