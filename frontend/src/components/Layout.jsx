@@ -4,7 +4,7 @@ import {
   LayoutDashboard, Users, BookOpen, FileText, CheckSquare,
   BarChart2, Settings as SettingsIcon, ShieldCheck, LogOut, User, ChevronDown, ChevronLeft, ChevronRight
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { VERSION } from '../version.js';
 import { useTranslation } from 'react-i18next';
 
@@ -25,7 +25,7 @@ export default function Layout() {
   const [collapsed, setCollapsed] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const { t, i18n } = useTranslation();
-  const isRTL = i18n.language === 'he';
+  const [isRTL, setIsRTL] = useState(i18n.language === 'he');
 
   const handleLogout = () => { logout(); navigate('/login'); };
 
@@ -33,13 +33,17 @@ export default function Layout() {
     i18n.changeLanguage(lang);
     localStorage.setItem('language', lang);
     document.documentElement.dir = lang === 'he' ? 'rtl' : 'ltr';
+    setIsRTL(lang === 'he');
     setUserMenuOpen(false);
   };
 
-  // Set RTL on mount
-  useState(() => {
-    document.documentElement.dir = i18n.language === 'he' ? 'rtl' : 'ltr';
-  });
+  // Set RTL on mount from saved preference
+  useEffect(() => {
+    const saved = localStorage.getItem('language');
+    const rtl = saved === 'he';
+    setIsRTL(rtl);
+    document.documentElement.dir = rtl ? 'rtl' : 'ltr';
+  }, []);
 
   const DEFAULT_LOGO = "https://www.one1.co.il/wp-content/uploads/2024/11/dark_logo.webp";
   const logoSrc = logo || DEFAULT_LOGO;
