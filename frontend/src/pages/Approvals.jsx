@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { api } from '../api/client.js';
 import { useAuth } from '../hooks/useAuth.jsx';
 import { X, ChevronDown, ChevronUp } from 'lucide-react';
+import { usePageTitle } from '../hooks/usePageTitle.js';
 
 const STATUS_STYLES = {
   Draft:    { bg:'#f1f5f9', color:'#64748b', border:'#e2e8f0' },
@@ -157,6 +158,7 @@ function ApprovalDetail({ request, onClose, onRefresh }) {
 }
 
 export default function Approvals() {
+  const { title, subtitle } = usePageTitle('approvals', { title: 'Approvals', subtitle: 'Review and approve purchase requests' });
   const { user } = useAuth();
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -205,12 +207,12 @@ export default function Approvals() {
 
       <div style={{ marginBottom:20 }}>
         <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom:2 }}>
-          <h1 style={{ fontSize:20, fontWeight:700, color:'#1a1d23' }}>Approvals</h1>
+          <h1 style={{ fontSize:20, fontWeight:700, color:'#1a1d23' }}>{title}</h1>
           {pendingCount > 0 && (
             <span style={{ background:'#dc2626', color:'#fff', borderRadius:12, padding:'2px 8px', fontSize:12, fontWeight:700 }}>{pendingCount}</span>
           )}
         </div>
-        <p style={{ color:'#6b7280', fontSize:13 }}>Review and approve purchase requests</p>
+        <p style={{ color:'#6b7280', fontSize:13 }}>{subtitle}</p>
       </div>
 
       {/* Filters */}

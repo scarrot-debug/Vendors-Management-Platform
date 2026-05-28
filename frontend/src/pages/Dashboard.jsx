@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api/client.js';
 import { Users, CheckCircle, Clock, XCircle, TrendingUp, Package, DollarSign, BarChart2 } from 'lucide-react';
+import { usePageTitle } from '../hooks/usePageTitle.js';
 
 function formatCurrency(val) {
   if (!val) return '$0';
@@ -74,6 +75,7 @@ function DonutChart({ segments, size = 120 }) {
 }
 
 export default function Dashboard() {
+  const { title, subtitle } = usePageTitle('dashboard', { title: 'Dashboard', subtitle: 'Overview of your vendor ecosystem' });
   const [distributors, setDistributors] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -143,8 +145,8 @@ export default function Dashboard() {
 
   return (
     <div style={{ padding:'16px 24px', flex:1 }}>
-      <h1 style={{ fontSize:24, fontWeight:700, marginBottom:4, color:'#1a1d23' }}>Dashboard</h1>
-      <p style={{ color:'#6b7280', fontSize:14, marginBottom:24 }}>Overview of your vendor ecosystem</p>
+      <h1 style={{ fontSize:24, fontWeight:700, marginBottom:4, color:'#1a1d23' }}>{title}</h1>
+      <p style={{ color:'#6b7280', fontSize:14, marginBottom:24 }}>{subtitle}</p>
 
       {/* Stats */}
       <div style={{ display:'grid', gridTemplateColumns:'repeat(6, 1fr)', gap:14, marginBottom:24 }}>

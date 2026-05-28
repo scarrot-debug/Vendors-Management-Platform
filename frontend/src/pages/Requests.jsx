@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { api } from '../api/client.js';
 import { useAuth } from '../hooks/useAuth.jsx';
 import { Plus, X, Check, Trash2, Send, Edit2, ChevronDown, ChevronUp } from 'lucide-react';
+import { usePageTitle } from '../hooks/usePageTitle.js';
 
 const STATUS_STYLES = {
   Draft:    { bg:'#f1f5f9', color:'#64748b', border:'#e2e8f0' },
@@ -287,6 +288,7 @@ function RequestDetail({ request, onClose, onRefresh, currentUser }) {
 
 export default function Requests() {
   const { user } = useAuth();
+  const { title, subtitle } = usePageTitle('requests', { title: 'Purchase Requests', subtitle: 'Create and manage purchase requests' });
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState(null);
@@ -339,8 +341,8 @@ export default function Requests() {
 
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:20 }}>
         <div>
-          <h1 style={{ fontSize:20, fontWeight:700, marginBottom:2, color:'#1a1d23' }}>Purchase Requests</h1>
-          <p style={{ color:'#6b7280', fontSize:13 }}>Create and manage procurement requests</p>
+          <h1 style={{ fontSize:20, fontWeight:700, marginBottom:2, color:'#1a1d23' }}>{title}</h1>
+          <p style={{ color:'#6b7280', fontSize:13 }}>{subtitle}</p>
         </div>
         <button onClick={()=>setModal('new')} style={{...btnStyle, background:'#1a1d23', color:'#fff'}}>
           <Plus size={15}/> New Request

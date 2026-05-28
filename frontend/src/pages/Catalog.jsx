@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api/client.js';
 import { useAuth } from '../hooks/useAuth.jsx';
+import { usePageTitle } from '../hooks/usePageTitle.js';
 
 const inputStyle = {
   width:'100%', padding:'9px 12px', borderRadius:7,
@@ -98,10 +99,11 @@ function ListManager({ title, description, fetchFn, saveFn, icon }) {
 }
 
 export default function Catalog() {
+  const { title, subtitle } = usePageTitle('catalog', { title: 'Catalog', subtitle: 'Manage product categories and manufacturers' });
   return (
     <div style={{ padding:'16px 24px', flex:1 }}>
-      <h1 style={{ fontSize:20, fontWeight:700, marginBottom:2, color:'#1a1d23' }}>Catalog</h1>
-      <p style={{ color:'#6b7280', fontSize:13, marginBottom:24 }}>Manage product categories and manufacturers</p>
+      <h1 style={{ fontSize:20, fontWeight:700, marginBottom:2, color:'#1a1d23' }}>{title}</h1>
+      <p style={{ color:'#6b7280', fontSize:13, marginBottom:24 }}>{subtitle}</p>
 
       <div style={{ display:'flex', flexDirection:'column', gap:20 }}>
         <ListManager

@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react';import { api } from '../api/client.js';
 import { useAuth } from '../hooks/useAuth.jsx';
 import { Plus, Search, Edit2, Trash2, RefreshCw, X, Check, ChevronDown, ChevronRight, Package, ChevronsDownUp, ChevronsUpDown, ArrowUpDown, GripVertical } from 'lucide-react';
+import { usePageTitle } from '../hooks/usePageTitle.js';
 
 // Default column order — can be rearranged by drag & drop
 const DEFAULT_COLUMNS = [
@@ -547,6 +548,7 @@ function DocumentsPanel({ dist, onClose, isViewer }) {
 
 export default function Vendors() {
   const { user, permissions = { can_see_cost_price: true, can_see_customer_price: true } } = useAuth();
+  const { title, subtitle } = usePageTitle('vendors', { title: 'Vendors Management Platform', subtitle: 'Manage your distributors and products' });
   const isViewer = user?.role === 'viewer';
   const [data, setData] = useState({ distributors: [], total: 0 });
   const [loading, setLoading] = useState(true);
@@ -754,8 +756,8 @@ export default function Vendors() {
     <div style={{ padding:'16px 24px', flex:1, minWidth:0 }}>
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:12 }}>
         <div>
-          <h1 style={{ fontSize:20, fontWeight:700, marginBottom:2, color:'#1a1d23' }}>Vendors Management Platform</h1>
-          <p style={{ color:'#6b7280', fontSize:13 }}>Manage your distributors and products</p>
+          <h1 style={{ fontSize:20, fontWeight:700, marginBottom:2, color:'#1a1d23' }}>{title}</h1>
+          <p style={{ color:'#6b7280', fontSize:13 }}>{subtitle}</p>
         </div>
       </div>
 
