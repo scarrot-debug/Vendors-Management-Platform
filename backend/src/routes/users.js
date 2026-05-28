@@ -141,7 +141,11 @@ router.delete('/:id', auth, adminOnly, async (req, res) => {
 router.get('/:id/permissions', auth, adminOnly, async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM user_permissions WHERE user_id=$1', [req.params.id]);
-    if (!result.rows.length) return res.json({ can_see_cost_price: true, can_see_customer_price: true, can_see_documents: true });
+    if (!result.rows.length) return res.json({
+      can_see_cost_price: true, can_see_customer_price: true, can_see_documents: true,
+      can_access_dashboard: true, can_access_vendors: true, can_access_catalog: true,
+      can_access_requests: true, can_access_approvals: true,
+    });
     res.json(result.rows[0]);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch permissions' });
@@ -151,21 +155,26 @@ router.get('/:id/permissions', auth, adminOnly, async (req, res) => {
 // PUT /api/users/:id/permissions
 router.put('/:id/permissions', auth, adminOnly, async (req, res) => {
   try {
-    const { can_see_cost_price, can_see_customer_price, can_see_documents } = req.body;
+    const {
+      can_see_cost_price, can_see_customer_price, can_see_documents,
+      can_access_dashboard, can_access_vendors, can_access_catalog,
+      can_access_requests, can_access_approvals,
+    } = req.body;
     const user = await pool.query('SELECT username FROM users WHERE id=$1', [req.params.id]);
     await pool.query(
-      `INSERT INTO user_permissions (user_id, can_see_cost_price, can_see_customer_price, can_see_documents)
-       VALUES ($1, $2, $3, $4)
+      `INSERT INTO user_permissions (user_id, can_see_cost_price, can_see_customer_price, can_see_documents,
+        can_access_dashboard, can_access_vendors, can_access_catalog, can_access_requests, can_access_approvals)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
        ON CONFLICT (user_id) DO UPDATE SET
-         can_see_cost_price=$2, can_see_customer_price=$3, can_see_documents=$4, updated_at=NOW()`,
-      [req.params.id, can_see_cost_price, can_see_customer_price, can_see_documents ?? true]
+         can_see_cost_price=$2, can_see_customer_price=$3, can_see_documents=$4,
+         can_access_dashboard=$5, can_access_vendors=$6, can_access_catalog=$7,
+         can_access_requests=$8, can_access_approvals=$9, updated_at=NOW()`,
+      [req.params.id,
+       can_see_cost_price, can_see_customer_price, can_see_documents ?? true,
+       can_access_dashboard ?? true, can_access_vendors ?? true, can_access_catalog ?? true,
+       can_access_requests ?? true, can_access_approvals ?? true]
     );
-    await logHistory(req.user?.id, 'UPDATE', 'user', user.rows[0]?.username, {
-      action: 'Field permissions updated',
-      cost_price: can_see_cost_price ? 'visible' : 'hidden',
-      customer_price: can_see_customer_price ? 'visible' : 'hidden',
-      documents: can_see_documents ? 'visible' : 'hidden',
-    });
+    await logHistory(req.user?.id, 'UPDATE', 'user', user.rows[0]?.username, { action: 'Permissions updated' });
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: 'Failed to update permissions' });

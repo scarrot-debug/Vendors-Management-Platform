@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './hooks/useAuth.jsx';
 import Layout from './components/Layout.jsx';
+import PageGuard from './components/PageGuard.jsx';
 import Login from './pages/Login.jsx';
 import Vendors from './pages/Vendors.jsx';
 import Dashboard from './pages/Dashboard.jsx';
@@ -23,11 +24,11 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/" element={<Protected><Layout /></Protected>}>
             <Route index element={<Navigate to="/dashboard" replace />} />
-            <Route path="dashboard" element={<Dashboard />} />
-            <Route path="vendors" element={<Vendors />} />
-            <Route path="catalog" element={<Catalog />} />
-            <Route path="requests" element={<Requests />} />
-            <Route path="approvals" element={<Approvals />} />
+            <Route path="dashboard" element={<PageGuard permKey="can_access_dashboard"><Dashboard /></PageGuard>} />
+            <Route path="vendors" element={<PageGuard permKey="can_access_vendors"><Vendors /></PageGuard>} />
+            <Route path="catalog" element={<PageGuard permKey="can_access_catalog"><Catalog /></PageGuard>} />
+            <Route path="requests" element={<PageGuard permKey="can_access_requests"><Requests /></PageGuard>} />
+            <Route path="approvals" element={<PageGuard permKey="can_access_approvals"><Approvals /></PageGuard>} />
             <Route path="settings" element={<Settings />} />
             <Route path="profile" element={<Profile />} />
           </Route>

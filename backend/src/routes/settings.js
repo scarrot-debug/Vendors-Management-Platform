@@ -20,7 +20,11 @@ router.get('/my-permissions', auth, async (req, res) => {
       'SELECT * FROM user_permissions WHERE user_id=$1', [req.user.id]
     );
     if (!result.rows.length) {
-      return res.json({ can_see_cost_price: true, can_see_customer_price: true, can_see_documents: true });
+      return res.json({
+        can_see_cost_price: true, can_see_customer_price: true, can_see_documents: true,
+        can_access_dashboard: true, can_access_vendors: true, can_access_catalog: true,
+        can_access_requests: true, can_access_approvals: true,
+      });
     }
     res.json(result.rows[0]);
   } catch (err) {

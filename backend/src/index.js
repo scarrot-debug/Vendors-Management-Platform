@@ -158,10 +158,20 @@ async function initDB() {
         can_see_cost_price BOOLEAN NOT NULL DEFAULT true,
         can_see_customer_price BOOLEAN NOT NULL DEFAULT true,
         can_see_documents BOOLEAN NOT NULL DEFAULT true,
+        can_access_dashboard BOOLEAN NOT NULL DEFAULT true,
+        can_access_vendors BOOLEAN NOT NULL DEFAULT true,
+        can_access_catalog BOOLEAN NOT NULL DEFAULT true,
+        can_access_requests BOOLEAN NOT NULL DEFAULT true,
+        can_access_approvals BOOLEAN NOT NULL DEFAULT true,
         updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
       )
     `);
     await pool.query(`ALTER TABLE user_permissions ADD COLUMN IF NOT EXISTS can_see_documents BOOLEAN NOT NULL DEFAULT true`);
+    await pool.query(`ALTER TABLE user_permissions ADD COLUMN IF NOT EXISTS can_access_dashboard BOOLEAN NOT NULL DEFAULT true`);
+    await pool.query(`ALTER TABLE user_permissions ADD COLUMN IF NOT EXISTS can_access_vendors BOOLEAN NOT NULL DEFAULT true`);
+    await pool.query(`ALTER TABLE user_permissions ADD COLUMN IF NOT EXISTS can_access_catalog BOOLEAN NOT NULL DEFAULT true`);
+    await pool.query(`ALTER TABLE user_permissions ADD COLUMN IF NOT EXISTS can_access_requests BOOLEAN NOT NULL DEFAULT true`);
+    await pool.query(`ALTER TABLE user_permissions ADD COLUMN IF NOT EXISTS can_access_approvals BOOLEAN NOT NULL DEFAULT true`);
 
     await pool.query(`
       CREATE TABLE IF NOT EXISTS system_settings (

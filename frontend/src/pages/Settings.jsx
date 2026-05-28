@@ -131,56 +131,102 @@ function ResetPasswordForm({ user, onSave, onCancel, saving }) {
 }
 
 function PermissionsModal({ user, onClose }) {
-  const [perms, setPerms] = useState({ can_see_cost_price: true, can_see_customer_price: true, can_see_documents: true });
+  const [perms, setPerms] = useState({
+    can_see_cost_price: true, can_see_customer_price: true, can_see_documents: true,
+    can_access_dashboard: true, can_access_vendors: true, can_access_catalog: true,
+    can_access_requests: true, can_access_approvals: true,
+  });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    api.getUserPermissions(user.id).then(p => {
-      setPerms(p);
-      setLoading(false);
-    });
+    api.getUserPermissions(user.id).then(p => { setPerms(p); setLoading(false); });
   }, [user.id]);
 
   const handleSave = async () => {
     setSaving(true);
-    try {
-      await api.updateUserPermissions(user.id, perms);
-      onClose();
-    } catch (err) { alert(err.message); }
+    try { await api.updateUserPermissions(user.id, perms); onClose(); }
+    catch (err) { alert(err.message); }
     finally { setSaving(false); }
   };
 
+  const isAdmin = user.role === 'admin';
+
   return (
     <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.4)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:1000 }}>
-      <div style={{ background:'#fff', border:'1px solid #e2e6ed', borderRadius:12, padding:28, width:420, boxShadow:'0 20px 60px rgba(0,0,0,0.15)' }}>
+      <div style={{ background:'#fff', border:'1px solid #e2e6ed', borderRadius:12, padding:28, width:500, maxHeight:'90vh', overflowY:'auto', boxShadow:'0 20px 60px rgba(0,0,0,0.15)' }}>
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:20 }}>
-          <h2 style={{ fontSize:16, fontWeight:600, color:'#1a1d23' }}>Field Permissions — {user.username}</h2>
+          <h2 style={{ fontSize:16, fontWeight:600, color:'#1a1d23' }}>Permissions — {user.username}</h2>
           <button onClick={onClose} style={{ background:'none', border:'none', color:'#6b7280', cursor:'pointer' }}><X size={20}/></button>
         </div>
+
         {loading ? <div style={{ textAlign:'center', color:'#9ca3af', padding:20 }}>Loading…</div> : (
-          <div style={{ display:'flex', flexDirection:'column', gap:16 }}>
-            <p style={{ fontSize:13, color:'#6b7280' }}>Choose which price fields this user can see:</p>
-            {[
-              { key:'can_see_cost_price', label:'Cost Price', desc:'Purchase/cost price of products' },
-              { key:'can_see_customer_price', label:'Customer Price', desc:'Selling price to customers' },
-              { key:'can_see_documents', label:'Documents', desc:'Access to distributor documents panel' },
-            ].map(({ key, label, desc }) => (
-              <label key={key} style={{ display:'flex', alignItems:'center', gap:12, padding:'12px 16px', borderRadius:8, border:'1px solid #e2e6ed', cursor:'pointer', background: perms[key] ? '#f0fdf4' : '#fafafa' }}>
-                <input type="checkbox" checked={perms[key]} onChange={e => setPerms(p => ({...p, [key]: e.target.checked}))}
-                  style={{ width:16, height:16, cursor:'pointer' }}/>
-                <div>
-                  <div style={{ fontWeight:600, fontSize:14, color:'#1a1d23' }}>{label}</div>
-                  <div style={{ fontSize:12, color:'#6b7280' }}>{desc}</div>
+          <div style={{ display:'flex', flexDirection:'column', gap:20 }}>
+
+            {isAdmin && (
+              <div style={{ padding:'10px 14px', background:'#eff6ff', borderRadius:8, border:'1px solid #bfdbfe', fontSize:13, color:'#1d4ed8' }}>
+                ⚡ Admin users have full access to all pages and fields.
+              </div>
+            )}
+
+            {/* Field Permissions */}
+            <div>
+              <div style={{ fontSize:12, fontWeight:700, color:'#9ca3af', letterSpacing:0.5, marginBottom:10 }}>FIELD VISIBILITY</div>
+              <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
+                {[
+                  { key:'can_see_cost_price', label:'Cost Price', desc:'Purchase/cost price of products' },
+                  { key:'can_see_customer_price', label:'Customer Price', desc:'Selling price to customers' },
+                  { key:'can_see_documents', label:'Documents', desc:'Distributor documents panel' },
+                ].map(({ key, label, desc }) => (
+                  <label key={key} style={{ display:'flex', alignItems:'center', gap:12, padding:'10px 14px', borderRadius:8, border:'1px solid #e2e6ed', cursor: isAdmin ? 'not-allowed' : 'pointer', background: perms[key] ? '#f0fdf4' : '#fafafa', opacity: isAdmin ? 0.6 : 1 }}>
+                    <input type="checkbox" checked={perms[key] ?? true} onChange={e => !isAdmin && setPerms(p=>({...p,[key]:e.target.checked}))}
+                      disabled={isAdmin} style={{ width:15, height:15, cursor:'pointer' }}/>
+                    <div style={{ flex:1 }}>
+                      <div style={{ fontWeight:600, fontSize:13, color:'#1a1d23' }}>{label}</div>
+                      <div style={{ fontSize:12, color:'#6b7280' }}>{desc}</div>
+                    </div>
+                    <span style={{ fontSize:12, fontWeight:600, color: perms[key] ? '#16a34a' : '#9ca3af' }}>
+                      {perms[key] ? 'Visible ✓' : 'Hidden'}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* Page Access */}
+            <div>
+              <div style={{ fontSize:12, fontWeight:700, color:'#9ca3af', letterSpacing:0.5, marginBottom:10 }}>PAGE ACCESS</div>
+              <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
+                {[
+                  { key:'can_access_dashboard', label:'Dashboard', icon:'📊' },
+                  { key:'can_access_vendors', label:'Vendors', icon:'🏢' },
+                  { key:'can_access_catalog', label:'Catalog', icon:'📚' },
+                  { key:'can_access_requests', label:'Requests', icon:'📋' },
+                  { key:'can_access_approvals', label:'Approvals', icon:'✅' },
+                ].map(({ key, label, icon }) => (
+                  <label key={key} style={{ display:'flex', alignItems:'center', gap:12, padding:'10px 14px', borderRadius:8, border:'1px solid #e2e6ed', cursor: isAdmin ? 'not-allowed' : 'pointer', background: perms[key] !== false ? '#f0fdf4' : '#fef2f2', opacity: isAdmin ? 0.6 : 1 }}>
+                    <input type="checkbox" checked={perms[key] !== false} onChange={e => !isAdmin && setPerms(p=>({...p,[key]:e.target.checked}))}
+                      disabled={isAdmin} style={{ width:15, height:15, cursor:'pointer' }}/>
+                    <span style={{ fontSize:16 }}>{icon}</span>
+                    <div style={{ flex:1, fontWeight:600, fontSize:13, color:'#1a1d23' }}>{label}</div>
+                    <span style={{ fontSize:12, fontWeight:600, color: perms[key] !== false ? '#16a34a' : '#dc2626' }}>
+                      {perms[key] !== false ? 'Access ✓' : 'Blocked'}
+                    </span>
+                  </label>
+                ))}
+                {/* Settings - always locked */}
+                <div style={{ display:'flex', alignItems:'center', gap:12, padding:'10px 14px', borderRadius:8, border:'1px solid #e2e6ed', background:'#f8f9fb', opacity:0.5 }}>
+                  <input type="checkbox" checked={false} disabled style={{ width:15, height:15 }}/>
+                  <span style={{ fontSize:16 }}>⚙️</span>
+                  <div style={{ flex:1, fontWeight:600, fontSize:13, color:'#1a1d23' }}>Settings</div>
+                  <span style={{ fontSize:12, color:'#9ca3af' }}>Admin only 🔒</span>
                 </div>
-                <span style={{ marginLeft:'auto', fontSize:12, fontWeight:600, color: perms[key] ? '#16a34a' : '#9ca3af' }}>
-                  {perms[key] ? 'Visible ✓' : 'Hidden'}
-                </span>
-              </label>
-            ))}
-            <div style={{ display:'flex', gap:10, justifyContent:'flex-end', marginTop:8 }}>
+              </div>
+            </div>
+
+            <div style={{ display:'flex', gap:10, justifyContent:'flex-end' }}>
               <button onClick={onClose} style={{ padding:'8px 16px', borderRadius:7, border:'1px solid #e2e6ed', background:'#f4f6f9', color:'#6b7280', cursor:'pointer', fontSize:13 }}>Cancel</button>
-              <button onClick={handleSave} disabled={saving} style={{ padding:'8px 16px', borderRadius:7, border:'none', background:'#1a1d23', color:'#fff', cursor:'pointer', fontSize:13, fontWeight:500 }}>
+              <button onClick={handleSave} disabled={saving||isAdmin} style={{ padding:'8px 16px', borderRadius:7, border:'none', background: isAdmin ? '#e2e6ed' : '#1a1d23', color:'#fff', cursor: isAdmin ? 'not-allowed' : 'pointer', fontSize:13, fontWeight:500 }}>
                 {saving ? 'Saving…' : 'Save Permissions'}
               </button>
             </div>
