@@ -594,6 +594,86 @@ function HistorySection() {
   );
 }
 
+const PAGE_DEFS = [
+  { key:'dashboard', label:'Dashboard',  icon:'📊' },
+  { key:'vendors',   label:'Vendors',    icon:'🏢' },
+  { key:'catalog',   label:'Catalog',    icon:'📚' },
+  { key:'requests',  label:'Requests',   icon:'📋' },
+  { key:'approvals', label:'Approvals',  icon:'✅' },
+  { key:'settings',  label:'Settings',   icon:'⚙️' },
+];
+
+function PageTitlesSection() {
+  const [titles, setTitles] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    api.getPageTitles().then(t => { setTitles(t || {}); setLoading(false); }).catch(()=>setLoading(false));
+  }, []);
+
+  const set = (page, field, val) => setTitles(t => ({ ...t, [page]: { ...t[page], [field]: val } }));
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await api.setPageTitles(titles);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    } catch(e) { alert(e.message); }
+    finally { setSaving(false); }
+  };
+
+  return (
+    <div style={{ background:'#fff', border:'1px solid #e2e6ed', borderRadius:10, overflow:'hidden', marginTop:24 }}>
+      <div style={{ padding:'16px 24px', borderBottom:'1px solid #e2e6ed', background:'#f8f9fb' }}>
+        <h2 style={{ fontSize:16, fontWeight:600, color:'#1a1d23', marginBottom:2, display:'flex', alignItems:'center', gap:8 }}>
+          🖊️ Page Titles
+        </h2>
+        <p style={{ fontSize:13, color:'#6b7280' }}>Customize the title and subtitle displayed on each page</p>
+      </div>
+      <div style={{ padding:'20px 24px' }}>
+        {loading ? <div style={{ color:'#9ca3af', fontSize:13 }}>Loading…</div> : (
+          <>
+            {/* Column headers */}
+            <div style={{ display:'grid', gridTemplateColumns:'130px 1fr 1fr', gap:12, marginBottom:8, paddingBottom:8, borderBottom:'1px solid #f1f5f9' }}>
+              <div style={{ fontSize:12, fontWeight:600, color:'#9ca3af', textTransform:'uppercase', letterSpacing:0.5 }}>Page</div>
+              <div style={{ fontSize:12, fontWeight:600, color:'#9ca3af', textTransform:'uppercase', letterSpacing:0.5 }}>Title</div>
+              <div style={{ fontSize:12, fontWeight:600, color:'#9ca3af', textTransform:'uppercase', letterSpacing:0.5 }}>Subtitle</div>
+            </div>
+            {PAGE_DEFS.map(({ key, label, icon }) => (
+              <div key={key} style={{ display:'grid', gridTemplateColumns:'130px 1fr 1fr', gap:12, alignItems:'center', padding:'8px 0', borderBottom:'1px solid #f8f9fb' }}>
+                <div style={{ display:'flex', alignItems:'center', gap:7, fontSize:13, fontWeight:600, color:'#374151' }}>
+                  <span>{icon}</span> {label}
+                </div>
+                <input
+                  value={titles[key]?.title || ''}
+                  onChange={e => set(key, 'title', e.target.value)}
+                  placeholder={label}
+                  style={{...inputStyle, fontSize:13}}
+                />
+                <input
+                  value={titles[key]?.subtitle || ''}
+                  onChange={e => set(key, 'subtitle', e.target.value)}
+                  placeholder="Subtitle…"
+                  style={{...inputStyle, fontSize:13, color:'#6b7280'}}
+                />
+              </div>
+            ))}
+            <div style={{ display:'flex', justifyContent:'flex-end', marginTop:16 }}>
+              <button onClick={handleSave} disabled={saving}
+                style={{...btnStyle, background: saved ? '#16a34a' : '#1a1d23', color:'#fff'}}>
+                {saved ? <><Check size={14}/> Saved!</> : saving ? 'Saving…' : <><Check size={14}/> Save Changes</>}
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function Settings() {
   const { user: currentUser, sessionTimeout, updateSessionTimeout, logo, updateLogo } = useAuth();
   const logoFileRef = useRef(null);
@@ -858,6 +938,9 @@ export default function Settings() {
           </div>
         </div>
       </div>
+
+      {/* Page Titles */}
+      {isAdmin && <PageTitlesSection/>}
 
       {permissionsUser && (
         <PermissionsModal user={permissionsUser} onClose={()=>setPermissionsUser(null)}/>

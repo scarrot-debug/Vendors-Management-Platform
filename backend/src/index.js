@@ -192,6 +192,19 @@ async function initDB() {
       ON CONFLICT DO NOTHING
     `);
 
+    // Default page titles
+    await pool.query(`
+      INSERT INTO system_settings (key, value) VALUES ('page_titles', $1)
+      ON CONFLICT DO NOTHING
+    `, [JSON.stringify({
+      dashboard: { title: 'Dashboard', subtitle: 'Overview of your vendor ecosystem' },
+      vendors:   { title: 'Vendors',   subtitle: 'Manage your distributors & products' },
+      catalog:   { title: 'Catalog',   subtitle: 'Categories & manufacturers' },
+      requests:  { title: 'Requests',  subtitle: 'Purchase requests' },
+      approvals: { title: 'Approvals', subtitle: 'Review & approve requests' },
+      settings:  { title: 'Settings',  subtitle: 'System configuration and user management' },
+    })]);
+
     console.log('DB initialized successfully');
   } catch (err) {
     console.error('DB init error:', err.message);

@@ -70,4 +70,6 @@ export const api = {
   rejectRequest: (id, data) => req(`/requests/${id}/reject`, { method: 'POST', body: JSON.stringify(data) }),
   deleteRequest: (id) => req(`/requests/${id}`, { method: 'DELETE' }),
   downloadRequestDoc: (reqId, docId) => `${BASE}/requests/${reqId}/documents/${docId}/download`,
+  getPageTitles: () => req('/settings/page-titles'),
+  setPageTitles: (titles) => req('/settings/page-titles', { method: 'PUT', body: JSON.stringify({ titles }) }),
 };

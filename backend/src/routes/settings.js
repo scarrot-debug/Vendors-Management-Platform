@@ -137,4 +137,31 @@ router.put('/manufacturers', auth, adminOnly, async (req, res) => {
   }
 });
 
+// GET /api/settings/page-titles
+router.get('/page-titles', auth, async (req, res) => {
+  try {
+    const result = await pool.query("SELECT value FROM system_settings WHERE key='page_titles'");
+    const titles = result.rows[0]?.value ? JSON.parse(result.rows[0].value) : {};
+    res.json(titles);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch page titles' });
+  }
+});
+
+// PUT /api/settings/page-titles
+router.put('/page-titles', auth, adminOnly, async (req, res) => {
+  try {
+    const { titles } = req.body;
+    await pool.query(
+      `INSERT INTO system_settings (key, value) VALUES ('page_titles', $1)
+       ON CONFLICT (key) DO UPDATE SET value=$1, updated_at=NOW()`,
+      [JSON.stringify(titles)]
+    );
+    await logHistory(req.user?.id, 'UPDATE', 'setting', 'Page Titles', { pages: Object.keys(titles).length });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to save page titles' });
+  }
+});
+
 module.exports = router;
