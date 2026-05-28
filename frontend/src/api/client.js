@@ -16,9 +16,7 @@ async function req(path, options = {}) {
 
 async function download(path) {
   const token = getToken();
-  const res = await fetch(`${BASE}${path}`, {
-    headers: { 'Authorization': `Bearer ${token}` }
-  });
+  const res = await fetch(`${BASE}${path}`, { headers: { 'Authorization': `Bearer ${token}` } });
   if (!res.ok) throw new Error('Export failed');
   const blob = await res.blob();
   const url = URL.createObjectURL(blob);
@@ -70,15 +68,6 @@ export const api = {
   submitRequest: (id) => req(`/requests/${id}/submit`, { method: 'POST' }),
   approveRequest: (id, data) => req(`/requests/${id}/approve`, { method: 'POST', body: JSON.stringify(data) }),
   rejectRequest: (id, data) => req(`/requests/${id}/reject`, { method: 'POST', body: JSON.stringify(data) }),
-  deleteRequest: (id) => req(`/requests/${id}`, { method: 'DELETE' }),
-  downloadRequestDoc: (reqId, docId) => `${BASE}/requests/${reqId}/documents/${docId}/download`,
-  getRequests: () => req('/requests'),
-  getRequest: (id) => req(`/requests/${id}`),
-  createRequest: (data) => req('/requests', { method: 'POST', body: JSON.stringify(data) }),
-  updateRequest: (id, data) => req(`/requests/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
-  submitRequest: (id) => req(`/requests/${id}/submit`, { method: 'POST' }),
-  approveRequest: (id, notes) => req(`/requests/${id}/approve`, { method: 'POST', body: JSON.stringify({ reviewer_notes: notes }) }),
-  rejectRequest: (id, notes) => req(`/requests/${id}/reject`, { method: 'POST', body: JSON.stringify({ reviewer_notes: notes }) }),
   deleteRequest: (id) => req(`/requests/${id}`, { method: 'DELETE' }),
   downloadRequestDoc: (reqId, docId) => `${BASE}/requests/${reqId}/documents/${docId}/download`,
 };
