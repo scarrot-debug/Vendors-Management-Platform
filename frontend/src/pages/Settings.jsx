@@ -225,7 +225,7 @@ function PermissionsModal({ user, onClose }) {
             </div>
 
             <div style={{ display:'flex', gap:10, justifyContent:'flex-end' }}>
-              <button onClick={onClose} style={{ padding:'8px 16px', borderRadius:7, border:'1px solid #e2e6ed', background:'#f4f6f9', color:'#6b7280', cursor:'pointer', fontSize:13 }}>Cancel</button>
+              <button onClick={onClose} style={{ padding:'8px 16px', borderRadius:7, border:'1px solid #e2e6ed', background:'#f4f6f9', color:'#6b7280', cursor:'pointer', fontSize:13 }}>Skip</button>
               <button onClick={handleSave} disabled={saving||isAdmin} style={{ padding:'8px 16px', borderRadius:7, border:'none', background: isAdmin ? '#e2e6ed' : '#1a1d23', color:'#fff', cursor: isAdmin ? 'not-allowed' : 'pointer', fontSize:13, fontWeight:500 }}>
                 {saving ? 'Saving…' : 'Save Permissions'}
               </button>
@@ -511,10 +511,19 @@ export default function Settings() {
   const handleSaveUser = async (form) => {
     setSaving(true);
     try {
-      if (modal.type === 'add') await api.createUser(form);
-      else await api.updateUser(modal.data.id, form);
-      setModal(null); load();
-      showToast(modal.type === 'add' ? 'User created successfully' : 'User updated successfully');
+      if (modal.type === 'add') {
+        const newUser = await api.createUser(form);
+        setModal(null);
+        load();
+        showToast('User created successfully');
+        // Open permissions modal immediately after creation
+        setPermissionsUser(newUser);
+      } else {
+        await api.updateUser(modal.data.id, form);
+        setModal(null);
+        load();
+        showToast('User updated successfully');
+      }
     } catch (err) { showToast(err.message, 'error'); }
     finally { setSaving(false); }
   };
