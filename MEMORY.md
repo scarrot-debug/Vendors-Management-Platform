@@ -19,29 +19,35 @@
 ```
 vendor-management/
 ├── frontend/src/
-│   ├── api/client.js          ← ALL API calls — must stay complete!
-│   ├── components/Layout.jsx  ← Sidebar + top bar + user dropdown
-│   ├── hooks/useAuth.jsx      ← Auth + session + logo + permissions
+│   ├── api/client.js              ← ALL API calls — must stay complete!
+│   ├── components/
+│   │   ├── Layout.jsx             ← Sidebar + top bar + user dropdown
+│   │   └── PageGuard.jsx          ← Page access protection component
+│   ├── hooks/useAuth.jsx          ← Auth + session + logo + permissions
 │   ├── pages/
-│   │   ├── Vendors.jsx        ← Main table + docs panel + bulk actions
-│   │   ├── Dashboard.jsx      ← Charts
-│   │   ├── Settings.jsx       ← Users + categories + logo + history
-│   │   ├── Profile.jsx        ← User profile
+│   │   ├── Vendors.jsx            ← Main table + docs panel + bulk actions
+│   │   ├── Dashboard.jsx          ← Charts
+│   │   ├── Settings.jsx           ← Users + categories + logo + history
+│   │   ├── Catalog.jsx            ← Categories + Manufacturers management
+│   │   ├── Requests.jsx           ← Purchase requests
+│   │   ├── Approvals.jsx          ← Request approvals
+│   │   ├── Profile.jsx            ← User profile
 │   │   └── Login.jsx
-│   ├── App.jsx                ← Routes
-│   └── version.js             ← Auto version UTC+3
+│   ├── App.jsx                    ← Routes with PageGuard
+│   └── version.js                 ← Auto version UTC+3
 ├── backend/src/
-│   ├── index.js               ← DB auto-init + all table creation
-│   ├── db/pool.js             ← ⚠️ CRITICAL: must have SSL line!
+│   ├── index.js                   ← DB auto-init + all table creation
+│   ├── db/pool.js                 ← ⚠️ CRITICAL: must have SSL line!
 │   └── routes/
-│       ├── vendors.js         ← Distributors + products + export + history
-│       ├── auth.js            ← Login
-│       ├── users.js           ← Users + /me routes BEFORE /:id
-│       ├── history.js         ← Change history
-│       ├── settings.js        ← Logo + timeout + categories + permissions
-│       └── documents.js       ← File upload/download/delete
-├── .git-hooks/pre-push        ← Auto SSL fix before every push
-├── setup-hooks.ps1            ← Run ONCE to activate hooks
+│       ├── vendors.js             ← Distributors + products + export + history
+│       ├── auth.js                ← Login
+│       ├── users.js               ← Users + /me routes BEFORE /:id
+│       ├── history.js             ← Change history
+│       ├── settings.js            ← Logo + timeout + categories + manufacturers + permissions
+│       ├── documents.js           ← File upload/download/delete per distributor
+│       └── requests.js            ← Purchase requests CRUD + approve/reject
+├── .git-hooks/pre-push            ← Auto SSL fix before every push
+├── setup-hooks.ps1                ← Run ONCE to activate hooks
 ├── MEMORY.md
 └── README.md
 ```
@@ -50,10 +56,13 @@ vendor-management/
 - **distributors** — id, name, contact, email, phone, mobile, website, status, notes
 - **products** — id, distributor_id, name, category, vendor, cost, customer_price, currency, status, description
 - **users** — id, username, email, password_hash, role, first_name, last_name, mobile, created_at
-- **user_permissions** — user_id, can_see_cost_price, can_see_customer_price, can_see_documents
+- **user_permissions** — user_id, can_see_cost_price, can_see_customer_price, can_see_documents, can_access_dashboard, can_access_vendors, can_access_catalog, can_access_requests, can_access_approvals
 - **documents** — id, distributor_id, name, mime_type, size_bytes, data (base64), uploaded_by, created_at
+- **requests** — id, title, distributor_id, requested_by, status (Draft/Pending/Approved/Rejected), notes, reviewer_notes, reviewed_by, reviewed_at
+- **request_items** — id, request_id, product_name, quantity, notes
+- **request_documents** — id, request_id, name, mime_type, size_bytes, data
 - **change_history** — id, user_id, action, entity_type, entity_name, details, created_at
-- **system_settings** — key (session_timeout, logo, categories), value, updated_at
+- **system_settings** — key (session_timeout, logo, categories, manufacturers), value, updated_at
 
 ## ⚠️ Critical Known Issues
 
@@ -63,27 +72,26 @@ vendor-management/
 ssl: process.env.DB_HOST ? { rejectUnauthorized: false } : false,
 ```
 The pre-push hook fixes this automatically. If it fails, run `.\fix-ssl.ps1` manually.
+Hook sometimes writes `module.exports = pool;` TWICE — fix by removing the duplicate.
 
 ### 2. settings.js confusion
 `backend/src/routes/settings.js` must be Node.js/Express code starting with `const express = require('express')`.
 NOT the React Settings.jsx frontend file! This has happened multiple times.
 
 ### 3. /me routes must be BEFORE /:id in users.js
-`GET /api/users/me` and `PUT /api/users/me` must be defined BEFORE `/:id` routes or Express interprets "me" as an ID.
+`GET /api/users/me` and `PUT /api/users/me` must be defined BEFORE `/:id` routes.
 
 ### 4. Express JSON limit
 `app.use(express.json({ limit: '15mb' }))` — required for document uploads.
 
-### 5. Brace balance in JSX
-Before pushing frontend changes, verify:
-```javascript
-// Open braces must equal close braces
-// Settings.jsx and Vendors.jsx are most prone to this
-```
+### 5. Duplicate tables in index.js
+When adding new tables, check for duplicates. requests/request_items/request_documents had duplicates causing SyntaxError.
 
-### 6. duplicate module.exports in pool.js
-The pre-push hook sometimes writes `module.exports = pool;` twice.
-Fix: manually edit pool.js and remove the duplicate line.
+### 6. Brace balance in JSX
+Before pushing: verify Open braces === Close braces. Settings.jsx is most prone.
+
+### 7. client.js duplicates
+Check for duplicate API function names. getRequests was duplicated causing "not a function" error.
 
 ## Render Environment Variables (Backend)
 ```
@@ -106,7 +114,6 @@ VITE_API_URL = https://vendor-backend-6gpd.onrender.com/api
 | Username | Password | Role |
 |----------|----------|------|
 | admin | admin123 | Admin |
-| viewer | viewer123 | Viewer |
 
 ## Deploy Process
 ```powershell
@@ -118,41 +125,42 @@ git push
 # Both changed     → deploy both
 ```
 
-## Features Implemented
-- ✅ Distributor + product CRUD with all fields
-- ✅ Cost Price + Customer Price per product
-- ✅ Hierarchical table with expand/collapse
-- ✅ Drag & Drop column reordering
-- ✅ Sort by any column
-- ✅ Global search (including products)
-- ✅ Filter by status + category
-- ✅ Page size: 10/25/50
-- ✅ Bulk Actions (select, change status, delete)
-- ✅ Export CSV + Import CSV (distributors + products)
-- ✅ Documents Panel per distributor (PDF/Word/Excel/Images, 10MB)
-- ✅ Notes displayed as yellow row when distributor expanded
-- ✅ Role-based access: Admin/User/Viewer
-- ✅ Field-level permissions: Cost Price, Customer Price, Documents
-- ✅ User management + profile (first/last name, mobile)
-- ✅ User dropdown → My Profile / Logout
-- ✅ Change History (all actions logged)
-- ✅ Session Timeout (global DB setting, 15min-Never)
-- ✅ Sidebar Logo (Base64, 500KB max)
-- ✅ Categories management in Settings
-- ✅ Dashboard with 5 chart types
-- ✅ Custom domain vendors.191.co.il
-- ✅ Auto version UTC+3 in sidebar
-- ✅ Viewer: no Settings access, Docs read-only
+## Features Implemented ✅
+- Distributor + product CRUD with all fields
+- Cost Price + Customer Price per product
+- Hierarchical table with expand/collapse + Drag & Drop columns
+- Sort by any column, global search, filter by status/category
+- Page size: 10/25/50, Expand All/Collapse All
+- Bulk Actions (select, change status, delete)
+- Export CSV + Import CSV (distributors + products)
+- Notes displayed as yellow row when distributor expanded
+- Documents Panel per distributor (PDF/Word/Excel/Images, 10MB, Base64)
+- Catalog page: Categories + Manufacturers management (add/edit/delete)
+- Manufacturer dropdown in product form (from Catalog)
+- Category dropdown in product form (from Catalog)
+- Role-based access: Admin/User/Viewer
+- Field-level permissions: Cost Price, Customer Price, Documents
+- Page-level permissions: Dashboard, Vendors, Catalog, Requests, Approvals
+- PageGuard: restricted pages show 🔒 placeholder instead of error
+- Add User Wizard: 2-step (Details → Permissions) before creation
+- User management table: Avatar + First Name + Last Name columns
+- User profile (first/last name, mobile, email, password change)
+- User dropdown → My Profile / Logout
+- Change History (all actions logged)
+- Session Timeout (global DB setting, 15min-Never)
+- Sidebar Logo (Base64, 500KB max)
+- Dashboard with 6 stat cards + 5 chart types
+- Custom domain vendors.191.co.il
+- Requests: create/edit/submit/delete purchase requests with items + attachments
+- Approvals: review pending requests, approve/reject with reviewer notes
+- Auto version UTC+3 in sidebar
 
-## TODO
-- [ ] Remove DB_HOST from docker-compose.yml backend environment to fix local SSL issue
-- [ ] Toast notifications in Vendors page (replace alert() with nice toasts)
-- [ ] Notes field shown in distributor table (yellow row — DONE in Vendors.jsx)
-
-## Local Docker Commands
-```powershell
-docker compose up --build
-docker compose down -v && docker compose up --build  # reset DB
-docker logs vendor_backend  # check errors
-docker exec vendor_backend printenv DB_HOST  # should be empty locally
+## Request/Approval Flow
 ```
+Create Request (Draft) → Submit → Pending → Admin/User Reviews → Approved/Rejected
+```
+- All users can create requests
+- Admin + User role can approve/reject
+- Only Draft requests can be edited/deleted
+- Owner can submit own Draft
+- Reviewer notes saved with decision

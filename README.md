@@ -3,7 +3,7 @@
 A full-stack vendor & product management system built from scratch.
 
 🌐 **Live:** https://vendors.191.co.il  
-📅 **Last Updated:** v20260526  
+📅 **Last Updated:** v20260528  
 🔧 **Status:** Production
 
 ---
@@ -32,32 +32,45 @@ A full-stack vendor & product management system built from scratch.
 - Viewer cannot access Settings
 
 ### 👥 User Management
-- Add, edit, delete users + reset passwords
+- Add User Wizard: 2-step flow (Details → Permissions) before creation
+- Edit, delete users + reset passwords
 - Per-user field permissions: Cost Price / Customer Price / Documents
+- Per-user page permissions: Dashboard / Vendors / Catalog / Requests / Approvals
+- PageGuard: restricted pages show 🔒 placeholder instead of error
+- Users table: Avatar + First Name + Last Name + Username + Email + Role
 - User profile: first name, last name, mobile, email, password change
 - User dropdown menu → My Profile / Logout
 
 ### 📋 Distributor Management
 - Full CRUD — Name, Contact, Email, Phone, Mobile, Website, Notes, Status
 - Notes displayed as yellow row when distributor is expanded
-- Hierarchical table: expand distributor to see its products
-- Expand All / Collapse All
-- Drag & Drop column reordering
-- Sort by any column
-- Bulk Actions: select multiple → change status or delete
+- Hierarchical table: expand to see products
+- Expand All / Collapse All, Drag & Drop column reordering
+- Sort by any column, Bulk Actions (select, change status, delete)
 
 ### 📦 Product Management
 - Full CRUD per distributor
-- Fields: Name, Manufacturer, Category (from managed list), Cost Price, Customer Price, Currency, Status, Description
+- Fields: Name, Manufacturer (from Catalog), Category (from Catalog), Cost Price, Customer Price, Currency, Status, Description
 - Field visibility controlled per user
 
 ### 📄 Documents Panel
 - 📄 Docs button on every distributor row
 - Floating panel (bottom-right, minimizable)
 - Upload: PDF, Word, Excel, Images up to 10MB
-- Viewer role: read-only (download only, no upload/delete)
-- Stored as Base64 in PostgreSQL
-- All actions logged in Change History
+- Viewer role: read-only (download only)
+- Permission-controlled per user
+
+### 📋 Requests (Purchase Requests)
+- Any user can create a request
+- Fields: Title, Distributor, Products + Quantity, Notes, Attachments
+- Statuses: Draft → Pending → Approved / Rejected
+- Owner can submit/delete own Draft requests
+
+### ✅ Approvals
+- Admin + User role can review Pending requests
+- Approve or Reject with reviewer notes
+- Full request details: items, attachments, notes
+- Counter badge showing pending count
 
 ### 🔍 Search & Filter
 - Global search (distributors + products + manufacturers + categories)
@@ -65,23 +78,23 @@ A full-stack vendor & product management system built from scratch.
 - Page size: 10 / 25 / 50
 
 ### 📤 Export / Import
-- Export CSV: all distributors + products (Cost Price, Customer Price)
+- Export CSV: all distributors + products
 - Import CSV: imports both distributors and products
 
 ### 📊 Dashboard
 - 6 stat cards + 5 bar/donut charts
-- Cost by category/distributor, products by category/distributor
+
+### 📚 Catalog
+- Categories management (add/edit/delete)
+- Manufacturers management (add/edit/delete)
+- Used as dropdowns in product forms
 
 ### ⚙️ Settings
-- User Management + field permissions per user
+- User Management + 2-step wizard for new users
+- Field permissions + Page access per user
 - Sidebar Logo (PNG/JPG/WebP/SVG, max 500KB)
 - Session Timeout (global)
-- Categories management (add/edit/delete)
-- Change History (full audit log of all actions)
-
-### 👤 Profile Page
-- Personal info: first name, last name, mobile, email
-- Change password (requires current password)
+- Change History (full audit log)
 
 ---
 
@@ -92,10 +105,13 @@ A full-stack vendor & product management system built from scratch.
 | `distributors` | Distributor records |
 | `products` | Products per distributor |
 | `users` | System users |
-| `user_permissions` | Per-user field visibility |
+| `user_permissions` | Field + page visibility per user |
 | `documents` | Files per distributor (Base64) |
+| `requests` | Purchase requests |
+| `request_items` | Items per request |
+| `request_documents` | Attachments per request |
 | `change_history` | Full audit log |
-| `system_settings` | Logo, session timeout, categories |
+| `system_settings` | Logo, session timeout, categories, manufacturers |
 
 ---
 
@@ -118,19 +134,29 @@ git add . && git commit -m "description" && git push
 
 ## Changelog
 
+### v20260528
+- Requests page: create/submit/delete purchase requests with items + attachments
+- Approvals page: review/approve/reject pending requests with reviewer notes
+- Page-level permissions per user (Dashboard/Vendors/Catalog/Requests/Approvals)
+- PageGuard: blocked pages show 🔒 placeholder
+- Add User Wizard: 2-step flow (Details → Permissions before creation)
+- Users table: Avatar + First Name + Last Name columns
+- User icon added to User Management section header
+
 ### v20260526
 - Notes displayed as yellow row when distributor expanded
 - Documents permission added to Role settings
-- Viewer: read-only access to Documents (download only)
+- Viewer: read-only access to Documents
 - Fix create user to save first/last name and mobile
-- Fix /me routes order in users.js (before /:id)
+- Manufacturer dropdown in product form (from Catalog)
+- Catalog page activated with Categories + Manufacturers
 
 ### v20260525
 - Documents Panel per distributor (upload/download/delete)
 - Bulk Actions (select multiple, change status, delete)
 - User Profile page + password change
 - User dropdown menu
-- Categories management in Settings
+- Categories management in Settings → moved to Catalog
 - Import CSV includes products
 - Responsive layout
 - Field-level permissions (Cost Price, Customer Price, Documents)
@@ -139,7 +165,6 @@ git add . && git commit -m "description" && git push
 - Session timeout (global, DB)
 - Sidebar logo upload
 - Cost Price + Customer Price fields
-- Category dropdown from managed list
 - Detailed change history
 
 ### v20260523
