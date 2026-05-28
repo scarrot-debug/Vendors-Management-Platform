@@ -49,8 +49,126 @@ function Modal({ title, onClose, children }) {
   );
 }
 
-function UserForm({ initial, onSave, onCancel, saving, isEdit }) {
-  const [form, setForm] = useState(initial || { username:'', email:'', password:'', role:'viewer', first_name:'', last_name:'', mobile:'' });
+function AddUserWizard({ onSave, onCancel, saving }) {
+  const [step, setStep] = useState(1);
+  const [form, setForm] = useState({ username:'', email:'', password:'', role:'viewer', first_name:'', last_name:'', mobile:'' });
+  const [perms, setPerms] = useState({
+    can_see_cost_price: true, can_see_customer_price: true, can_see_documents: true,
+    can_access_dashboard: true, can_access_vendors: true, can_access_catalog: true,
+    can_access_requests: true, can_access_approvals: true,
+  });
+  const set = (k,v) => setForm(f=>({...f,[k]:v}));
+
+  return (
+    <div>
+      {/* Step indicator */}
+      <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:22 }}>
+        {[{n:1,label:'Details'},{n:2,label:'Permissions'}].map(({n,label}) => (
+          <div key={n} style={{ display:'flex', alignItems:'center', gap:6 }}>
+            <div style={{ width:24, height:24, borderRadius:'50%', background: step>=n ? '#1a1d23' : '#e2e6ed', color: step>=n ? '#fff' : '#9ca3af', display:'flex', alignItems:'center', justifyContent:'center', fontSize:12, fontWeight:600 }}>{n}</div>
+            <span style={{ fontSize:13, color: step>=n ? '#1a1d23' : '#9ca3af', fontWeight: step===n ? 600 : 400 }}>{label}</span>
+            {n < 2 && <div style={{ width:32, height:1, background: step>n ? '#1a1d23' : '#e2e6ed' }}/>}
+          </div>
+        ))}
+      </div>
+
+      {step === 1 && (
+        <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:14 }}>
+            <div>
+              <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>First Name</label>
+              <input value={form.first_name||''} onChange={e=>set('first_name',e.target.value)} style={inputStyle} autoComplete="off"/>
+            </div>
+            <div>
+              <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>Last Name</label>
+              <input value={form.last_name||''} onChange={e=>set('last_name',e.target.value)} style={inputStyle} autoComplete="off"/>
+            </div>
+          </div>
+          <div>
+            <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>Username *</label>
+            <input value={form.username||''} onChange={e=>set('username',e.target.value)} style={inputStyle} autoComplete="off"/>
+          </div>
+          <div>
+            <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>Email *</label>
+            <input type="email" value={form.email||''} onChange={e=>set('email',e.target.value)} style={inputStyle} autoComplete="off"/>
+          </div>
+          <div>
+            <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>Mobile</label>
+            <input value={form.mobile||''} onChange={e=>set('mobile',e.target.value)} style={inputStyle} placeholder="+972 50 000 0000"/>
+          </div>
+          <div>
+            <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>Password *</label>
+            <input type="password" value={form.password||''} onChange={e=>set('password',e.target.value)} style={inputStyle} autoComplete="new-password"/>
+          </div>
+          <div>
+            <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>Role</label>
+            <select value={form.role} onChange={e=>set('role',e.target.value)} style={inputStyle}>
+              <option value="admin">Admin — full access</option>
+              <option value="user">User — can edit</option>
+              <option value="viewer">Viewer — read only</option>
+            </select>
+          </div>
+          <div style={{ display:'flex', gap:10, justifyContent:'flex-end', marginTop:6 }}>
+            <button onClick={onCancel} style={{...btnStyle, background:'#f4f6f9', color:'#6b7280'}}>Cancel</button>
+            <button onClick={()=>{ if(!form.username||!form.email||!form.password){ alert('Username, email and password are required'); return; } setStep(2); }}
+              style={{...btnStyle, background:'#1a1d23', color:'#fff'}}>
+              Next →
+            </button>
+          </div>
+        </div>
+      )}
+
+      {step === 2 && (
+        <div style={{ display:'flex', flexDirection:'column', gap:16 }}>
+          <div style={{ fontSize:12, fontWeight:700, color:'#9ca3af', letterSpacing:0.5 }}>FIELD VISIBILITY</div>
+          <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
+            {[
+              { key:'can_see_cost_price', label:'Cost Price', desc:'Purchase/cost price of products' },
+              { key:'can_see_customer_price', label:'Customer Price', desc:'Selling price to customers' },
+              { key:'can_see_documents', label:'Documents', desc:'Distributor documents panel' },
+            ].map(({ key, label, desc }) => (
+              <label key={key} style={{ display:'flex', alignItems:'center', gap:12, padding:'10px 14px', borderRadius:8, border:'1px solid #e2e6ed', cursor:'pointer', background: perms[key] ? '#f0fdf4' : '#fafafa' }}>
+                <input type="checkbox" checked={perms[key]??true} onChange={e=>setPerms(p=>({...p,[key]:e.target.checked}))} style={{ width:15, height:15 }}/>
+                <div style={{ flex:1 }}>
+                  <div style={{ fontWeight:600, fontSize:13, color:'#1a1d23' }}>{label}</div>
+                  <div style={{ fontSize:12, color:'#6b7280' }}>{desc}</div>
+                </div>
+                <span style={{ fontSize:12, fontWeight:600, color: perms[key] ? '#16a34a' : '#9ca3af' }}>{perms[key] ? 'Visible ✓' : 'Hidden'}</span>
+              </label>
+            ))}
+          </div>
+
+          <div style={{ fontSize:12, fontWeight:700, color:'#9ca3af', letterSpacing:0.5 }}>PAGE ACCESS</div>
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
+            {[
+              { key:'can_access_dashboard', label:'Dashboard', icon:'📊' },
+              { key:'can_access_vendors', label:'Vendors', icon:'🏢' },
+              { key:'can_access_catalog', label:'Catalog', icon:'📚' },
+              { key:'can_access_requests', label:'Requests', icon:'📋' },
+              { key:'can_access_approvals', label:'Approvals', icon:'✅' },
+            ].map(({ key, label, icon }) => (
+              <label key={key} style={{ display:'flex', alignItems:'center', gap:8, padding:'9px 12px', borderRadius:8, border:'1px solid #e2e6ed', cursor:'pointer', background: perms[key]!==false ? '#f0fdf4' : '#fef2f2' }}>
+                <input type="checkbox" checked={perms[key]!==false} onChange={e=>setPerms(p=>({...p,[key]:e.target.checked}))} style={{ width:15, height:15 }}/>
+                <span style={{ fontSize:14 }}>{icon}</span>
+                <span style={{ fontSize:13, color:'#1a1d23', fontWeight:500 }}>{label}</span>
+              </label>
+            ))}
+          </div>
+
+          <div style={{ display:'flex', gap:10, justifyContent:'flex-end', marginTop:6 }}>
+            <button onClick={()=>setStep(1)} style={{...btnStyle, background:'#f4f6f9', color:'#6b7280'}}>← Back</button>
+            <button onClick={()=>onSave(form, perms)} disabled={saving} style={{...btnStyle, background:'#1a1d23', color:'#fff'}}>
+              {saving ? 'Creating…' : 'Create User'}
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function EditUserForm({ initial, onSave, onCancel, saving }) {
+  const [form, setForm] = useState(initial || { username:'', email:'', role:'viewer', first_name:'', last_name:'', mobile:'' });
   const set = (k,v) => setForm(f=>({...f,[k]:v}));
   return (
     <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
@@ -76,12 +194,6 @@ function UserForm({ initial, onSave, onCancel, saving, isEdit }) {
         <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>Mobile</label>
         <input value={form.mobile||''} onChange={e=>set('mobile',e.target.value)} style={inputStyle} placeholder="+972 50 000 0000"/>
       </div>
-      {!isEdit && (
-        <div>
-          <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>Password *</label>
-          <input type="password" value={form.password||''} onChange={e=>set('password',e.target.value)} style={inputStyle} autoComplete="new-password"/>
-        </div>
-      )}
       <div>
         <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>Role</label>
         <select value={form.role} onChange={e=>set('role',e.target.value)} style={inputStyle}>
@@ -93,14 +205,12 @@ function UserForm({ initial, onSave, onCancel, saving, isEdit }) {
       <div style={{ display:'flex', gap:10, justifyContent:'flex-end', marginTop:6 }}>
         <button onClick={onCancel} style={{...btnStyle, background:'#f4f6f9', color:'#6b7280'}}>Cancel</button>
         <button onClick={()=>onSave(form)} disabled={saving} style={{...btnStyle, background:'#1a1d23', color:'#fff'}}>
-          <Check size={15}/> {saving ? 'Saving…' : isEdit ? 'Save Changes' : 'Create User'}
+          <Check size={15}/> {saving ? 'Saving…' : 'Save Changes'}
         </button>
       </div>
     </div>
   );
-}
-
-function ResetPasswordForm({ user, onSave, onCancel, saving }) {
+} user, onSave, onCancel, saving }) {
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const mismatch = confirm && password !== confirm;
@@ -508,20 +618,19 @@ export default function Settings() {
 
   useEffect(() => { load(); }, []);
 
-  const handleSaveUser = async (form) => {
+  const handleSaveUser = async (form, perms) => {
     setSaving(true);
     try {
       if (modal.type === 'add') {
         const newUser = await api.createUser(form);
-        setModal(null);
-        load();
+        if (perms && newUser?.id) {
+          await api.updateUserPermissions(newUser.id, perms);
+        }
+        setModal(null); load();
         showToast('User created successfully');
-        // Open permissions modal immediately after creation
-        setPermissionsUser(newUser);
       } else {
         await api.updateUser(modal.data.id, form);
-        setModal(null);
-        load();
+        setModal(null); load();
         showToast('User updated successfully');
       }
     } catch (err) { showToast(err.message, 'error'); }
@@ -758,12 +867,12 @@ export default function Settings() {
       {/* Modals */}
       {modal?.type==='add' && (
         <Modal title="Add New User" onClose={()=>setModal(null)}>
-          <UserForm onSave={handleSaveUser} onCancel={()=>setModal(null)} saving={saving}/>
+          <AddUserWizard onSave={handleSaveUser} onCancel={()=>setModal(null)} saving={saving}/>
         </Modal>
       )}
       {modal?.type==='edit' && (
         <Modal title={`Edit User — ${modal.data.username}`} onClose={()=>setModal(null)}>
-          <UserForm initial={modal.data} isEdit onSave={handleSaveUser} onCancel={()=>setModal(null)} saving={saving}/>
+          <EditUserForm initial={modal.data} onSave={handleSaveUser} onCancel={()=>setModal(null)} saving={saving}/>
         </Modal>
       )}
       {modal?.type==='reset' && (
