@@ -2,20 +2,21 @@ import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth.jsx';
 import {
   LayoutDashboard, Users, BookOpen, FileText, CheckSquare,
-  BarChart2, Settings as SettingsIcon, ShieldCheck, LogOut, ChevronLeft, User, ChevronDown
+  BarChart2, Settings as SettingsIcon, ShieldCheck, LogOut, User, ChevronDown, Globe
 } from 'lucide-react';
 import { useState } from 'react';
 import { VERSION } from '../version.js';
+import { useTranslation } from 'react-i18next';
 
 const NAV = [
-  { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/vendors',   icon: Users,           label: 'Vendors' },
-  { to: '/catalog',   icon: BookOpen,         label: 'Catalog' },
-  { to: '/requests',  icon: FileText,         label: 'Requests' },
-  { to: '/approvals', icon: CheckSquare,      label: 'Approvals' },
-  { to: '#',          icon: BarChart2,        label: 'Reports' },
-  { to: '/settings',  icon: SettingsIcon,     label: 'Settings', adminOnly: true },
-  { to: '#',          icon: ShieldCheck,      label: 'Admin' },
+  { to: '/dashboard', icon: LayoutDashboard, labelKey: 'nav.dashboard' },
+  { to: '/vendors',   icon: Users,           labelKey: 'nav.vendors' },
+  { to: '/catalog',   icon: BookOpen,        labelKey: 'nav.catalog' },
+  { to: '/requests',  icon: FileText,        labelKey: 'nav.requests' },
+  { to: '/approvals', icon: CheckSquare,     labelKey: 'nav.approvals' },
+  { to: '#',          icon: BarChart2,       labelKey: 'nav.reports' },
+  { to: '/settings',  icon: SettingsIcon,    labelKey: 'nav.settings', adminOnly: true },
+  { to: '#',          icon: ShieldCheck,     labelKey: 'nav.admin' },
 ];
 
 export default function Layout() {
@@ -24,7 +25,22 @@ export default function Layout() {
   const [collapsed, setCollapsed] = useState(false);
 
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === 'he';
+
   const handleLogout = () => { logout(); navigate('/login'); };
+
+  const switchLanguage = (lang) => {
+    i18n.changeLanguage(lang);
+    localStorage.setItem('language', lang);
+    document.documentElement.dir = lang === 'he' ? 'rtl' : 'ltr';
+    setUserMenuOpen(false);
+  };
+
+  // Set RTL on mount
+  useState(() => {
+    document.documentElement.dir = i18n.language === 'he' ? 'rtl' : 'ltr';
+  });
 
   const DEFAULT_LOGO = "https://www.one1.co.il/wp-content/uploads/2024/11/dark_logo.webp";
   const logoSrc = logo || DEFAULT_LOGO;
@@ -55,8 +71,10 @@ export default function Layout() {
 
         {/* Nav */}
         <nav style={{ flex: 1, padding: '10px 8px', display: 'flex', flexDirection: 'column', gap: 2 }}>
-          {NAV.filter(item => !item.adminOnly || user?.role === 'admin').map(({ to, icon: Icon, label }) => to === '#' ? (
-            <div key={label} style={{
+          {NAV.filter(item => !item.adminOnly || user?.role === 'admin').map(({ to, icon: Icon, labelKey }) => {
+            const label = t(labelKey);
+            return to === '#' ? (
+            <div key={labelKey} style={{
               display: 'flex', alignItems: 'center', gap: 10,
               padding: '9px 10px', borderRadius: 7,
               color: 'rgba(255,255,255,0.35)', fontSize: 14, whiteSpace: 'nowrap',
@@ -66,7 +84,7 @@ export default function Layout() {
               {!collapsed && label}
             </div>
           ) : (
-            <NavLink key={label} to={to}
+            <NavLink key={labelKey} to={to}
               style={({ isActive }) => ({
                 display: 'flex', alignItems: 'center', gap: 10,
                 padding: '9px 10px', borderRadius: 7,
@@ -82,7 +100,7 @@ export default function Layout() {
               <Icon size={17} style={{ flexShrink: 0, color: '#fff' }}/>
               {!collapsed && label}
             </NavLink>
-          ))}
+          );})}
         </nav>
 
         {/* Version at bottom */}
@@ -154,6 +172,24 @@ export default function Layout() {
                 >
                   <User size={14}/> My Profile
                 </button>
+                <div style={{ height:1, background:'#f1f5f9' }}/>
+                {/* Language switcher */}
+                <div style={{ padding:'8px 16px' }}>
+                  <div style={{ fontSize:11, color:'#9ca3af', marginBottom:6, fontWeight:500 }}>LANGUAGE</div>
+                  <div style={{ display:'flex', gap:6 }}>
+                    {['en','he'].map(lang => (
+                      <button key={lang} onClick={()=>switchLanguage(lang)} style={{
+                        flex:1, padding:'5px 8px', borderRadius:6, border:'1px solid',
+                        borderColor: i18n.language===lang ? '#1a1d23' : '#e2e6ed',
+                        background: i18n.language===lang ? '#1a1d23' : '#fff',
+                        color: i18n.language===lang ? '#fff' : '#374151',
+                        fontSize:12, cursor:'pointer', fontWeight:500,
+                      }}>
+                        {lang === 'en' ? '🇺🇸 EN' : '🇮🇱 HE'}
+                      </button>
+                    ))}
+                  </div>
+                </div>
                 <div style={{ height:1, background:'#f1f5f9' }}/>
                 <button onClick={handleLogout} style={{
                   display:'flex', alignItems:'center', gap:8, width:'100%', padding:'10px 16px',
