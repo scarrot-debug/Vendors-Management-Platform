@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api/client.js';
 import { useAuth } from '../hooks/useAuth.jsx';
-import { usePageTitle } from '../hooks/usePageTitle.js';
+import { useTranslation } from 'react-i18next';
 
 const inputStyle = {
   width:'100%', padding:'9px 12px', borderRadius:7,
@@ -99,23 +99,23 @@ function ListManager({ title, description, fetchFn, saveFn, icon }) {
 }
 
 export default function Catalog() {
-  const { title, subtitle } = usePageTitle('catalog', { title: 'Catalog', subtitle: 'Manage product categories and manufacturers' });
+  const { t } = useTranslation();
   return (
     <div style={{ padding:'16px 24px', flex:1 }}>
-      <h1 style={{ fontSize:20, fontWeight:700, marginBottom:2, color:'#1a1d23' }}>{title}</h1>
-      <p style={{ color:'#6b7280', fontSize:13, marginBottom:24 }}>{subtitle}</p>
+      <h1 style={{ fontSize:20, fontWeight:700, marginBottom:2, color:'#1a1d23' }}>{t('catalog.title')}</h1>
+      <p style={{ color:'#6b7280', fontSize:13, marginBottom:24 }}>{t('catalog.subtitle')}</p>
 
       <div style={{ display:'flex', flexDirection:'column', gap:20 }}>
         <ListManager
-          title="Categories"
-          description="Product categories used across the system"
+          title={t('catalog.categories')}
+          description={t('catalog.categoriesDesc')}
           icon="🏷️"
           fetchFn={api.getSystemCategories}
           saveFn={(cats) => api.setSystemCategories(cats)}
         />
         <ListManager
-          title="Manufacturers"
-          description="Manufacturer list used in product forms"
+          title={t('catalog.manufacturers')}
+          description={t('catalog.manufacturersDesc')}
           icon="🏭"
           fetchFn={api.getSystemManufacturers}
           saveFn={(mfrs) => api.setSystemManufacturers(mfrs)}

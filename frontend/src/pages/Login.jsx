@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth.jsx';
 import { api } from '../api/client.js';
+import { useTranslation } from 'react-i18next';
 
 export default function Login() {
   const [username, setUsername] = useState('');
@@ -10,6 +11,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -42,13 +44,13 @@ export default function Login() {
             style={{ height: 36, objectFit: 'contain', marginBottom: 20 }}
           />
           <h1 style={{ fontSize: 20, fontWeight: 700, marginBottom: 4, color: '#1a1d23' }}>Vendor Management</h1>
-          <p style={{ color: '#6b7280', fontSize: 14 }}>Sign in to continue</p>
+          <p style={{ color: '#6b7280', fontSize: 14 }}>{t('auth.login')}</p>
         </div>
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           {[
-            { label: 'Username', value: username, set: setUsername, type: 'text', placeholder: 'Enter username' },
-            { label: 'Password', value: password, set: setPassword, type: 'password', placeholder: 'Enter password' },
+            { label: t('auth.username'), value: username, set: setUsername, type: 'text', placeholder: t('auth.username') },
+            { label: t('auth.password'), value: password, set: setPassword, type: 'password', placeholder: '••••••••' },
           ].map(({ label, value, set, type, placeholder }) => (
             <div key={label}>
               <label style={{ fontSize: 13, color: '#374151', fontWeight: 500, display: 'block', marginBottom: 6 }}>{label}</label>
@@ -75,7 +77,7 @@ export default function Login() {
             color: '#fff', fontSize: 14, fontWeight: 600,
             cursor: loading ? 'not-allowed' : 'pointer', marginTop: 4,
           }}>
-            {loading ? 'Signing in…' : 'Sign In'}
+            {loading ? t('auth.signingIn') : t('auth.login')}
           </button>
         </form>
       </div>

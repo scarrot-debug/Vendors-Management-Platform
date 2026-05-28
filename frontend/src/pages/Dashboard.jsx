@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api/client.js';
 import { Users, CheckCircle, Clock, XCircle, TrendingUp, Package, DollarSign, BarChart2 } from 'lucide-react';
-import { usePageTitle } from '../hooks/usePageTitle.js';
+import { useTranslation } from 'react-i18next';
 
 function formatCurrency(val) {
   if (!val) return '$0';
@@ -75,9 +75,9 @@ function DonutChart({ segments, size = 120 }) {
 }
 
 export default function Dashboard() {
-  const { title, subtitle } = usePageTitle('dashboard', { title: 'Dashboard', subtitle: 'Overview of your vendor ecosystem' });
   const [distributors, setDistributors] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { t } = useTranslation();
 
   useEffect(() => {
     api.getVendors({ limit: 200 }).then(d => {
@@ -95,12 +95,12 @@ export default function Dashboard() {
   const totalCost = allProducts.reduce((s, p) => s + (parseFloat(p.cost) || 0), 0);
 
   const stats = [
-    { label:'Total Distributors', value: distributors.length, icon: Users,        color:'#2563eb', bg:'#eff6ff' },
-    { label:'Active',             value: active,               icon: CheckCircle,  color:'#16a34a', bg:'#f0fdf4' },
-    { label:'Pending',            value: pending,              icon: Clock,        color:'#d97706', bg:'#fffbeb' },
-    { label:'Inactive',           value: inactive,             icon: XCircle,      color:'#dc2626', bg:'#fef2f2' },
-    { label:'Total Products',     value: totalProducts,        icon: Package,      color:'#7c3aed', bg:'#f5f3ff' },
-    { label:'Total Cost',         value: formatCurrency(totalCost), icon: DollarSign, color:'#0891b2', bg:'#ecfeff', isText:true },
+    { label: t('dashboard.totalDistributors'), value: distributors.length, icon: Users,        color:'#2563eb', bg:'#eff6ff' },
+    { label: t('dashboard.activeDistributors'), value: active,              icon: CheckCircle,  color:'#16a34a', bg:'#f0fdf4' },
+    { label: t('dashboard.pendingDistributors'), value: pending,            icon: Clock,        color:'#d97706', bg:'#fffbeb' },
+    { label: t('dashboard.inactiveDistributors'), value: inactive,          icon: XCircle,      color:'#dc2626', bg:'#fef2f2' },
+    { label: t('dashboard.totalProducts'),     value: totalProducts,        icon: Package,      color:'#7c3aed', bg:'#f5f3ff' },
+    { label: t('dashboard.totalCost'),         value: formatCurrency(totalCost), icon: DollarSign, color:'#0891b2', bg:'#ecfeff', isText:true },
   ];
 
   // Cost by category
@@ -139,14 +139,14 @@ export default function Dashboard() {
 
   if (loading) return (
     <div style={{ padding:32, display:'flex', alignItems:'center', justifyContent:'center', flex:1 }}>
-      <span style={{ color:'#9ca3af' }}>Loading dashboard…</span>
+      <span style={{ color:'#9ca3af' }}>{t('common.loading')}</span>
     </div>
   );
 
   return (
     <div style={{ padding:'16px 24px', flex:1 }}>
-      <h1 style={{ fontSize:24, fontWeight:700, marginBottom:4, color:'#1a1d23' }}>{title}</h1>
-      <p style={{ color:'#6b7280', fontSize:14, marginBottom:24 }}>{subtitle}</p>
+      <h1 style={{ fontSize:24, fontWeight:700, marginBottom:4, color:'#1a1d23' }}>{t('dashboard.title')}</h1>
+      <p style={{ color:'#6b7280', fontSize:14, marginBottom:24 }}>{t('dashboard.subtitle')}</p>
 
       {/* Stats */}
       <div style={{ display:'grid', gridTemplateColumns:'repeat(6, 1fr)', gap:14, marginBottom:24 }}>

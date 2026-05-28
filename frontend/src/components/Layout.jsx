@@ -2,7 +2,7 @@ import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth.jsx';
 import {
   LayoutDashboard, Users, BookOpen, FileText, CheckSquare,
-  BarChart2, Settings as SettingsIcon, ShieldCheck, LogOut, User, ChevronDown, ChevronLeft, Globe
+  BarChart2, Settings as SettingsIcon, ShieldCheck, LogOut, User, ChevronDown, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { useState } from 'react';
 import { VERSION } from '../version.js';
@@ -23,7 +23,6 @@ export default function Layout() {
   const { user, logout, logo } = useAuth();
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
-
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'he';
@@ -45,8 +44,21 @@ export default function Layout() {
   const DEFAULT_LOGO = "https://www.one1.co.il/wp-content/uploads/2024/11/dark_logo.webp";
   const logoSrc = logo || DEFAULT_LOGO;
 
+  // RTL-aware collapse button position
+  const collapseLeft = isRTL
+    ? (collapsed ? 'auto' : 'auto')
+    : (collapsed ? 48 : 204);
+  const collapseRight = isRTL
+    ? (collapsed ? 48 : 204)
+    : 'auto';
+
+  // Arrow direction: in LTR collapse=left arrow, in RTL collapse=right arrow, flips when collapsed
+  const CollapseIcon = isRTL
+    ? (collapsed ? ChevronLeft : ChevronRight)
+    : (collapsed ? ChevronRight : ChevronLeft);
+
   return (
-    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
+    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', direction: isRTL ? 'rtl' : 'ltr' }}>
       <aside style={{
         width: collapsed ? 64 : 220,
         background: '#1a1d23',
@@ -54,6 +66,7 @@ export default function Layout() {
         transition: 'width 0.2s ease',
         flexShrink: 0,
         overflow: 'hidden',
+        order: isRTL ? 2 : 0,
       }}>
         {/* Logo */}
         <div style={{
@@ -78,7 +91,9 @@ export default function Layout() {
               display: 'flex', alignItems: 'center', gap: 10,
               padding: '9px 10px', borderRadius: 7,
               color: 'rgba(255,255,255,0.35)', fontSize: 14, whiteSpace: 'nowrap',
-              borderLeft: '3px solid transparent', cursor: 'default',
+              borderLeft: isRTL ? 'none' : '3px solid transparent',
+              borderRight: isRTL ? '3px solid transparent' : 'none',
+              cursor: 'default',
             }}>
               <Icon size={17} style={{ flexShrink: 0, color: 'rgba(255,255,255,0.35)' }}/>
               {!collapsed && label}
@@ -91,8 +106,10 @@ export default function Layout() {
                 color: '#ffffff', background: 'transparent',
                 textDecoration: 'none', fontSize: 14, fontWeight: isActive ? 600 : 400,
                 transition: 'all 0.15s', whiteSpace: 'nowrap',
-                borderLeft: isActive ? '3px solid #fff' : '3px solid transparent',
-                paddingLeft: isActive ? 8 : 10,
+                borderLeft: isRTL ? 'none' : (isActive ? '3px solid #fff' : '3px solid transparent'),
+                borderRight: isRTL ? (isActive ? '3px solid #fff' : '3px solid transparent') : 'none',
+                paddingLeft: isRTL ? 10 : (isActive ? 8 : 10),
+                paddingRight: isRTL ? (isActive ? 8 : 10) : 10,
               })}
               onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; }}
               onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
@@ -115,16 +132,19 @@ export default function Layout() {
 
       {/* Collapse toggle */}
       <button onClick={() => setCollapsed(c => !c)} style={{
-        position: 'fixed', left: collapsed ? 48 : 204, top: 20, zIndex: 100,
+        position: 'fixed',
+        left: isRTL ? 'auto' : (collapsed ? 48 : 204),
+        right: isRTL ? (collapsed ? 48 : 204) : 'auto',
+        top: 20, zIndex: 100,
         width: 22, height: 22, borderRadius: '50%', border: '1px solid #e2e6ed',
         background: '#fff', color: '#6b7280', display: 'flex', alignItems: 'center', justifyContent: 'center',
-        cursor: 'pointer', transition: 'left 0.2s ease', boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
+        cursor: 'pointer', transition: 'left 0.2s ease, right 0.2s ease', boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
       }}>
-        <ChevronLeft size={12} style={{ transform: collapsed ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}/>
+        <CollapseIcon size={12}/>
       </button>
 
       {/* Main content */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#f4f6f9' }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#f4f6f9', order: isRTL ? 1 : 1 }}>
         {/* Top bar with user dropdown */}
         <div style={{
           display: 'flex', alignItems: 'center', justifyContent: 'flex-end',
@@ -146,7 +166,7 @@ export default function Layout() {
                 display:'flex', alignItems:'center', justifyContent:'center',
                 fontSize:12, fontWeight:600, color:'#fff',
               }}>{user?.username?.[0]?.toUpperCase()}</div>
-              <div style={{ textAlign:'left' }}>
+              <div style={{ textAlign: isRTL ? 'right' : 'left' }}>
                 <div style={{ fontSize:13, fontWeight:500, color:'#1a1d23' }}>{user?.username}</div>
                 <div style={{ fontSize:11, color:'#9ca3af', textTransform:'capitalize' }}>{user?.role}</div>
               </div>
@@ -157,7 +177,7 @@ export default function Layout() {
               <div style={{
                 position:'absolute', top:'calc(100% + 8px)', right:0, zIndex:200,
                 background:'#fff', border:'1px solid #e2e6ed', borderRadius:10,
-                boxShadow:'0 8px 24px rgba(0,0,0,0.12)', minWidth:180, overflow:'hidden',
+                boxShadow:'0 8px 24px rgba(0,0,0,0.12)', minWidth:200, overflow:'hidden',
               }} onMouseLeave={()=>setUserMenuOpen(false)}>
                 <div style={{ padding:'12px 16px', borderBottom:'1px solid #f1f5f9' }}>
                   <div style={{ fontSize:13, fontWeight:600, color:'#1a1d23' }}>{user?.username}</div>
@@ -165,27 +185,32 @@ export default function Layout() {
                 </div>
                 <button onClick={()=>{ navigate('/profile'); setUserMenuOpen(false); }} style={{
                   display:'flex', alignItems:'center', gap:8, width:'100%', padding:'10px 16px',
-                  background:'none', border:'none', fontSize:13, color:'#374151', cursor:'pointer', textAlign:'left',
+                  background:'none', border:'none', fontSize:13, color:'#374151', cursor:'pointer', textAlign: isRTL ? 'right' : 'left',
                 }}
                   onMouseEnter={e=>e.currentTarget.style.background='#f8f9fb'}
                   onMouseLeave={e=>e.currentTarget.style.background='none'}
                 >
-                  <User size={14}/> My Profile
+                  <User size={14}/> {t('profile.title')}
                 </button>
                 <div style={{ height:1, background:'#f1f5f9' }}/>
                 {/* Language switcher */}
                 <div style={{ padding:'8px 16px' }}>
-                  <div style={{ fontSize:11, color:'#9ca3af', marginBottom:6, fontWeight:500 }}>LANGUAGE</div>
+                  <div style={{ fontSize:11, color:'#9ca3af', marginBottom:6, fontWeight:500, textTransform:'uppercase' }}>{t('language.label')}</div>
                   <div style={{ display:'flex', gap:6 }}>
-                    {['en','he'].map(lang => (
-                      <button key={lang} onClick={()=>switchLanguage(lang)} style={{
-                        flex:1, padding:'5px 8px', borderRadius:6, border:'1px solid',
-                        borderColor: i18n.language===lang ? '#1a1d23' : '#e2e6ed',
-                        background: i18n.language===lang ? '#1a1d23' : '#fff',
-                        color: i18n.language===lang ? '#fff' : '#374151',
-                        fontSize:12, cursor:'pointer', fontWeight:500,
+                    {[
+                      { code:'en', flag:'🇺🇸', label:'US-EN' },
+                      { code:'he', flag:'🇮🇱', label:'IL-HE' },
+                    ].map(({ code, flag, label }) => (
+                      <button key={code} onClick={()=>switchLanguage(code)} style={{
+                        flex:1, padding:'6px 4px', borderRadius:6, border:'1px solid',
+                        borderColor: i18n.language===code ? '#1a1d23' : '#e2e6ed',
+                        background: i18n.language===code ? '#1a1d23' : '#fff',
+                        color: i18n.language===code ? '#fff' : '#374151',
+                        fontSize:12, cursor:'pointer', fontWeight:600,
+                        display:'flex', flexDirection:'column', alignItems:'center', gap:2,
                       }}>
-                        {lang === 'en' ? '🇺🇸 EN' : '🇮🇱 HE'}
+                        <span style={{ fontSize:16 }}>{flag}</span>
+                        <span>{label}</span>
                       </button>
                     ))}
                   </div>
@@ -193,12 +218,12 @@ export default function Layout() {
                 <div style={{ height:1, background:'#f1f5f9' }}/>
                 <button onClick={handleLogout} style={{
                   display:'flex', alignItems:'center', gap:8, width:'100%', padding:'10px 16px',
-                  background:'none', border:'none', fontSize:13, color:'#dc2626', cursor:'pointer', textAlign:'left',
+                  background:'none', border:'none', fontSize:13, color:'#dc2626', cursor:'pointer', textAlign: isRTL ? 'right' : 'left',
                 }}
                   onMouseEnter={e=>e.currentTarget.style.background='#fef2f2'}
                   onMouseLeave={e=>e.currentTarget.style.background='none'}
                 >
-                  <LogOut size={14}/> Logout
+                  <LogOut size={14}/> {t('auth.logout')}
                 </button>
               </div>
             )}

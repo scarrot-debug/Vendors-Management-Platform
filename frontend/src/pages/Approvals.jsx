@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { api } from '../api/client.js';
 import { useAuth } from '../hooks/useAuth.jsx';
 import { X, ChevronDown, ChevronUp } from 'lucide-react';
-import { usePageTitle } from '../hooks/usePageTitle.js';
+import { useTranslation } from 'react-i18next';
 
 const STATUS_STYLES = {
   Draft:    { bg:'#f1f5f9', color:'#64748b', border:'#e2e8f0' },
@@ -158,8 +158,8 @@ function ApprovalDetail({ request, onClose, onRefresh }) {
 }
 
 export default function Approvals() {
-  const { title, subtitle } = usePageTitle('approvals', { title: 'Approvals', subtitle: 'Review and approve purchase requests' });
   const { user } = useAuth();
+  const { t } = useTranslation();
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [detail, setDetail] = useState(null);
@@ -192,8 +192,8 @@ export default function Approvals() {
       <div style={{ padding:'16px 24px', flex:1, display:'flex', alignItems:'center', justifyContent:'center' }}>
         <div style={{ textAlign:'center', color:'#9ca3af' }}>
           <div style={{ fontSize:40, marginBottom:12 }}>🔒</div>
-          <div style={{ fontSize:16, fontWeight:600, color:'#374151' }}>Access Restricted</div>
-          <div style={{ fontSize:14, marginTop:4 }}>Only Admin and User roles can review approvals.</div>
+          <div style={{ fontSize:16, fontWeight:600, color:'#374151' }}>{t('approvals.accessRestricted')}</div>
+          <div style={{ fontSize:14, marginTop:4 }}>{t('approvals.accessRestrictedDesc')}</div>
         </div>
       </div>
     );
@@ -207,12 +207,12 @@ export default function Approvals() {
 
       <div style={{ marginBottom:20 }}>
         <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom:2 }}>
-          <h1 style={{ fontSize:20, fontWeight:700, color:'#1a1d23' }}>{title}</h1>
+          <h1 style={{ fontSize:20, fontWeight:700, color:'#1a1d23' }}>{t('approvals.title')}</h1>
           {pendingCount > 0 && (
             <span style={{ background:'#dc2626', color:'#fff', borderRadius:12, padding:'2px 8px', fontSize:12, fontWeight:700 }}>{pendingCount}</span>
           )}
         </div>
-        <p style={{ color:'#6b7280', fontSize:13 }}>{subtitle}</p>
+        <p style={{ color:'#6b7280', fontSize:13 }}>{t('approvals.subtitle')}</p>
       </div>
 
       {/* Filters */}

@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { api } from '../api/client.js';
 import { useAuth } from '../hooks/useAuth.jsx';
 import { Plus, X, Check, Trash2, Send, Edit2, ChevronDown, ChevronUp } from 'lucide-react';
-import { usePageTitle } from '../hooks/usePageTitle.js';
+import { useTranslation } from 'react-i18next';
 
 const STATUS_STYLES = {
   Draft:    { bg:'#f1f5f9', color:'#64748b', border:'#e2e8f0' },
@@ -288,7 +288,7 @@ function RequestDetail({ request, onClose, onRefresh, currentUser }) {
 
 export default function Requests() {
   const { user } = useAuth();
-  const { title, subtitle } = usePageTitle('requests', { title: 'Purchase Requests', subtitle: 'Create and manage purchase requests' });
+  const { t } = useTranslation();
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState(null);
@@ -341,11 +341,11 @@ export default function Requests() {
 
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:20 }}>
         <div>
-          <h1 style={{ fontSize:20, fontWeight:700, marginBottom:2, color:'#1a1d23' }}>{title}</h1>
-          <p style={{ color:'#6b7280', fontSize:13 }}>{subtitle}</p>
+          <h1 style={{ fontSize:20, fontWeight:700, marginBottom:2, color:'#1a1d23' }}>{t('requests.title')}</h1>
+          <p style={{ color:'#6b7280', fontSize:13 }}>{t('requests.subtitle')}</p>
         </div>
         <button onClick={()=>setModal('new')} style={{...btnStyle, background:'#1a1d23', color:'#fff'}}>
-          <Plus size={15}/> New Request
+          <Plus size={15}/> {t('requests.newRequest')}
         </button>
       </div>
 
@@ -353,7 +353,7 @@ export default function Requests() {
       <div style={{ display:'flex', gap:6, marginBottom:16 }}>
         {['All','Draft','Pending','Approved','Rejected'].map(s => (
           <button key={s} onClick={()=>setFilter(s)} style={{ padding:'5px 14px', borderRadius:6, border:'1px solid', fontSize:13, cursor:'pointer', fontWeight: filter===s ? 600 : 400, borderColor: filter===s ? '#1a1d23' : '#e2e6ed', background: filter===s ? '#1a1d23' : '#fff', color: filter===s ? '#fff' : '#374151' }}>
-            {s} {s==='All' ? `(${requests.length})` : `(${requests.filter(r=>r.status===s).length})`}
+            {s === 'All' ? t('common.all') : t(`requests.status.${s.toLowerCase()}`)} {s==='All' ? `(${requests.length})` : `(${requests.filter(r=>r.status===s).length})`}
           </button>
         ))}
       </div>
@@ -363,16 +363,16 @@ export default function Requests() {
         <table style={{ width:'100%', borderCollapse:'collapse', fontSize:14 }}>
           <thead>
             <tr style={{ borderBottom:'1px solid #e2e6ed', background:'#f8f9fb' }}>
-              {['Title','Distributor','Requested By','Date','Status','Actions'].map(h=>(
+              {[t('requests.requestTitle'),t('vendors.distributor'),t('common.name'),t('common.date'),t('common.status'),t('common.actions')].map(h=>(
                 <th key={h} style={{ padding:'11px 16px', textAlign:'left', color:'#374151', fontWeight:600, fontSize:12, textTransform:'uppercase', letterSpacing:0.5 }}>{h}</th>
               ))}
             </tr>
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={6} style={{ padding:32, textAlign:'center', color:'#9ca3af' }}>Loading…</td></tr>
+              <tr><td colSpan={6} style={{ padding:32, textAlign:'center', color:'#9ca3af' }}>{t('common.loading')}</td></tr>
             ) : filtered.length === 0 ? (
-              <tr><td colSpan={6} style={{ padding:32, textAlign:'center', color:'#9ca3af' }}>No requests found</td></tr>
+              <tr><td colSpan={6} style={{ padding:32, textAlign:'center', color:'#9ca3af' }}>{t('requests.noRequests')}</td></tr>
             ) : filtered.map((req, i) => (
               <tr key={req.id} style={{ borderBottom: i<filtered.length-1 ? '1px solid #f1f5f9' : 'none' }}
                 onMouseEnter={e=>e.currentTarget.style.background='#f8f9fb'}
