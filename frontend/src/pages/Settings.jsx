@@ -254,6 +254,7 @@ function PermissionsModal({ user, onClose }) {
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const { t } = useTranslation();
 
   useEffect(() => {
     api.getUserPermissions(user.id).then(p => { setPerms(p); setLoading(false); });
@@ -272,27 +273,27 @@ function PermissionsModal({ user, onClose }) {
     <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.4)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:1000 }}>
       <div style={{ background:'#fff', border:'1px solid #e2e6ed', borderRadius:12, padding:28, width:500, maxHeight:'90vh', overflowY:'auto', boxShadow:'0 20px 60px rgba(0,0,0,0.15)' }}>
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:20 }}>
-          <h2 style={{ fontSize:16, fontWeight:600, color:'#1a1d23' }}>Permissions — {user.username}</h2>
+          <h2 style={{ fontSize:16, fontWeight:600, color:'#1a1d23' }}>{t('settings.permissions.title')} — {user.username}</h2>
           <button onClick={onClose} style={{ background:'none', border:'none', color:'#6b7280', cursor:'pointer' }}><X size={20}/></button>
         </div>
 
-        {loading ? <div style={{ textAlign:'center', color:'#9ca3af', padding:20 }}>Loading…</div> : (
+        {loading ? <div style={{ textAlign:'center', color:'#9ca3af', padding:20 }}>{t('common.loading')}</div> : (
           <div style={{ display:'flex', flexDirection:'column', gap:20 }}>
 
             {isAdmin && (
               <div style={{ padding:'10px 14px', background:'#eff6ff', borderRadius:8, border:'1px solid #bfdbfe', fontSize:13, color:'#1d4ed8' }}>
-                ⚡ Admin users have full access to all pages and fields.
+                {t('settings.permissions.adminNote')}
               </div>
             )}
 
             {/* Field Permissions */}
             <div>
-              <div style={{ fontSize:12, fontWeight:700, color:'#9ca3af', letterSpacing:0.5, marginBottom:10 }}>FIELD VISIBILITY</div>
+              <div style={{ fontSize:12, fontWeight:700, color:'#9ca3af', letterSpacing:0.5, marginBottom:10 }}>{t('settings.permissions.fieldVisibility')}</div>
               <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
                 {[
-                  { key:'can_see_cost_price', label:'Cost Price', desc:'Purchase/cost price of products' },
-                  { key:'can_see_customer_price', label:'Customer Price', desc:'Selling price to customers' },
-                  { key:'can_see_documents', label:'Documents', desc:'Distributor documents panel' },
+                  { key:'can_see_cost_price', label:t('settings.permissions.costPrice'), desc:t('settings.permissions.costPriceDesc') },
+                  { key:'can_see_customer_price', label:t('settings.permissions.customerPrice'), desc:t('settings.permissions.customerPriceDesc') },
+                  { key:'can_see_documents', label:t('settings.permissions.documents'), desc:t('settings.permissions.documentsDesc') },
                 ].map(({ key, label, desc }) => (
                   <label key={key} style={{ display:'flex', alignItems:'center', gap:12, padding:'10px 14px', borderRadius:8, border:'1px solid #e2e6ed', cursor: isAdmin ? 'not-allowed' : 'pointer', background: perms[key] ? '#f0fdf4' : '#fafafa', opacity: isAdmin ? 0.6 : 1 }}>
                     <input type="checkbox" checked={perms[key] ?? true} onChange={e => !isAdmin && setPerms(p=>({...p,[key]:e.target.checked}))}
@@ -302,7 +303,7 @@ function PermissionsModal({ user, onClose }) {
                       <div style={{ fontSize:12, color:'#6b7280' }}>{desc}</div>
                     </div>
                     <span style={{ fontSize:12, fontWeight:600, color: perms[key] ? '#16a34a' : '#9ca3af' }}>
-                      {perms[key] ? 'Visible ✓' : 'Hidden'}
+                      {perms[key] ? t('settings.permissions.visible') : t('settings.permissions.hidden')}
                     </span>
                   </label>
                 ))}
@@ -311,14 +312,14 @@ function PermissionsModal({ user, onClose }) {
 
             {/* Page Access */}
             <div>
-              <div style={{ fontSize:12, fontWeight:700, color:'#9ca3af', letterSpacing:0.5, marginBottom:10 }}>PAGE ACCESS</div>
+              <div style={{ fontSize:12, fontWeight:700, color:'#9ca3af', letterSpacing:0.5, marginBottom:10 }}>{t('settings.permissions.pageAccess')}</div>
               <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
                 {[
-                  { key:'can_access_dashboard', label:'Dashboard', icon:'📊' },
-                  { key:'can_access_vendors', label:'Vendors', icon:'🏢' },
-                  { key:'can_access_catalog', label:'Catalog', icon:'📚' },
-                  { key:'can_access_requests', label:'Requests', icon:'📋' },
-                  { key:'can_access_approvals', label:'Approvals', icon:'✅' },
+                  { key:'can_access_dashboard', label:t('nav.dashboard'), icon:'📊' },
+                  { key:'can_access_vendors', label:t('nav.vendors'), icon:'🏢' },
+                  { key:'can_access_catalog', label:t('nav.catalog'), icon:'📚' },
+                  { key:'can_access_requests', label:t('nav.requests'), icon:'📋' },
+                  { key:'can_access_approvals', label:t('nav.approvals'), icon:'✅' },
                 ].map(({ key, label, icon }) => (
                   <label key={key} style={{ display:'flex', alignItems:'center', gap:12, padding:'10px 14px', borderRadius:8, border:'1px solid #e2e6ed', cursor: isAdmin ? 'not-allowed' : 'pointer', background: perms[key] !== false ? '#f0fdf4' : '#fef2f2', opacity: isAdmin ? 0.6 : 1 }}>
                     <input type="checkbox" checked={perms[key] !== false} onChange={e => !isAdmin && setPerms(p=>({...p,[key]:e.target.checked}))}
@@ -326,7 +327,7 @@ function PermissionsModal({ user, onClose }) {
                     <span style={{ fontSize:16 }}>{icon}</span>
                     <div style={{ flex:1, fontWeight:600, fontSize:13, color:'#1a1d23' }}>{label}</div>
                     <span style={{ fontSize:12, fontWeight:600, color: perms[key] !== false ? '#16a34a' : '#dc2626' }}>
-                      {perms[key] !== false ? 'Access ✓' : 'Blocked'}
+                      {perms[key] !== false ? t('settings.permissions.access') : t('settings.permissions.blocked')}
                     </span>
                   </label>
                 ))}
@@ -334,16 +335,16 @@ function PermissionsModal({ user, onClose }) {
                 <div style={{ display:'flex', alignItems:'center', gap:12, padding:'10px 14px', borderRadius:8, border:'1px solid #e2e6ed', background:'#f8f9fb', opacity:0.5 }}>
                   <input type="checkbox" checked={false} disabled style={{ width:15, height:15 }}/>
                   <span style={{ fontSize:16 }}>⚙️</span>
-                  <div style={{ flex:1, fontWeight:600, fontSize:13, color:'#1a1d23' }}>Settings</div>
-                  <span style={{ fontSize:12, color:'#9ca3af' }}>Admin only 🔒</span>
+                  <div style={{ flex:1, fontWeight:600, fontSize:13, color:'#1a1d23' }}>{t('nav.settings')}</div>
+                  <span style={{ fontSize:12, color:'#9ca3af' }}>{t('settings.permissions.settingsAdminOnly')}</span>
                 </div>
               </div>
             </div>
 
             <div style={{ display:'flex', gap:10, justifyContent:'flex-end' }}>
-              <button onClick={onClose} style={{ padding:'8px 16px', borderRadius:7, border:'1px solid #e2e6ed', background:'#f4f6f9', color:'#6b7280', cursor:'pointer', fontSize:13 }}>Skip</button>
+              <button onClick={onClose} style={{ padding:'8px 16px', borderRadius:7, border:'1px solid #e2e6ed', background:'#f4f6f9', color:'#6b7280', cursor:'pointer', fontSize:13 }}>{t('common.skip')}</button>
               <button onClick={handleSave} disabled={saving||isAdmin} style={{ padding:'8px 16px', borderRadius:7, border:'none', background: isAdmin ? '#e2e6ed' : '#1a1d23', color:'#fff', cursor: isAdmin ? 'not-allowed' : 'pointer', fontSize:13, fontWeight:500 }}>
-                {saving ? 'Saving…' : 'Save Permissions'}
+                {saving ? t('common.saving') : t('settings.permissions.title')}
               </button>
             </div>
           </div>
