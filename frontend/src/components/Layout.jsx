@@ -60,7 +60,7 @@ export default function Layout() {
     : (collapsed ? ChevronRight : ChevronLeft);
 
   return (
-    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', flexDirection: isRTL ? 'row-reverse' : 'row' }}>
+    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
       <aside style={{
         width: collapsed ? 64 : 220,
         background: '#1a1d23',
@@ -68,6 +68,7 @@ export default function Layout() {
         transition: 'width 0.2s ease',
         flexShrink: 0,
         overflow: 'hidden',
+        order: isRTL ? 2 : 0,
       }}>
         {/* Logo */}
         <div style={{
@@ -145,7 +146,7 @@ export default function Layout() {
       </button>
 
       {/* Main content */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#f4f6f9' }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#f4f6f9', order: isRTL ? 0 : 1 }}>
         {/* Top bar with user dropdown */}
         <div style={{
           display: 'flex', alignItems: 'center', justifyContent: 'flex-end',
