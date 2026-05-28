@@ -2,7 +2,7 @@ import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth.jsx';
 import {
   LayoutDashboard, Users, BookOpen, FileText, CheckSquare,
-  BarChart2, Settings as SettingsIcon, ShieldCheck, LogOut, User, ChevronDown, Globe
+  BarChart2, Settings as SettingsIcon, ShieldCheck, LogOut, User, ChevronDown, ChevronLeft, Globe
 } from 'lucide-react';
 import { useState } from 'react';
 import { VERSION } from '../version.js';
