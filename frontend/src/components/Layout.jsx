@@ -30,11 +30,12 @@ export default function Layout() {
   const handleLogout = () => { logout(); navigate('/login'); };
 
   const switchLanguage = (lang) => {
-    i18n.changeLanguage(lang);
     localStorage.setItem('language', lang);
     document.documentElement.dir = lang === 'he' ? 'rtl' : 'ltr';
-    setIsRTL(lang === 'he');
     setUserMenuOpen(false);
+    i18n.changeLanguage(lang).then(() => {
+      window.location.reload();
+    });
   };
 
   // Set RTL on mount from saved preference
