@@ -57,16 +57,17 @@ function Modal({ title, onClose, children, wide }) {
 function DistributorForm({ initial, onSave, onCancel, saving }) {
   const [form, setForm] = useState(initial || { name:'', contact:'', email:'', phone:'', mobile:'', website:'', status:'Active', notes:'' });
   const set = (k,v) => setForm(f=>({...f,[k]:v}));
+  const { t } = useTranslation();
   return (
     <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
       <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:14 }}>
         {[
-          {k:'name',l:'Distributor Name *'},
-          {k:'contact',l:'Contact Person'},
-          {k:'email',l:'Email'},
-          {k:'phone',l:'Phone'},
-          {k:'mobile',l:'Mobile'},
-          {k:'website',l:'Website'},
+          {k:'name',l:`${t('vendors.distributorName')} *`},
+          {k:'contact',l:t('vendors.contact')},
+          {k:'email',l:t('common.email')},
+          {k:'phone',l:t('vendors.phone')},
+          {k:'mobile',l:t('vendors.mobile')},
+          {k:'website',l:t('vendors.website')},
         ].map(({k,l})=>(
           <div key={k}>
             <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>{l}</label>
@@ -75,20 +76,20 @@ function DistributorForm({ initial, onSave, onCancel, saving }) {
           </div>
         ))}
         <div>
-          <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>Status</label>
+          <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>{t('common.status')}</label>
           <select value={form.status} onChange={e=>set('status',e.target.value)} style={inputStyle}>
             {['Active','Pending','Inactive'].map(s=><option key={s}>{s}</option>)}
           </select>
         </div>
       </div>
       <div>
-        <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>Notes</label>
+        <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>{t('common.notes')}</label>
         <input value={form.notes||''} onChange={e=>set('notes',e.target.value)} style={inputStyle}/>
       </div>
       <div style={{ display:'flex', gap:10, justifyContent:'flex-end', marginTop:6 }}>
-        <button onClick={onCancel} style={{...btnStyle, background:'#f4f6f9', color:'#6b7280'}}>Cancel</button>
+        <button onClick={onCancel} style={{...btnStyle, background:'#f4f6f9', color:'#6b7280'}}>{t('common.cancel')}</button>
         <button onClick={()=>onSave(form)} disabled={saving} style={{...btnStyle, background:'#1a1d23', color:'#fff'}}>
-          <Check size={15}/> {saving ? 'Saving…' : 'Save'}
+          <Check size={15}/> {saving ? t('common.saving') : t('common.save')}
         </button>
       </div>
     </div>
@@ -100,6 +101,7 @@ function ProductForm({ initial, onSave, onCancel, saving }) {
   const [categories, setCategories] = useState([]);
   const [manufacturers, setManufacturers] = useState([]);
   const set = (k,v) => setForm(f=>({...f,[k]:v}));
+  const { t } = useTranslation();
 
   useEffect(() => {
     api.getSystemCategories().then(c => setCategories(c || [])).catch(()=>{});
@@ -109,28 +111,28 @@ function ProductForm({ initial, onSave, onCancel, saving }) {
   return (
     <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
       <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:14 }}>
-        {[{k:'name',l:'Product Name *'}].map(({k,l})=>(
+        {[{k:'name',l:`${t('vendors.productName')} *`}].map(({k,l})=>(
           <div key={k}>
             <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>{l}</label>
             <input value={form[k]||''} onChange={e=>set(k,e.target.value)} style={inputStyle}/>
           </div>
         ))}
         <div>
-          <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>Manufacturer</label>
+          <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>{t('vendors.manufacturer')}</label>
           <select value={form.vendor||''} onChange={e=>set('vendor',e.target.value)} style={inputStyle}>
-            <option value="">— Select manufacturer —</option>
+            <option value="">—</option>
             {manufacturers.map(m=><option key={m} value={m}>{m}</option>)}
           </select>
         </div>
         <div>
-          <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>Category</label>
+          <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>{t('vendors.category')}</label>
           <select value={form.category||''} onChange={e=>set('category',e.target.value)} style={inputStyle}>
-            <option value="">— Select category —</option>
+            <option value="">—</option>
             {categories.map(c=><option key={c} value={c}>{c}</option>)}
           </select>
         </div>
         <div>
-          <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>Currency</label>
+          <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>{t('vendors.currency')}</label>
           <select value={form.currency} onChange={e=>set('currency',e.target.value)} style={inputStyle}>
             {CURRENCIES.map(c=><option key={c}>{c}</option>)}
           </select>
@@ -138,28 +140,28 @@ function ProductForm({ initial, onSave, onCancel, saving }) {
       </div>
       <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:14 }}>
         <div>
-          <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>Cost Price</label>
+          <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>{t('vendors.costPrice')}</label>
           <input type="number" value={form.cost||''} onChange={e=>set('cost',e.target.value)} style={inputStyle} placeholder="0.00"/>
         </div>
         <div>
-          <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>Customer Price</label>
+          <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>{t('vendors.customerPrice')}</label>
           <input type="number" value={form.customer_price||''} onChange={e=>set('customer_price',e.target.value)} style={inputStyle} placeholder="0.00"/>
         </div>
       </div>
       <div>
-        <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>Status</label>
+        <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>{t('common.status')}</label>
         <select value={form.status} onChange={e=>set('status',e.target.value)} style={inputStyle}>
           {['Active','Pending','Inactive'].map(s=><option key={s}>{s}</option>)}
         </select>
       </div>
       <div>
-        <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>Description</label>
+        <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>{t('vendors.description')}</label>
         <input value={form.description||''} onChange={e=>set('description',e.target.value)} style={inputStyle}/>
       </div>
       <div style={{ display:'flex', gap:10, justifyContent:'flex-end', marginTop:6 }}>
-        <button onClick={onCancel} style={{...btnStyle, background:'#f4f6f9', color:'#6b7280'}}>Cancel</button>
+        <button onClick={onCancel} style={{...btnStyle, background:'#f4f6f9', color:'#6b7280'}}>{t('common.cancel')}</button>
         <button onClick={()=>onSave(form)} disabled={saving} style={{...btnStyle, background:'#1a1d23', color:'#fff'}}>
-          <Check size={15}/> {saving ? 'Saving…' : 'Save Product'}
+          <Check size={15}/> {saving ? t('common.saving') : t('vendors.saveProduct')}
         </button>
       </div>
     </div>
@@ -375,6 +377,7 @@ function DocumentsPanel({ dist, onClose, isViewer }) {
   const [minimized, setMinimized] = useState(false);
   const fileRef = useRef(null);
   const token = localStorage.getItem('token');
+  const { t } = useTranslation();
 
   const loadDocs = () => {
     setLoading(true);
@@ -479,19 +482,19 @@ function DocumentsPanel({ dist, onClose, isViewer }) {
               style={{ display:'flex', alignItems:'center', gap:8, width:'100%', padding:'10px 16px',
                 borderRadius:8, border:'1px dashed #bfdbfe', background:'#f0f7ff', color:'#2563eb',
                 fontSize:13, fontWeight:500, cursor:'pointer', justifyContent:'center' }}>
-              <Plus size={15}/> {uploading ? 'Uploading…' : 'Upload Document'}
+              <Plus size={15}/> {uploading ? t('documents.uploading') : t('documents.upload')}
             </button>
             <input ref={fileRef} type="file"
               accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.webp,.gif,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,image/*"
               style={{ display:'none' }} onChange={e=>{ if(e.target.files[0]) handleUpload(e.target.files[0]); e.target.value=''; }}/>
             <div style={{ fontSize:11, color:'#9ca3af', textAlign:'center', marginTop:6 }}>
-              PDF, Word, Excel, Images · Max 10MB
+              {t('documents.allowedTypes')}
             </div>
           </>
         )}
         {isViewer && (
           <div style={{ fontSize:12, color:'#9ca3af', textAlign:'center', padding:'8px 0' }}>
-            View only — upload not permitted
+            {t('documents.viewOnly')}
           </div>
         )}
       </div>
@@ -501,11 +504,11 @@ function DocumentsPanel({ dist, onClose, isViewer }) {
       {!minimized && (
       <div style={{ flex:1, overflowY:'auto', padding:'10px 16px' }}>
         {loading ? (
-          <div style={{ textAlign:'center', color:'#9ca3af', padding:32, fontSize:13 }}>Loading…</div>
+          <div style={{ textAlign:'center', color:'#9ca3af', padding:32, fontSize:13 }}>{t('common.loading')}</div>
         ) : docs.length === 0 ? (
           <div style={{ textAlign:'center', color:'#9ca3af', padding:32, fontSize:13 }}>
             <div style={{ fontSize:32, marginBottom:8 }}>📁</div>
-            No documents yet
+            {t('documents.noDocuments')}
           </div>
         ) : docs.map(doc => (
           <div key={doc.id} style={{
@@ -525,11 +528,11 @@ function DocumentsPanel({ dist, onClose, isViewer }) {
             <div style={{ display:'flex', gap:4, flexShrink:0 }}>
               <button onClick={()=>handleDownload(doc.id, doc.name)}
                 style={{ padding:'5px 8px', borderRadius:6, border:'1px solid #e2e6ed', background:'#fff', color:'#374151', cursor:'pointer', fontSize:12 }}
-                title="Download">⬇</button>
+                title={t('common.download')}>⬇</button>
               {!isViewer && (
                 <button onClick={()=>handleDelete(doc.id)}
                   style={{ padding:'5px 8px', borderRadius:6, border:'1px solid #fee2e2', background:'#fff', color:'#dc2626', cursor:'pointer', fontSize:12 }}
-                  title="Delete">🗑</button>
+                  title={t('common.delete')}>🗑</button>
               )}
             </div>
           </div>
@@ -920,7 +923,7 @@ export default function Vendors() {
       {/* Pagination */}
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginTop:14 }}>
         <span style={{ fontSize:13, color:'#6b7280' }}>
-          Total: <strong>{data.total}</strong> distributors · <strong>{totalProducts}</strong> products
+          {t('vendors.total')}: <strong>{data.total}</strong> {t('vendors.distributor')} · <strong>{totalProducts}</strong> {t('vendors.products')}
         </span>
         <div style={{ display:'flex', gap:4 }}>
           <button onClick={()=>setPage(p=>Math.max(1,p-1))} disabled={page===1}

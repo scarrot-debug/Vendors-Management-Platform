@@ -59,12 +59,13 @@ function AddUserWizard({ onSave, onCancel, saving }) {
     can_access_requests: true, can_access_approvals: true,
   });
   const set = (k,v) => setForm(f=>({...f,[k]:v}));
+  const { t } = useTranslation();
 
   return (
     <div>
       {/* Step indicator */}
       <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:22 }}>
-        {[{n:1,label:'Details'},{n:2,label:'Permissions'}].map(({n,label}) => (
+        {[{n:1,label:t('settings.stepDetails')},{n:2,label:t('settings.stepPermissions')}].map(({n,label}) => (
           <div key={n} style={{ display:'flex', alignItems:'center', gap:6 }}>
             <div style={{ width:24, height:24, borderRadius:'50%', background: step>=n ? '#1a1d23' : '#e2e6ed', color: step>=n ? '#fff' : '#9ca3af', display:'flex', alignItems:'center', justifyContent:'center', fontSize:12, fontWeight:600 }}>{n}</div>
             <span style={{ fontSize:13, color: step>=n ? '#1a1d23' : '#9ca3af', fontWeight: step===n ? 600 : 400 }}>{label}</span>
@@ -77,32 +78,32 @@ function AddUserWizard({ onSave, onCancel, saving }) {
         <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:14 }}>
             <div>
-              <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>First Name</label>
+              <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>{t('common.firstName')}</label>
               <input value={form.first_name||''} onChange={e=>set('first_name',e.target.value)} style={inputStyle} autoComplete="off"/>
             </div>
             <div>
-              <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>Last Name</label>
+              <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>{t('common.lastName')}</label>
               <input value={form.last_name||''} onChange={e=>set('last_name',e.target.value)} style={inputStyle} autoComplete="off"/>
             </div>
           </div>
           <div>
-            <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>Username *</label>
+            <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>{t('auth.username')} *</label>
             <input value={form.username||''} onChange={e=>set('username',e.target.value)} style={inputStyle} autoComplete="off"/>
           </div>
           <div>
-            <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>Email *</label>
+            <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>{t('common.email')} *</label>
             <input type="email" value={form.email||''} onChange={e=>set('email',e.target.value)} style={inputStyle} autoComplete="off"/>
           </div>
           <div>
-            <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>Mobile</label>
+            <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>{t('common.mobile')}</label>
             <input value={form.mobile||''} onChange={e=>set('mobile',e.target.value)} style={inputStyle} placeholder="+972 50 000 0000"/>
           </div>
           <div>
-            <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>Password *</label>
+            <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>{t('auth.password')} *</label>
             <input type="password" value={form.password||''} onChange={e=>set('password',e.target.value)} style={inputStyle} autoComplete="new-password"/>
           </div>
           <div>
-            <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>Role</label>
+            <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>{t('common.role')}</label>
             <select value={form.role} onChange={e=>set('role',e.target.value)} style={inputStyle}>
               <option value="admin">Admin — full access</option>
               <option value="user">User — can edit</option>
@@ -110,10 +111,10 @@ function AddUserWizard({ onSave, onCancel, saving }) {
             </select>
           </div>
           <div style={{ display:'flex', gap:10, justifyContent:'flex-end', marginTop:6 }}>
-            <button onClick={onCancel} style={{...btnStyle, background:'#f4f6f9', color:'#6b7280'}}>Cancel</button>
-            <button onClick={()=>{ if(!form.username||!form.email||!form.password){ alert('Username, email and password are required'); return; } setStep(2); }}
+            <button onClick={onCancel} style={{...btnStyle, background:'#f4f6f9', color:'#6b7280'}}>{t('common.cancel')}</button>
+            <button onClick={()=>{ if(!form.username||!form.email||!form.password){ alert(`${t('auth.username')}, ${t('common.email')} ${t('auth.password')}`); return; } setStep(2); }}
               style={{...btnStyle, background:'#1a1d23', color:'#fff'}}>
-              Next →
+              {t('common.next')} →
             </button>
           </div>
         </div>
@@ -121,12 +122,12 @@ function AddUserWizard({ onSave, onCancel, saving }) {
 
       {step === 2 && (
         <div style={{ display:'flex', flexDirection:'column', gap:16 }}>
-          <div style={{ fontSize:12, fontWeight:700, color:'#9ca3af', letterSpacing:0.5 }}>FIELD VISIBILITY</div>
+          <div style={{ fontSize:12, fontWeight:700, color:'#9ca3af', letterSpacing:0.5 }}>{t('settings.permissions.fieldVisibility')}</div>
           <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
             {[
-              { key:'can_see_cost_price', label:'Cost Price', desc:'Purchase/cost price of products' },
-              { key:'can_see_customer_price', label:'Customer Price', desc:'Selling price to customers' },
-              { key:'can_see_documents', label:'Documents', desc:'Distributor documents panel' },
+              { key:'can_see_cost_price', label:t('settings.permissions.costPrice'), desc:t('settings.permissions.costPriceDesc') },
+              { key:'can_see_customer_price', label:t('settings.permissions.customerPrice'), desc:t('settings.permissions.customerPriceDesc') },
+              { key:'can_see_documents', label:t('settings.permissions.documents'), desc:t('settings.permissions.documentsDesc') },
             ].map(({ key, label, desc }) => (
               <label key={key} style={{ display:'flex', alignItems:'center', gap:12, padding:'10px 14px', borderRadius:8, border:'1px solid #e2e6ed', cursor:'pointer', background: perms[key] ? '#f0fdf4' : '#fafafa' }}>
                 <input type="checkbox" checked={perms[key]??true} onChange={e=>setPerms(p=>({...p,[key]:e.target.checked}))} style={{ width:15, height:15 }}/>
@@ -134,19 +135,19 @@ function AddUserWizard({ onSave, onCancel, saving }) {
                   <div style={{ fontWeight:600, fontSize:13, color:'#1a1d23' }}>{label}</div>
                   <div style={{ fontSize:12, color:'#6b7280' }}>{desc}</div>
                 </div>
-                <span style={{ fontSize:12, fontWeight:600, color: perms[key] ? '#16a34a' : '#9ca3af' }}>{perms[key] ? 'Visible ✓' : 'Hidden'}</span>
+                <span style={{ fontSize:12, fontWeight:600, color: perms[key] ? '#16a34a' : '#9ca3af' }}>{perms[key] ? t('settings.permissions.visible') : t('settings.permissions.hidden')}</span>
               </label>
             ))}
           </div>
 
-          <div style={{ fontSize:12, fontWeight:700, color:'#9ca3af', letterSpacing:0.5 }}>PAGE ACCESS</div>
+          <div style={{ fontSize:12, fontWeight:700, color:'#9ca3af', letterSpacing:0.5 }}>{t('settings.permissions.pageAccess')}</div>
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
             {[
-              { key:'can_access_dashboard', label:'Dashboard', icon:'📊' },
-              { key:'can_access_vendors', label:'Vendors', icon:'🏢' },
-              { key:'can_access_catalog', label:'Catalog', icon:'📚' },
-              { key:'can_access_requests', label:'Requests', icon:'📋' },
-              { key:'can_access_approvals', label:'Approvals', icon:'✅' },
+              { key:'can_access_dashboard', label:t('nav.dashboard'), icon:'📊' },
+              { key:'can_access_vendors', label:t('nav.vendors'), icon:'🏢' },
+              { key:'can_access_catalog', label:t('nav.catalog'), icon:'📚' },
+              { key:'can_access_requests', label:t('nav.requests'), icon:'📋' },
+              { key:'can_access_approvals', label:t('nav.approvals'), icon:'✅' },
             ].map(({ key, label, icon }) => (
               <label key={key} style={{ display:'flex', alignItems:'center', gap:8, padding:'9px 12px', borderRadius:8, border:'1px solid #e2e6ed', cursor:'pointer', background: perms[key]!==false ? '#f0fdf4' : '#fef2f2' }}>
                 <input type="checkbox" checked={perms[key]!==false} onChange={e=>setPerms(p=>({...p,[key]:e.target.checked}))} style={{ width:15, height:15 }}/>
@@ -157,9 +158,9 @@ function AddUserWizard({ onSave, onCancel, saving }) {
           </div>
 
           <div style={{ display:'flex', gap:10, justifyContent:'flex-end', marginTop:6 }}>
-            <button onClick={()=>setStep(1)} style={{...btnStyle, background:'#f4f6f9', color:'#6b7280'}}>← Back</button>
+            <button onClick={()=>setStep(1)} style={{...btnStyle, background:'#f4f6f9', color:'#6b7280'}}>← {t('common.back')}</button>
             <button onClick={()=>onSave(form, perms)} disabled={saving} style={{...btnStyle, background:'#1a1d23', color:'#fff'}}>
-              {saving ? 'Creating…' : 'Create User'}
+              {saving ? t('common.creating') : t('settings.createUser')}
             </button>
           </div>
         </div>
@@ -171,32 +172,33 @@ function AddUserWizard({ onSave, onCancel, saving }) {
 function EditUserForm({ initial, onSave, onCancel, saving }) {
   const [form, setForm] = useState(initial || { username:'', email:'', role:'viewer', first_name:'', last_name:'', mobile:'' });
   const set = (k,v) => setForm(f=>({...f,[k]:v}));
+  const { t } = useTranslation();
   return (
     <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
       <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:14 }}>
         <div>
-          <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>First Name</label>
+          <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>{t('common.firstName')}</label>
           <input value={form.first_name||''} onChange={e=>set('first_name',e.target.value)} style={inputStyle} autoComplete="off"/>
         </div>
         <div>
-          <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>Last Name</label>
+          <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>{t('common.lastName')}</label>
           <input value={form.last_name||''} onChange={e=>set('last_name',e.target.value)} style={inputStyle} autoComplete="off"/>
         </div>
       </div>
       <div>
-        <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>Username *</label>
+        <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>{t('auth.username')} *</label>
         <input value={form.username||''} onChange={e=>set('username',e.target.value)} style={inputStyle} autoComplete="off"/>
       </div>
       <div>
-        <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>Email *</label>
+        <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>{t('common.email')} *</label>
         <input type="email" value={form.email||''} onChange={e=>set('email',e.target.value)} style={inputStyle} autoComplete="off"/>
       </div>
       <div>
-        <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>Mobile</label>
+        <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>{t('common.mobile')}</label>
         <input value={form.mobile||''} onChange={e=>set('mobile',e.target.value)} style={inputStyle} placeholder="+972 50 000 0000"/>
       </div>
       <div>
-        <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>Role</label>
+        <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>{t('common.role')}</label>
         <select value={form.role} onChange={e=>set('role',e.target.value)} style={inputStyle}>
           <option value="admin">Admin — full access</option>
           <option value="user">User — can edit</option>
@@ -204,9 +206,9 @@ function EditUserForm({ initial, onSave, onCancel, saving }) {
         </select>
       </div>
       <div style={{ display:'flex', gap:10, justifyContent:'flex-end', marginTop:6 }}>
-        <button onClick={onCancel} style={{...btnStyle, background:'#f4f6f9', color:'#6b7280'}}>Cancel</button>
+        <button onClick={onCancel} style={{...btnStyle, background:'#f4f6f9', color:'#6b7280'}}>{t('common.cancel')}</button>
         <button onClick={()=>onSave(form)} disabled={saving} style={{...btnStyle, background:'#1a1d23', color:'#fff'}}>
-          <Check size={15}/> {saving ? 'Saving…' : 'Save Changes'}
+          <Check size={15}/> {saving ? t('common.saving') : t('settings.saveChanges')}
         </button>
       </div>
     </div>
@@ -217,26 +219,27 @@ function ResetPasswordForm({ user, onSave, onCancel, saving }) {
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const mismatch = confirm && password !== confirm;
+  const { t } = useTranslation();
   return (
     <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
       <p style={{ fontSize:13, color:'#6b7280', marginBottom:4 }}>
-        Reset password for <strong style={{ color:'#1a1d23' }}>{user.username}</strong>
+        {t('settings.resetPasswordTitle')} — <strong style={{ color:'#1a1d23' }}>{user.username}</strong>
       </p>
       <div>
-        <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>New Password *</label>
+        <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>{t('settings.newPassword')} *</label>
         <input type="password" value={password} onChange={e=>setPassword(e.target.value)} style={inputStyle} autoComplete="new-password" placeholder="Min. 6 characters"/>
       </div>
       <div>
-        <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>Confirm Password *</label>
+        <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>{t('settings.confirmPassword')} *</label>
         <input type="password" value={confirm} onChange={e=>setConfirm(e.target.value)}
           style={{...inputStyle, borderColor: mismatch ? '#ef4444' : '#e2e6ed'}} placeholder="Repeat password"/>
-        {mismatch && <p style={{ fontSize:12, color:'#ef4444', marginTop:4 }}>Passwords do not match</p>}
+        {mismatch && <p style={{ fontSize:12, color:'#ef4444', marginTop:4 }}>{t('profile.passwordMismatch')}</p>}
       </div>
       <div style={{ display:'flex', gap:10, justifyContent:'flex-end', marginTop:6 }}>
-        <button onClick={onCancel} style={{...btnStyle, background:'#f4f6f9', color:'#6b7280'}}>Cancel</button>
+        <button onClick={onCancel} style={{...btnStyle, background:'#f4f6f9', color:'#6b7280'}}>{t('common.cancel')}</button>
         <button onClick={()=>!mismatch && password.length>=6 && onSave(password)} disabled={saving||mismatch||password.length<6}
           style={{...btnStyle, background: password.length>=6&&!mismatch ? '#1a1d23' : '#e2e6ed', color:'#fff'}}>
-          <KeyRound size={15}/> {saving ? 'Saving…' : 'Reset Password'}
+          <KeyRound size={15}/> {saving ? t('common.saving') : t('settings.resetPasswordTitle')}
         </button>
       </div>
     </div>
@@ -541,7 +544,7 @@ function HistorySection() {
       <div style={{ padding:'16px 24px', borderBottom:'1px solid #e2e6ed', background:'#f8f9fb', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
         <div>
           <h2 style={{ fontSize:16, fontWeight:600, color:'#1a1d23', marginBottom:2, display:'flex', alignItems:'center', gap:8 }}>
-            <History size={16} color="#2563eb"/> Change History
+            <History size={16} color="#2563eb"/> {t('settings.changeHistory')}
           </h2>
           <p style={{ fontSize:13, color:'#6b7280' }}>Track all changes made to the system</p>
         </div>
@@ -550,7 +553,7 @@ function HistorySection() {
       <table style={{ width:'100%', borderCollapse:'collapse', fontSize:13 }}>
         <thead>
           <tr style={{ borderBottom:'1px solid #e2e6ed', background:'#fafafa' }}>
-            {['Date & Time','User','Action','Type','Name'].map(h=>(
+            {[t('settings.colHistDate'), t('settings.colHistUser'), t('settings.colHistAction'), t('settings.colHistType'), t('common.name')].map(h=>(
               <th key={h} style={{ padding:'10px 20px', textAlign:'left', color:'#374151', fontWeight:600, fontSize:12, textTransform:'uppercase', letterSpacing:0.5 }}>{h}</th>
             ))}
           </tr>
@@ -559,7 +562,7 @@ function HistorySection() {
           {loading ? (
             <tr><td colSpan={5} style={{ padding:32, textAlign:'center', color:'#9ca3af' }}>Loading…</td></tr>
           ) : history.length === 0 ? (
-            <tr><td colSpan={5} style={{ padding:32, textAlign:'center', color:'#9ca3af' }}>No history yet</td></tr>
+            <tr><td colSpan={5} style={{ padding:32, textAlign:'center', color:'#9ca3af' }}>{t('settings.noHistory')}</td></tr>
           ) : history.map((h, i) => {
             const s = ACTION_STYLES[h.action] || ACTION_STYLES.UPDATE;
             return (
@@ -770,7 +773,7 @@ export default function Settings() {
         <div style={{ background:'#fff', border:'1px solid #e2e6ed', borderRadius:10, overflow:'hidden', marginTop:24 }}>
           <div style={{ padding:'16px 24px', borderBottom:'1px solid #e2e6ed', background:'#f8f9fb' }}>
             <h2 style={{ fontSize:16, fontWeight:600, color:'#1a1d23', marginBottom:2, display:'flex', alignItems:'center', gap:8 }}>
-              <Image size={16} color="#2563eb"/> Sidebar Logo
+              <Image size={16} color="#2563eb"/> {t('settings.sidebarLogo')}
             </h2>
             <p style={{ fontSize:13, color:'#6b7280' }}>Customize the logo displayed in the sidebar</p>
           </div>
@@ -791,12 +794,12 @@ export default function Settings() {
               <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
                 <button onClick={()=>logoFileRef.current?.click()} disabled={logoUploading}
                   style={{...btnStyle, background:'#1a1d23', color:'#fff', fontSize:13}}>
-                  <Upload size={14}/> {logoUploading ? 'Uploading…' : logo ? 'Change Logo' : 'Upload Logo'}
+                  <Upload size={14}/> {logoUploading ? t('common.upload') : logo ? t('settings.logoChange') : t('settings.uploadLogo')}
                 </button>
                 {logo && (
                   <button onClick={async()=>{ setLogoUploading(true); await updateLogo(''); setLogoUploading(false); }}
                     style={{...btnStyle, background:'#fff', color:'#dc2626', border:'1px solid #fee2e2', fontSize:13}}>
-                    <Trash2 size={14}/> Remove Logo
+                    <Trash2 size={14}/> {t('settings.removeLogo')}
                   </button>
                 )}
                 <input ref={logoFileRef} type="file" accept=".png,.jpg,.jpeg,.webp,.svg" style={{ display:'none' }}
@@ -834,13 +837,13 @@ export default function Settings() {
         <div style={{ padding:'16px 24px', borderBottom:'1px solid #e2e6ed', background:'#f8f9fb', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
           <div>
             <h2 style={{ fontSize:16, fontWeight:600, color:'#1a1d23', marginBottom:2, display:'flex', alignItems:'center', gap:8 }}>
-              <Clock size={16} color="#2563eb"/> Session Timeout
+              <Clock size={16} color="#2563eb"/> {t('settings.sessionTimeout')}
             </h2>
             <p style={{ fontSize:13, color:'#6b7280' }}>Auto logout after inactivity</p>
           </div>
         </div>
         <div style={{ padding:'20px 24px', display:'flex', alignItems:'center', gap:16 }}>
-          <span style={{ fontSize:14, color:'#374151', fontWeight:500 }}>Auto logout after:</span>
+          <span style={{ fontSize:14, color:'#374151', fontWeight:500 }}>{t('settings.autoLogoutAfter')}</span>
           <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
             {SESSION_OPTIONS.map(opt => (
               <button

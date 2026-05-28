@@ -17,6 +17,7 @@ function ListManager({ title, description, fetchFn, saveFn, icon }) {
   const [editVal, setEditVal] = useState('');
   const [saving, setSaving] = useState(false);
   const { user } = useAuth();
+  const { t } = useTranslation();
   const isAdmin = user?.role === 'admin';
 
   useEffect(() => {
@@ -50,23 +51,23 @@ function ListManager({ title, description, fetchFn, saveFn, icon }) {
           <h2 style={{ fontSize:16, fontWeight:600, color:'#1a1d23', marginBottom:2 }}>{icon} {title}</h2>
           <p style={{ fontSize:13, color:'#6b7280' }}>{description}</p>
         </div>
-        <span style={{ fontSize:13, color:'#6b7280' }}>{items.length} items</span>
+        <span style={{ fontSize:13, color:'#6b7280' }}>{items.length} {t('common.items')}</span>
       </div>
       <div style={{ padding:'16px 24px' }}>
         {isAdmin && (
           <div style={{ display:'flex', gap:8, marginBottom:16 }}>
             <input value={newItem} onChange={e=>setNewItem(e.target.value)}
               onKeyDown={e=>e.key==='Enter'&&handleAdd()}
-              placeholder={`New ${title.toLowerCase()} name…`}
+              placeholder={`${title}…`}
               style={{...inputStyle, flex:1}}/>
             <button onClick={handleAdd} disabled={saving||!newItem.trim()}
               style={{ padding:'8px 16px', borderRadius:7, border:'none', background:'#1a1d23', color:'#fff', fontSize:13, cursor:'pointer', fontWeight:500 }}>
-              Add
+              {t('common.add')}
             </button>
           </div>
         )}
-        {loading ? <div style={{ color:'#9ca3af', fontSize:13 }}>Loading…</div> :
-          items.length === 0 ? <div style={{ color:'#9ca3af', fontSize:13, fontStyle:'italic' }}>No {title.toLowerCase()} yet</div> :
+        {loading ? <div style={{ color:'#9ca3af', fontSize:13 }}>{t('common.loading')}</div> :
+          items.length === 0 ? <div style={{ color:'#9ca3af', fontSize:13, fontStyle:'italic' }}>{t('catalog.noItems')}</div> :
           <div style={{ display:'flex', flexWrap:'wrap', gap:8 }}>
             {items.map((item, idx) => (
               <div key={idx} style={{ display:'flex', alignItems:'center', gap:6, padding:'6px 12px', background:'#f8f9fb', borderRadius:20, border:'1px solid #e2e6ed' }}>
