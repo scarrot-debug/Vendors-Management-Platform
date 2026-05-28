@@ -513,7 +513,9 @@ export default function Settings() {
       <div style={{ background:'#fff', border:'1px solid #e2e6ed', borderRadius:10, overflow:'hidden' }}>
         <div style={{ padding:'16px 24px', borderBottom:'1px solid #e2e6ed', display:'flex', justifyContent:'space-between', alignItems:'center', background:'#f8f9fb' }}>
           <div>
-            <h2 style={{ fontSize:16, fontWeight:600, color:'#1a1d23', marginBottom:2 }}>User Management</h2>
+            <h2 style={{ fontSize:16, fontWeight:600, color:'#1a1d23', marginBottom:2, display:'flex', alignItems:'center', gap:8 }}>
+              <User size={16} color="#2563eb"/> User Management
+            </h2>
             <p style={{ fontSize:13, color:'#6b7280' }}>Add, edit or remove system users</p>
           </div>
           {isAdmin && (
