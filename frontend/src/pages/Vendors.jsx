@@ -1,19 +1,20 @@
-import { useEffect, useState, useCallback, useRef } from 'react';import { api } from '../api/client.js';
+import { useEffect, useState, useCallback, useRef } from 'react';
+import { api } from '../api/client.js';
 import { useAuth } from '../hooks/useAuth.jsx';
 import { Plus, Search, Edit2, Trash2, RefreshCw, X, Check, ChevronDown, ChevronRight, Package, ChevronsDownUp, ChevronsUpDown, ArrowUpDown, GripVertical } from 'lucide-react';
-import { usePageTitle } from '../hooks/usePageTitle.js';
+import { useTranslation } from 'react-i18next';
 
 // Default column order — can be rearranged by drag & drop
 const DEFAULT_COLUMNS = [
-  { key: 'status',         label: 'Status' },
-  { key: 'name',           label: 'Distributor Name' },
-  { key: 'contact',        label: 'Contact' },
-  { key: 'email',          label: 'Email' },
-  { key: 'phone',          label: 'Phone' },
-  { key: 'mobile',         label: 'Mobile' },
-  { key: 'website',        label: 'Website' },
-  { key: 'products',       label: 'Products' },
-  { key: 'actions',        label: 'Actions' },
+  { key: 'status',         labelKey: 'vendors.colStatus' },
+  { key: 'name',           labelKey: 'vendors.colName' },
+  { key: 'contact',        labelKey: 'vendors.colContact' },
+  { key: 'email',          labelKey: 'vendors.colEmail' },
+  { key: 'phone',          labelKey: 'vendors.colPhone' },
+  { key: 'mobile',         labelKey: 'vendors.colMobile' },
+  { key: 'website',        labelKey: 'vendors.colWebsite' },
+  { key: 'products',       labelKey: 'vendors.colProducts' },
+  { key: 'actions',        labelKey: 'vendors.colActions' },
 ];
 
 const STATUS_STYLES = {
@@ -180,7 +181,9 @@ function SortIcon({ field, sortField, sortDir }) {
 }
 
 function DraggableHeader({ col, sortField, sortDir, onSort, onDragStart, onDragOver, onDrop, isDragOver }) {
+  const { t } = useTranslation();
   const isSortable = !['website','actions'].includes(col.key);
+  const label = col.labelKey ? t(col.labelKey) : col.label;
   return (
     <th
       draggable
@@ -201,7 +204,7 @@ function DraggableHeader({ col, sortField, sortDir, onSort, onDragStart, onDragO
     >
       <span style={{ display:'inline-flex', alignItems:'center', gap:4 }}>
         <GripVertical size={12} style={{ opacity:0.3, cursor:'grab' }}/>
-        {col.label}
+        {label}
         {isSortable && <SortIcon field={col.key} sortField={sortField} sortDir={sortDir}/>}
       </span>
     </th>
@@ -210,6 +213,7 @@ function DraggableHeader({ col, sortField, sortDir, onSort, onDragStart, onDragO
 
 function DistributorRow({ dist, isViewer, open, onToggle, columns, permissions, selected, onSelect, onEditDist, onDeleteDist, onAddProduct, onEditProduct, onDeleteProduct, onOpenDocs }) {
   const productCount = dist.products?.length || 0;
+  const { t } = useTranslation();
 
   const renderCell = (key) => {
     switch(key) {
@@ -245,7 +249,7 @@ function DistributorRow({ dist, isViewer, open, onToggle, columns, permissions, 
       case 'products': return (
         <td key={key} style={{ padding:'13px 16px' }}>
           <span style={{ display:'inline-flex', alignItems:'center', gap:5, background:'#eff6ff', color:'#2563eb', borderRadius:6, padding:'3px 10px', fontSize:12, fontWeight:500 }}>
-            <Package size={12}/> {productCount} product{productCount !== 1 ? 's' : ''}
+            <Package size={12}/> {productCount} {t('vendors.products')}
           </span>
         </td>
       );
@@ -254,16 +258,16 @@ function DistributorRow({ dist, isViewer, open, onToggle, columns, permissions, 
           <div style={{ display:'flex', gap:5 }}>
             {permissions?.can_see_documents !== false && (
               <button onClick={()=>onOpenDocs(dist)} style={{...btnStyle, padding:'4px 10px', background:'#f5f3ff', color:'#7c3aed', border:'1px solid #e9d5ff', fontSize:12}}>
-                📄 Docs
+                📄 {t('documents.title')}
               </button>
             )}
             {!isViewer && (
               <>
                 <button onClick={()=>onAddProduct(dist)} style={{...btnStyle, padding:'4px 10px', background:'#f0fdf4', color:'#16a34a', border:'1px solid #bbf7d0', fontSize:12}}>
-                  <Plus size={12}/> Product
+                  <Plus size={12}/> {t('vendors.addProduct')}
                 </button>
                 <button onClick={()=>onEditDist(dist)} style={{...btnStyle, padding:'4px 10px', background:'#fff', color:'#2563eb', border:'1px solid #e2e6ed', fontSize:12}}>
-                  <Edit2 size={12}/> Edit
+                  <Edit2 size={12}/> {t('vendors.edit')}
                 </button>
                 <button onClick={()=>onDeleteDist(dist)} style={{...btnStyle, padding:'4px 10px', background:'#fff', color:'#dc2626', border:'1px solid #fee2e2', fontSize:12}}>
                   <Trash2 size={12}/>
@@ -293,76 +297,73 @@ function DistributorRow({ dist, isViewer, open, onToggle, columns, permissions, 
         )}
         {columns.map(col => renderCell(col.key))}
       </tr>
-      {open && (() => {
-        const totalCols = columns.length + 1 + (isViewer ? 0 : 1); // +1 for expand arrow, +1 for checkbox if not viewer
-        return (
-          <>
-            <tr style={{ background:'#f0f6ff', borderTop:'2px solid #2563eb', borderBottom:'1px solid #dbeafe' }}>
-              <td colSpan={2} style={{ padding:'7px 16px 7px 48px' }}/>
-              <td style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#2563eb', textTransform:'uppercase', letterSpacing:1 }}>Status</td>
-              <td style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#2563eb', textTransform:'uppercase', letterSpacing:1 }}>Product Name</td>
-              <td style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#2563eb', textTransform:'uppercase', letterSpacing:1 }}>Manufacturer</td>
-              <td style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#2563eb', textTransform:'uppercase', letterSpacing:1 }}>Category</td>
-              <td style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#2563eb', textTransform:'uppercase', letterSpacing:1 }}>Description</td>
-              <td style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#2563eb', textTransform:'uppercase', letterSpacing:1 }}>Cost Price</td>
-              <td style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#2563eb', textTransform:'uppercase', letterSpacing:1 }}>Customer Price</td>
-              <td colSpan={totalCols - 9} style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#2563eb', textTransform:'uppercase', letterSpacing:1 }}>Actions</td>
+      {open && (
+        <>
+          <tr style={{ background:'#f0f6ff', borderTop:'2px solid #2563eb', borderBottom:'1px solid #dbeafe' }}>
+            <td colSpan={2} style={{ padding:'7px 16px 7px 48px' }}/>
+            <td style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#2563eb', textTransform:'uppercase', letterSpacing:1 }}>Status</td>
+            <td style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#2563eb', textTransform:'uppercase', letterSpacing:1 }}>Product Name</td>
+            <td style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#2563eb', textTransform:'uppercase', letterSpacing:1 }}>Manufacturer</td>
+            <td style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#2563eb', textTransform:'uppercase', letterSpacing:1 }}>Category</td>
+            <td style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#2563eb', textTransform:'uppercase', letterSpacing:1 }}>Description</td>
+            <td style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#2563eb', textTransform:'uppercase', letterSpacing:1 }}>Cost Price</td>
+            <td style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#2563eb', textTransform:'uppercase', letterSpacing:1 }}>Customer Price</td>
+            <td style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#2563eb', textTransform:'uppercase', letterSpacing:1 }}>Actions</td>
+          </tr>
+          {dist.products?.length === 0 ? (
+            <tr style={{ background:'#f8fbff', borderBottom:'2px solid #e2e6ed' }}>
+              <td colSpan={10} style={{ padding:'12px 48px', color:'#9ca3af', fontSize:13, fontStyle:'italic' }}>No products for this distributor</td>
             </tr>
-            {dist.products?.length === 0 ? (
-              <tr style={{ background:'#f8fbff', borderBottom:'2px solid #e2e6ed' }}>
-                <td colSpan={totalCols} style={{ padding:'12px 48px', color:'#9ca3af', fontSize:13, fontStyle:'italic' }}>No products for this distributor</td>
-              </tr>
-            ) : dist.products?.map((p, idx) => (
-              <tr key={p.id} style={{
-                background: idx % 2 === 0 ? '#f8fbff' : '#f0f6ff',
-                borderBottom: idx === (dist.products.length-1) ? '2px solid #bfdbfe' : '1px solid #e8f0fe',
-              }}>
-                <td style={{ padding:'10px 0 10px 32px', borderLeft:'3px solid #2563eb' }} colSpan={2}/>
-                <td style={{ padding:'10px 16px' }}><StatusBadge status={p.status}/></td>
-                <td style={{ padding:'10px 16px' }}><div style={{ fontWeight:600, color:'#1e40af', fontSize:13 }}>{p.name}</div></td>
-                <td style={{ padding:'10px 16px', color:'#374151', fontSize:13 }}>{p.vendor || '—'}</td>
-                <td style={{ padding:'10px 16px', color:'#6b7280', fontSize:13 }}>{p.category || '—'}</td>
-                <td style={{ padding:'10px 16px', color:'#6b7280', fontSize:13 }}>{p.description || '—'}</td>
-                <td style={{ padding:'10px 16px' }}>
-                  {permissions?.can_see_cost_price !== false ? (
-                    <span style={{ fontWeight:700, color:'#1a1d23', fontVariantNumeric:'tabular-nums', fontSize:14 }}>
-                      {formatCost(p.cost, p.currency)}
-                    </span>
-                  ) : <span style={{ color:'#d1d5db', fontSize:13 }}>—</span>}
-                </td>
-                <td style={{ padding:'10px 16px' }}>
-                  {permissions?.can_see_customer_price !== false ? (
-                    <span style={{ fontWeight:700, color:'#16a34a', fontVariantNumeric:'tabular-nums', fontSize:14 }}>
-                      {formatCost(p.customer_price, p.currency)}
-                    </span>
-                  ) : <span style={{ color:'#d1d5db', fontSize:13 }}>—</span>}
-                </td>
-                <td colSpan={totalCols - 9} style={{ padding:'10px 16px' }}>
-                  {!isViewer && (
-                    <div style={{ display:'flex', gap:5 }}>
-                      <button onClick={()=>onEditProduct(dist, p)} style={{...btnStyle, padding:'3px 9px', background:'#fff', color:'#2563eb', border:'1px solid #e2e6ed', fontSize:12}}>
-                        <Edit2 size={11}/> Edit
-                      </button>
-                      <button onClick={()=>onDeleteProduct(dist, p)} style={{...btnStyle, padding:'3px 9px', background:'#fff', color:'#dc2626', border:'1px solid #fee2e2', fontSize:12}}>
-                        <Trash2 size={11}/>
-                      </button>
-                    </div>
-                  )}
-                </td>
-              </tr>
-            ))}
-            {dist.notes && (
-              <tr style={{ background:'#fffbeb', borderBottom:'2px solid #bfdbfe', borderTop:'1px solid #fde68a' }}>
-                <td colSpan={2} style={{ padding:'10px 0 10px 32px', borderLeft:'3px solid #d97706' }}/>
-                <td colSpan={totalCols - 2} style={{ padding:'10px 16px' }}>
-                  <span style={{ fontSize:12, fontWeight:600, color:'#92400e', marginRight:8 }}>📝 Notes</span>
-                  <span style={{ fontSize:13, color:'#78350f' }}>{dist.notes}</span>
-                </td>
-              </tr>
-            )}
-          </>
-        );
-      })()}
+          ) : dist.products?.map((p, idx) => (
+            <tr key={p.id} style={{
+              background: idx % 2 === 0 ? '#f8fbff' : '#f0f6ff',
+              borderBottom: idx === (dist.products.length-1) ? '2px solid #bfdbfe' : '1px solid #e8f0fe',
+            }}>
+              <td style={{ padding:'10px 0 10px 32px', borderLeft:'3px solid #2563eb' }} colSpan={2}/>
+              <td style={{ padding:'10px 16px' }}><StatusBadge status={p.status}/></td>
+              <td style={{ padding:'10px 16px' }}><div style={{ fontWeight:600, color:'#1e40af', fontSize:13 }}>{p.name}</div></td>
+              <td style={{ padding:'10px 16px', color:'#374151', fontSize:13 }}>{p.vendor || '—'}</td>
+              <td style={{ padding:'10px 16px', color:'#6b7280', fontSize:13 }}>{p.category || '—'}</td>
+              <td style={{ padding:'10px 16px', color:'#6b7280', fontSize:13 }}>{p.description || '—'}</td>
+              <td style={{ padding:'10px 16px' }}>
+                {permissions?.can_see_cost_price !== false ? (
+                  <span style={{ fontWeight:700, color:'#1a1d23', fontVariantNumeric:'tabular-nums', fontSize:14 }}>
+                    {formatCost(p.cost, p.currency)}
+                  </span>
+                ) : <span style={{ color:'#d1d5db', fontSize:13 }}>—</span>}
+              </td>
+              <td style={{ padding:'10px 16px' }}>
+                {permissions?.can_see_customer_price !== false ? (
+                  <span style={{ fontWeight:700, color:'#16a34a', fontVariantNumeric:'tabular-nums', fontSize:14 }}>
+                    {formatCost(p.customer_price, p.currency)}
+                  </span>
+                ) : <span style={{ color:'#d1d5db', fontSize:13 }}>—</span>}
+              </td>
+              <td style={{ padding:'10px 16px' }}>
+                {!isViewer && (
+                  <div style={{ display:'flex', gap:5 }}>
+                    <button onClick={()=>onEditProduct(dist, p)} style={{...btnStyle, padding:'3px 9px', background:'#fff', color:'#2563eb', border:'1px solid #e2e6ed', fontSize:12}}>
+                      <Edit2 size={11}/> Edit
+                    </button>
+                    <button onClick={()=>onDeleteProduct(dist, p)} style={{...btnStyle, padding:'3px 9px', background:'#fff', color:'#dc2626', border:'1px solid #fee2e2', fontSize:12}}>
+                      <Trash2 size={11}/>
+                    </button>
+                  </div>
+                )}
+              </td>
+            </tr>
+          ))}
+          {dist.notes && (
+            <tr style={{ background:'#fffbeb', borderBottom:'2px solid #bfdbfe', borderTop:'1px solid #fde68a' }}>
+              <td colSpan={2} style={{ padding:'10px 0 10px 32px', borderLeft:'3px solid #d97706' }}/>
+              <td colSpan={8} style={{ padding:'10px 16px' }}>
+                <span style={{ fontSize:12, fontWeight:600, color:'#92400e', marginRight:8 }}>📝 Notes</span>
+                <span style={{ fontSize:13, color:'#78350f' }}>{dist.notes}</span>
+              </td>
+            </tr>
+          )}
+        </>
+      )}
     </>
   );
 }
@@ -548,7 +549,7 @@ function DocumentsPanel({ dist, onClose, isViewer }) {
 
 export default function Vendors() {
   const { user, permissions = { can_see_cost_price: true, can_see_customer_price: true } } = useAuth();
-  const { title, subtitle } = usePageTitle('vendors', { title: 'Vendors Management Platform', subtitle: 'Manage your distributors and products' });
+  const { t } = useTranslation();
   const isViewer = user?.role === 'viewer';
   const [data, setData] = useState({ distributors: [], total: 0 });
   const [loading, setLoading] = useState(true);
@@ -756,8 +757,8 @@ export default function Vendors() {
     <div style={{ padding:'16px 24px', flex:1, minWidth:0 }}>
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:12 }}>
         <div>
-          <h1 style={{ fontSize:20, fontWeight:700, marginBottom:2, color:'#1a1d23' }}>{title}</h1>
-          <p style={{ color:'#6b7280', fontSize:13 }}>{subtitle}</p>
+          <h1 style={{ fontSize:20, fontWeight:700, marginBottom:2, color:'#1a1d23' }}>{t('vendors.title')}</h1>
+          <p style={{ color:'#6b7280', fontSize:13 }}>{t('vendors.subtitle')}</p>
         </div>
       </div>
 
@@ -769,12 +770,12 @@ export default function Vendors() {
             borderRadius:8, border:'none', background:'#1a1d23',
             color:'#fff', fontSize:13, fontWeight:600, cursor:'pointer',
           }}>
-            <Plus size={15}/> Add
+            <Plus size={15}/> {t('vendors.addDistributor')}
           </button>
         )}
         <div style={{ position:'relative', flex:1, maxWidth:280 }}>
           <Search size={14} style={{ position:'absolute', left:11, top:'50%', transform:'translateY(-50%)', color:'#9ca3af' }}/>
-          <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search distributor…"
+          <input value={search} onChange={e=>setSearch(e.target.value)} placeholder={t('vendors.searchPlaceholder')}
             style={{...inputStyle, paddingLeft:34, paddingRight: search ? 32 : 12}}/>
           {search && (
             <button onClick={()=>setSearch('')} style={{
@@ -784,11 +785,11 @@ export default function Vendors() {
           )}
         </div>
         <select value={statusFilter} onChange={e=>setStatusFilter(e.target.value)} style={{...inputStyle, width:'auto'}}>
-          <option>All Status</option>
+          <option value="All Status">{t('vendors.allStatus')}</option>
           {['Active','Pending','Inactive'].map(s=><option key={s}>{s}</option>)}
         </select>
         <select value={categoryFilter} onChange={e=>setCategoryFilter(e.target.value)} style={{...inputStyle, width:'auto'}}>
-          <option>All Categories</option>
+          <option value="All Categories">{t('vendors.allCategories')}</option>
           {categories.map(c=><option key={c}>{c}</option>)}
         </select>
         <button onClick={load} style={{...btnStyle, background:'#fff', color:'#6b7280', border:'1px solid #e2e6ed', padding:'8px 12px'}}>
@@ -796,17 +797,17 @@ export default function Vendors() {
         </button>
         <button onClick={allOpen ? collapseAll : expandAll}
           style={{...btnStyle, background:'#fff', color:'#6b7280', border:'1px solid #e2e6ed', padding:'7px 12px', fontSize:12}}>
-          {allOpen ? <><ChevronsDownUp size={14}/> Collapse All</> : <><ChevronsUpDown size={14}/> Expand All</>}
+          {allOpen ? <><ChevronsDownUp size={14}/> {t('vendors.collapseAll')}</> : <><ChevronsUpDown size={14}/> {t('vendors.expandAll')}</>}
         </button>
         <select value={limit} onChange={e=>{ setLimit(Number(e.target.value)); setPage(1); }}
           style={{...inputStyle, width:'auto', fontSize:13}}>
-          {[10,25,50].map(n=><option key={n} value={n}>{n} / page</option>)}
+          {[10,25,50].map(n=><option key={n} value={n}>{n} / {t('vendors.perPage')}</option>)}
         </select>
         {!isViewer && (
           <div style={{ position:'relative' }}>
             <button onClick={()=>setShowImportExport(v=>!v)}
               style={{...btnStyle, background:'#fff', color:'#374151', border:'1px solid #e2e6ed', padding:'7px 12px', fontSize:12}}>
-              ⇅ Export / Import <ChevronDown size={12} style={{ marginLeft:2 }}/>
+              {t('vendors.exportImport')} <ChevronDown size={12} style={{ marginLeft:2 }}/>
             </button>
             {showImportExport && (
               <div style={{
@@ -819,7 +820,7 @@ export default function Vendors() {
                   style={{ display:'flex', alignItems:'center', gap:8, width:'100%', padding:'10px 16px', background:'none', border:'none', fontSize:13, color:'#374151', cursor:'pointer', textAlign:'left' }}
                   onMouseEnter={e=>e.currentTarget.style.background='#f4f6f9'}
                   onMouseLeave={e=>e.currentTarget.style.background='none'}>
-                  ⬇ Export CSV
+                  ⬇ {t('vendors.exportCSV')}
                 </button>
                 <div style={{ height:1, background:'#f1f5f9' }}/>
                 <button onClick={()=>{ setShowImportExport(false); fileInputRef.current?.click(); }}
@@ -827,7 +828,7 @@ export default function Vendors() {
                   style={{ display:'flex', alignItems:'center', gap:8, width:'100%', padding:'10px 16px', background:'none', border:'none', fontSize:13, color:'#374151', cursor:'pointer', textAlign:'left' }}
                   onMouseEnter={e=>e.currentTarget.style.background='#f4f6f9'}
                   onMouseLeave={e=>e.currentTarget.style.background='none'}>
-                  ⬆ Import CSV
+                  ⬆ {t('vendors.importCSV')}
                 </button>
               </div>
             )}

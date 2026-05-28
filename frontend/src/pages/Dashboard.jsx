@@ -126,9 +126,9 @@ export default function Dashboard() {
 
   // Status donut
   const statusSegments = [
-    { label:'Active',  value:active,  color:'#22c55e' },
-    { label:'Pending', value:pending, color:'#f59e0b' },
-    { label:'Inactive',value:inactive,color:'#94a3b8' },
+    { label: t('dashboard.active'),   value:active,  color:'#22c55e' },
+    { label: t('dashboard.pending'),  value:pending, color:'#f59e0b' },
+    { label: t('dashboard.inactive'), value:inactive,color:'#94a3b8' },
   ].filter(s=>s.value>0);
 
   // Products per distributor
@@ -169,7 +169,7 @@ export default function Dashboard() {
         {/* Status donut */}
         <div style={{ background:'#fff', border:'1px solid #e2e6ed', borderRadius:10, padding:22, boxShadow:'0 1px 3px rgba(0,0,0,0.04)' }}>
           <h2 style={{ fontSize:15, fontWeight:600, color:'#1a1d23', marginBottom:18, display:'flex', alignItems:'center', gap:8 }}>
-            <BarChart2 size={15} color="#2563eb"/> Distributor Status
+            <BarChart2 size={15} color="#2563eb"/> {t('dashboard.distributorStatus')}
           </h2>
           <DonutChart segments={statusSegments} size={130}/>
         </div>
@@ -177,7 +177,7 @@ export default function Dashboard() {
         {/* Products per distributor */}
         <div style={{ background:'#fff', border:'1px solid #e2e6ed', borderRadius:10, padding:22, boxShadow:'0 1px 3px rgba(0,0,0,0.04)' }}>
           <h2 style={{ fontSize:15, fontWeight:600, color:'#1a1d23', marginBottom:18, display:'flex', alignItems:'center', gap:8 }}>
-            <Package size={15} color="#7c3aed"/> Products per Distributor
+            <Package size={15} color="#7c3aed"/> {t('dashboard.productsPerDistributor')}
           </h2>
           <BarChart data={prodByDist} colorFn={(_, i) => COLORS[prodByDist.findIndex(x=>x.label===_) % COLORS.length]} valueLabel="count"/>
         </div>
@@ -189,7 +189,7 @@ export default function Dashboard() {
         {/* Cost by category */}
         <div style={{ background:'#fff', border:'1px solid #e2e6ed', borderRadius:10, padding:22, boxShadow:'0 1px 3px rgba(0,0,0,0.04)' }}>
           <h2 style={{ fontSize:15, fontWeight:600, color:'#1a1d23', marginBottom:18, display:'flex', alignItems:'center', gap:8 }}>
-            <DollarSign size={15} color="#0891b2"/> Cost by Category
+            <DollarSign size={15} color="#0891b2"/> {t('dashboard.costByCategory')}
           </h2>
           <BarChart data={catData} colorFn={()=>'linear-gradient(90deg,#0891b2,#06b6d4)'} valueLabel="cost"/>
         </div>
@@ -197,7 +197,7 @@ export default function Dashboard() {
         {/* Cost by distributor */}
         <div style={{ background:'#fff', border:'1px solid #e2e6ed', borderRadius:10, padding:22, boxShadow:'0 1px 3px rgba(0,0,0,0.04)' }}>
           <h2 style={{ fontSize:15, fontWeight:600, color:'#1a1d23', marginBottom:18, display:'flex', alignItems:'center', gap:8 }}>
-            <TrendingUp size={15} color="#16a34a"/> Cost by Distributor
+            <TrendingUp size={15} color="#16a34a"/> {t('dashboard.costByDistributor')}
           </h2>
           <BarChart data={distData} colorFn={()=>'linear-gradient(90deg,#16a34a,#22c55e)'} valueLabel="cost"/>
         </div>
@@ -206,7 +206,7 @@ export default function Dashboard() {
       {/* Row 3 — products by category count */}
       <div style={{ background:'#fff', border:'1px solid #e2e6ed', borderRadius:10, padding:22, boxShadow:'0 1px 3px rgba(0,0,0,0.04)' }}>
         <h2 style={{ fontSize:15, fontWeight:600, color:'#1a1d23', marginBottom:18, display:'flex', alignItems:'center', gap:8 }}>
-          <TrendingUp size={15} color="#2563eb"/> Products by Category
+          <TrendingUp size={15} color="#2563eb"/> {t('dashboard.productsByCategory')}
         </h2>
         <BarChart data={prodCatData} colorFn={()=>'linear-gradient(90deg,#2563eb,#3b82f6)'} valueLabel="count"/>
       </div>

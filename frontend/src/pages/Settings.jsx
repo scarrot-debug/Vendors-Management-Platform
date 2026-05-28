@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { api } from '../api/client.js';
 import { useAuth, SESSION_OPTIONS } from '../hooks/useAuth.jsx';
 import { Plus, Edit2, Trash2, KeyRound, Check, X, Shield, Eye, User, History, Clock, Image, Upload } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const ROLE_STYLES = {
   admin:  { bg:'#eff6ff', color:'#1d4ed8', border:'#bfdbfe', icon: Shield },
@@ -594,88 +595,9 @@ function HistorySection() {
   );
 }
 
-const PAGE_DEFS = [
-  { key:'dashboard', label:'Dashboard',  icon:'📊' },
-  { key:'vendors',   label:'Vendors',    icon:'🏢' },
-  { key:'catalog',   label:'Catalog',    icon:'📚' },
-  { key:'requests',  label:'Requests',   icon:'📋' },
-  { key:'approvals', label:'Approvals',  icon:'✅' },
-  { key:'settings',  label:'Settings',   icon:'⚙️' },
-];
-
-function PageTitlesSection() {
-  const [titles, setTitles] = useState({});
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
-
-  useEffect(() => {
-    api.getPageTitles().then(t => { setTitles(t || {}); setLoading(false); }).catch(()=>setLoading(false));
-  }, []);
-
-  const set = (page, field, val) => setTitles(t => ({ ...t, [page]: { ...t[page], [field]: val } }));
-
-  const handleSave = async () => {
-    setSaving(true);
-    try {
-      await api.setPageTitles(titles);
-      setSaved(true);
-      setTimeout(() => setSaved(false), 2000);
-    } catch(e) { alert(e.message); }
-    finally { setSaving(false); }
-  };
-
-  return (
-    <div style={{ background:'#fff', border:'1px solid #e2e6ed', borderRadius:10, overflow:'hidden', marginTop:24 }}>
-      <div style={{ padding:'16px 24px', borderBottom:'1px solid #e2e6ed', background:'#f8f9fb' }}>
-        <h2 style={{ fontSize:16, fontWeight:600, color:'#1a1d23', marginBottom:2, display:'flex', alignItems:'center', gap:8 }}>
-          🖊️ Page Titles
-        </h2>
-        <p style={{ fontSize:13, color:'#6b7280' }}>Customize the title and subtitle displayed on each page</p>
-      </div>
-      <div style={{ padding:'20px 24px' }}>
-        {loading ? <div style={{ color:'#9ca3af', fontSize:13 }}>Loading…</div> : (
-          <>
-            {/* Column headers */}
-            <div style={{ display:'grid', gridTemplateColumns:'130px 1fr 1fr', gap:12, marginBottom:8, paddingBottom:8, borderBottom:'1px solid #f1f5f9' }}>
-              <div style={{ fontSize:12, fontWeight:600, color:'#9ca3af', textTransform:'uppercase', letterSpacing:0.5 }}>Page</div>
-              <div style={{ fontSize:12, fontWeight:600, color:'#9ca3af', textTransform:'uppercase', letterSpacing:0.5 }}>Title</div>
-              <div style={{ fontSize:12, fontWeight:600, color:'#9ca3af', textTransform:'uppercase', letterSpacing:0.5 }}>Subtitle</div>
-            </div>
-            {PAGE_DEFS.map(({ key, label, icon }) => (
-              <div key={key} style={{ display:'grid', gridTemplateColumns:'130px 1fr 1fr', gap:12, alignItems:'center', padding:'8px 0', borderBottom:'1px solid #f8f9fb' }}>
-                <div style={{ display:'flex', alignItems:'center', gap:7, fontSize:13, fontWeight:600, color:'#374151' }}>
-                  <span>{icon}</span> {label}
-                </div>
-                <input
-                  value={titles[key]?.title || ''}
-                  onChange={e => set(key, 'title', e.target.value)}
-                  placeholder={label}
-                  style={{...inputStyle, fontSize:13}}
-                />
-                <input
-                  value={titles[key]?.subtitle || ''}
-                  onChange={e => set(key, 'subtitle', e.target.value)}
-                  placeholder="Subtitle…"
-                  style={{...inputStyle, fontSize:13, color:'#6b7280'}}
-                />
-              </div>
-            ))}
-            <div style={{ display:'flex', justifyContent:'flex-end', marginTop:16 }}>
-              <button onClick={handleSave} disabled={saving}
-                style={{...btnStyle, background: saved ? '#16a34a' : '#1a1d23', color:'#fff'}}>
-                {saved ? <><Check size={14}/> Saved!</> : saving ? 'Saving…' : <><Check size={14}/> Save Changes</>}
-              </button>
-            </div>
-          </>
-        )}
-      </div>
-    </div>
-  );
-}
-
 export default function Settings() {
   const { user: currentUser, sessionTimeout, updateSessionTimeout, logo, updateLogo } = useAuth();
+  const { t } = useTranslation();
   const logoFileRef = useRef(null);
   const [permissionsUser, setPermissionsUser] = useState(null);
   const [logoUploading, setLogoUploading] = useState(false);
@@ -752,34 +674,34 @@ export default function Settings() {
         }}>{toast.msg}</div>
       )}
 
-      <h1 style={{ fontSize:24, fontWeight:700, marginBottom:4, color:'#1a1d23' }}>Settings</h1>
-      <p style={{ color:'#6b7280', fontSize:14, marginBottom:28 }}>System configuration and user management</p>
+      <h1 style={{ fontSize:24, fontWeight:700, marginBottom:4, color:'#1a1d23' }}>{t('settings.title')}</h1>
+      <p style={{ color:'#6b7280', fontSize:14, marginBottom:28 }}>{t('settings.subtitle')}</p>
 
       {/* User Management */}
       <div style={{ background:'#fff', border:'1px solid #e2e6ed', borderRadius:10, overflow:'hidden' }}>
         <div style={{ padding:'16px 24px', borderBottom:'1px solid #e2e6ed', display:'flex', justifyContent:'space-between', alignItems:'center', background:'#f8f9fb' }}>
           <div>
             <h2 style={{ fontSize:16, fontWeight:600, color:'#1a1d23', marginBottom:2, display:'flex', alignItems:'center', gap:8 }}>
-              <User size={16} color="#2563eb"/> User Management
+              <User size={16} color="#2563eb"/> {t('settings.userManagement')}
             </h2>
-            <p style={{ fontSize:13, color:'#6b7280' }}>Add, edit or remove system users</p>
+            <p style={{ fontSize:13, color:'#6b7280' }}>{t('settings.userManagementDesc')}</p>
           </div>
           {isAdmin && (
-            <button onClick={()=>setModal({type:'add'})} style={{...btnStyle, background:'#1a1d23', color:'#fff'}}>              <Plus size={15}/> Add User
+            <button onClick={()=>setModal({type:'add'})} style={{...btnStyle, background:'#1a1d23', color:'#fff'}}>              <Plus size={15}/> {t('settings.addUser')}
             </button>
           )}
         </div>
         <table style={{ width:'100%', borderCollapse:'collapse', fontSize:14 }}>
           <thead>
             <tr style={{ borderBottom:'1px solid #e2e6ed', background:'#fafafa' }}>
-              {['','First Name','Last Name','Username','Email','Role','Created','Actions'].map(h => (
+              {['', t('settings.colFirstName'), t('settings.colLastName'), t('settings.colUsername'), t('settings.colEmail'), t('settings.colRole'), t('common.date'), t('settings.colActions')].map(h => (
                 <th key={h} style={{ padding:'10px 16px', textAlign:'left', color:'#374151', fontWeight:600, fontSize:12, textTransform:'uppercase', letterSpacing:0.5 }}>{h}</th>
               ))}
             </tr>
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={8} style={{ padding:32, textAlign:'center', color:'#9ca3af' }}>Loading…</td></tr>
+              <tr><td colSpan={8} style={{ padding:32, textAlign:'center', color:'#9ca3af' }}>{t('common.loading')}</td></tr>
             ) : users.map((u, i) => (
               <tr key={u.id} style={{ borderBottom: i < users.length-1 ? '1px solid #f1f5f9' : 'none', background: u.username===currentUser?.username ? '#fafeff' : '#fff' }}
                 onMouseEnter={e=>e.currentTarget.style.background='#f8f9fb'}
@@ -816,10 +738,10 @@ export default function Settings() {
                   {isAdmin && (
                     <div style={{ display:'flex', gap:5 }}>
                       <button onClick={()=>setModal({type:'edit', data:u})} style={{...btnStyle, padding:'5px 11px', background:'#fff', color:'#2563eb', border:'1px solid #e2e6ed', fontSize:12}}>
-                        <Edit2 size={12}/> Edit
+                        <Edit2 size={12}/> {t('common.edit')}
                       </button>
                       <button onClick={()=>setPermissionsUser(u)} style={{...btnStyle, padding:'5px 11px', background:'#fff', color:'#7c3aed', border:'1px solid #e9d5ff', fontSize:12}}>
-                        🔒 Role
+                        🔒 {t('settings.colRole')}
                       </button>
                       <button onClick={()=>setModal({type:'reset', data:u})} style={{...btnStyle, padding:'5px 11px', background:'#fff', color:'#d97706', border:'1px solid #fde68a', fontSize:12}}>
                         <KeyRound size={12}/> Reset
@@ -837,9 +759,9 @@ export default function Settings() {
           </tbody>
         </table>
         <div style={{ padding:'12px 24px', borderTop:'1px solid #f1f5f9', background:'#fafafa', display:'flex', gap:20 }}>
-          <span style={{ fontSize:12, color:'#9ca3af' }}>Roles:</span>
+          <span style={{ fontSize:12, color:'#9ca3af' }}>{t('settings.colRole')}:</span>
           {Object.keys(ROLE_STYLES).map(role=><RoleBadge key={role} role={role}/>)}
-          <span style={{ fontSize:12, color:'#9ca3af', marginLeft:'auto' }}>{users.length} user{users.length!==1?'s':''}</span>
+          <span style={{ fontSize:12, color:'#9ca3af', marginLeft:'auto' }}>{users.length} {t('settings.colUser') || 'users'}</span>
         </div>
       </div>
 
@@ -938,9 +860,6 @@ export default function Settings() {
           </div>
         </div>
       </div>
-
-      {/* Page Titles */}
-      {isAdmin && <PageTitlesSection/>}
 
       {permissionsUser && (
         <PermissionsModal user={permissionsUser} onClose={()=>setPermissionsUser(null)}/>
