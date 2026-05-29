@@ -80,7 +80,7 @@ export default function Login() {
             color: '#fff', fontSize: 14, fontWeight: 600,
             cursor: loading ? 'not-allowed' : 'pointer', marginTop: 4,
           }}>
-            {loading ? t('auth.signingIn') : t('auth.signIn')}
+            {loading ? t('auth.signingIn') : t('auth.login')}
           </button>
         </form>
       </div>
