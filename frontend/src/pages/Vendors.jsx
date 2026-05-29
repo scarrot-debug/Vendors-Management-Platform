@@ -277,7 +277,7 @@ function DistributorRow({ dist, isViewer, open, onToggle, columns, permissions, 
             {!isViewer && (
               <>
                 <button onClick={()=>onAddProduct(dist)} style={{...btnStyle, padding:'4px 10px', background:'#f0fdf4', color:'#16a34a', border:'1px solid #bbf7d0', fontSize:12}}>
-                  <Plus size={12}/> {t('vendors.addProduct')}
+                  {t('vendors.addProduct')}
                 </button>
                 <button onClick={()=>onEditDist(dist)} style={{...btnStyle, padding:'4px 10px', background:'#fff', color:'#2563eb', border:'1px solid #e2e6ed', fontSize:12}}>
                   <Edit2 size={12}/> {t('vendors.edit')}
