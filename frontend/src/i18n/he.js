@@ -240,6 +240,11 @@ export default {
     autoLogoutAfter: 'יציאה אוטומטית לאחר:',
     changeHistory: 'היסטוריית שינויים',
     changeHistoryDesc: 'מעקב אחר כל השינויים במערכת',
+    pageTitles: 'כותרות עמודים',
+    pageTitlesDesc: 'התאמת הכותרת והתיאור המוצגים בכל עמוד',
+    pageTitlesPage: 'עמוד',
+    pageTitlesTitle: 'כותרת',
+    pageTitlesSubtitle: 'תיאור',
     times: {
       min15: '15 דקות',
       min30: '30 דקות',

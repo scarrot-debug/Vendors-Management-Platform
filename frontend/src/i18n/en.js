@@ -240,6 +240,11 @@ export default {
     autoLogoutAfter: 'Auto logout after:',
     changeHistory: 'Change History',
     changeHistoryDesc: 'Track all changes made to the system',
+    pageTitles: 'Page Titles',
+    pageTitlesDesc: 'Customize the title and subtitle displayed on each page',
+    pageTitlesPage: 'Page',
+    pageTitlesTitle: 'Title',
+    pageTitlesSubtitle: 'Subtitle',
     times: {
       min15: '15 minutes',
       min30: '30 minutes',

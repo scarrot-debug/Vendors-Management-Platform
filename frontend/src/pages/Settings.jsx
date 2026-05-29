@@ -568,7 +568,7 @@ function PageTitlesSection() {
         {loading ? <div style={{ color:'#9ca3af', fontSize:13 }}>Loading…</div> : (
           <>
             <div style={{ display:'grid', gridTemplateColumns:'120px 1fr 1fr', gap:12, marginBottom:8, paddingBottom:8, borderBottom:'1px solid #f1f5f9' }}>
-              {['Page','Title','Subtitle'].map(h => (
+              {[t('settings.pageTitlesPage'), t('settings.pageTitlesTitle'), t('settings.pageTitlesSubtitle')].map(h => (
                 <div key={h} style={{ fontSize:12, fontWeight:600, color:'#9ca3af', textTransform:'uppercase', letterSpacing:0.5, textAlign: isRTL ? 'right' : 'left' }}>{h}</div>
               ))}
             </div>
