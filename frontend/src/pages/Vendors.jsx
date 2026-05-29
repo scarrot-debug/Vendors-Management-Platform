@@ -193,7 +193,8 @@ function SortIcon({ field, sortField, sortDir }) {
 }
 
 function DraggableHeader({ col, sortField, sortDir, onSort, onDragStart, onDragOver, onDrop, isDragOver }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === 'he';
   const isSortable = !['website','actions'].includes(col.key);
   const label = col.labelKey ? t(col.labelKey) : col.label;
   return (
@@ -204,7 +205,7 @@ function DraggableHeader({ col, sortField, sortDir, onSort, onDragStart, onDragO
       onDrop={e => { e.preventDefault(); onDrop(col.key); }}
       onClick={() => isSortable && onSort(col.key)}
       style={{
-        padding:'11px 16px', textAlign:'left',
+        padding:'11px 16px', textAlign: isRTL ? 'right' : 'left',
         color: sortField===col.key ? '#2563eb' : '#374151',
         fontWeight:600, fontSize:13,
         cursor: isSortable ? 'pointer' : 'default',
@@ -838,7 +839,7 @@ export default function Vendors() {
               }}>
                 <button onClick={async()=>{ setShowImportExport(false); setExporting(true); try { await api.exportCSV(); } catch(e){ alert(e.message); } finally{ setExporting(false); } }}
                   disabled={exporting}
-                  style={{ display:'flex', alignItems:'center', gap:8, width:'100%', padding:'10px 16px', background:'none', border:'none', fontSize:13, color:'#374151', cursor:'pointer', textAlign:'left' }}
+                  style={{ display:'flex', alignItems:'center', gap:8, width:'100%', padding:'10px 16px', background:'none', border:'none', fontSize:13, color:'#374151', cursor:'pointer', textAlign: isRTL ? 'right' : 'left' }}
                   onMouseEnter={e=>e.currentTarget.style.background='#f4f6f9'}
                   onMouseLeave={e=>e.currentTarget.style.background='none'}>
                   ⬇ {t('vendors.exportCSV')}
@@ -846,7 +847,7 @@ export default function Vendors() {
                 <div style={{ height:1, background:'#f1f5f9' }}/>
                 <button onClick={()=>{ setShowImportExport(false); fileInputRef.current?.click(); }}
                   disabled={importing}
-                  style={{ display:'flex', alignItems:'center', gap:8, width:'100%', padding:'10px 16px', background:'none', border:'none', fontSize:13, color:'#374151', cursor:'pointer', textAlign:'left' }}
+                  style={{ display:'flex', alignItems:'center', gap:8, width:'100%', padding:'10px 16px', background:'none', border:'none', fontSize:13, color:'#374151', cursor:'pointer', textAlign: isRTL ? 'right' : 'left' }}
                   onMouseEnter={e=>e.currentTarget.style.background='#f4f6f9'}
                   onMouseLeave={e=>e.currentTarget.style.background='none'}>
                   ⬆ {t('vendors.importCSV')}
