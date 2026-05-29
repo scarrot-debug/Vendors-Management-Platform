@@ -121,7 +121,7 @@ export default function Profile() {
           </div>
           <div>
             <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>{t('profile.newPassword')}</label>
-            <input type="password" value={password.new} onChange={e=>setPassword(p=>({...p,new:e.target.value}))} style={inputStyle} placeholder="Min. 6 characters"/>
+            <input type="password" value={password.new} onChange={e=>setPassword(p=>({...p,new:e.target.value}))} style={inputStyle} placeholder={t('settings.passwordMinChars')}/>
           </div>
           <div>
             <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>{t('profile.confirmPassword')}</label>
