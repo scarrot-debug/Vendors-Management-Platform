@@ -49,8 +49,8 @@ export default function Login() {
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           {[
-            { label: t('auth.username'), value: username, set: setUsername, type: 'text', placeholder: t('auth.username') },
-            { label: t('auth.password'), value: password, set: setPassword, type: 'password', placeholder: '••••••••' },
+            { label: t('auth.username'), value: username, set: setUsername, type: 'text', placeholder: '' },
+            { label: t('auth.password'), value: password, set: setPassword, type: 'password', placeholder: '' },
           ].map(({ label, value, set, type, placeholder }) => (
             <div key={label}>
               <label style={{ fontSize: 13, color: '#374151', fontWeight: 500, display: 'block', marginBottom: 6 }}>{label}</label>
@@ -59,7 +59,7 @@ export default function Login() {
                 style={{
                   width: '100%', padding: '10px 14px', borderRadius: 8,
                   border: '1px solid #e2e6ed', background: '#f8f9fb',
-                  color: '#1a1d23', fontSize: 14, outline: 'none',
+                  color: '#1a1d23', fontSize: 14, outline: 'none', boxSizing: 'border-box',
                 }}
               />
             </div>
@@ -77,7 +77,7 @@ export default function Login() {
             color: '#fff', fontSize: 14, fontWeight: 600,
             cursor: loading ? 'not-allowed' : 'pointer', marginTop: 4,
           }}>
-            {loading ? t('auth.signingIn') : t('auth.login')}
+            {loading ? t('auth.signingIn') : t('auth.signIn')}
           </button>
         </form>
       </div>
