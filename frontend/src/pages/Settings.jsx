@@ -548,7 +548,7 @@ function HistorySection() {
           <h2 style={{ fontSize:16, fontWeight:600, color:'#1a1d23', marginBottom:2, display:'flex', alignItems:'center', gap:8 }}>
             <History size={16} color="#2563eb"/> {t('settings.changeHistory')}
           </h2>
-          <p style={{ fontSize:13, color:'#6b7280' }}>Track all changes made to the system</p>
+          <p style={{ fontSize:13, color:'#6b7280' }}>{t('settings.changeHistoryDesc')}</p>
         </div>
         <span style={{ fontSize:13, color:'#6b7280' }}>{total} records</span>
       </div>
@@ -823,12 +823,12 @@ export default function Settings() {
             </div>
             {/* Guidelines */}
             <div style={{ background:'#f8f9fb', border:'1px solid #e2e6ed', borderRadius:8, padding:'12px 16px', fontSize:12, color:'#6b7280' }}>
-              <div style={{ fontWeight:600, color:'#374151', marginBottom:6 }}>📋 Logo Guidelines</div>
-              <div>• <strong>Formats:</strong> PNG, JPG, JPEG, WebP, SVG</div>
-              <div>• <strong>Max size:</strong> 500KB</div>
-              <div>• <strong>Recommended dimensions:</strong> 160×40px or similar wide format</div>
-              <div>• <strong>Background:</strong> Transparent or dark — logo appears on dark sidebar</div>
-              <div>• <strong>Note:</strong> Same image is used for both expanded and collapsed sidebar</div>
+              <div style={{ fontWeight:600, color:'#374151', marginBottom:6 }}>{t('settings.logoGuidelinesTitle')}</div>
+              <div>• <strong>{t('settings.logoGuidelinesFormats')}</strong></div>
+              <div>• <strong>{t('settings.logoGuidelinesSize')}</strong></div>
+              <div>• <strong>{t('settings.logoGuidelinesDimensions')}</strong></div>
+              <div>• <strong>{t('settings.logoGuidelinesBackground')}</strong></div>
+              <div>• <strong>{t('settings.logoGuidelinesNote')}</strong></div>
             </div>
           </div>
         </div>
@@ -841,13 +841,16 @@ export default function Settings() {
             <h2 style={{ fontSize:16, fontWeight:600, color:'#1a1d23', marginBottom:2, display:'flex', alignItems:'center', gap:8 }}>
               <Clock size={16} color="#2563eb"/> {t('settings.sessionTimeout')}
             </h2>
-            <p style={{ fontSize:13, color:'#6b7280' }}>Auto logout after inactivity</p>
+            <p style={{ fontSize:13, color:'#6b7280' }}>{t('settings.sessionTimeoutDesc')}</p>
           </div>
         </div>
         <div style={{ padding:'20px 24px', display:'flex', alignItems:'center', gap:16 }}>
           <span style={{ fontSize:14, color:'#374151', fontWeight:500 }}>{t('settings.autoLogoutAfter')}</span>
           <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
-            {SESSION_OPTIONS.map(opt => (
+            {SESSION_OPTIONS.map(opt => {
+              const timeKeys = { 15:'min15', 30:'min30', 45:'min45', 60:'hour1', 120:'hour2', 180:'hour3', 0:'never' };
+              const label = t(`settings.times.${timeKeys[opt.value]}`, { defaultValue: opt.label });
+              return (
               <button
                 key={opt.value}
                 onClick={() => updateSessionTimeout(opt.value)}
@@ -859,9 +862,10 @@ export default function Settings() {
                   transition:'all 0.15s',
                 }}
               >
-                {opt.label}
+                {label}
               </button>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>

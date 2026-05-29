@@ -217,9 +217,14 @@ export default function Approvals() {
 
       {/* Filters */}
       <div style={{ display:'flex', gap:6, marginBottom:16 }}>
-        {['Pending','All','Approved','Rejected'].map(s => (
-          <button key={s} onClick={()=>setFilter(s)} style={{ padding:'5px 14px', borderRadius:6, border:'1px solid', fontSize:13, cursor:'pointer', fontWeight: filter===s ? 600 : 400, borderColor: filter===s ? '#1a1d23' : '#e2e6ed', background: filter===s ? '#1a1d23' : '#fff', color: filter===s ? '#fff' : '#374151' }}>
-            {s} ({s==='All' ? requests.length : requests.filter(r=>r.status===s).length})
+        {[
+          { key: 'Pending',  label: t('approvals.filterPending') },
+          { key: 'All',      label: t('approvals.filterAll') },
+          { key: 'Approved', label: t('approvals.filterApproved') },
+          { key: 'Rejected', label: t('approvals.filterRejected') },
+        ].map(({ key, label }) => (
+          <button key={key} onClick={()=>setFilter(key)} style={{ padding:'5px 14px', borderRadius:6, border:'1px solid', fontSize:13, cursor:'pointer', fontWeight: filter===key ? 600 : 400, borderColor: filter===key ? '#1a1d23' : '#e2e6ed', background: filter===key ? '#1a1d23' : '#fff', color: filter===key ? '#fff' : '#374151' }}>
+            {label} ({key==='All' ? requests.length : requests.filter(r=>r.status===key).length})
           </button>
         ))}
       </div>
@@ -229,7 +234,7 @@ export default function Approvals() {
         <table style={{ width:'100%', borderCollapse:'collapse', fontSize:14 }}>
           <thead>
             <tr style={{ borderBottom:'1px solid #e2e6ed', background:'#f8f9fb' }}>
-              {['Title','Distributor','Requested By','Date','Status','Action'].map(h=>(
+              {[t('approvals.colTitle'), t('approvals.colDistributor'), t('approvals.colRequestedBy'), t('approvals.colDate'), t('approvals.colStatus'), t('approvals.colAction')].map(h=>(
                 <th key={h} style={{ padding:'11px 16px', textAlign:'left', color:'#374151', fontWeight:600, fontSize:12, textTransform:'uppercase', letterSpacing:0.5 }}>{h}</th>
               ))}
             </tr>
@@ -238,7 +243,7 @@ export default function Approvals() {
             {loading ? (
               <tr><td colSpan={6} style={{ padding:32, textAlign:'center', color:'#9ca3af' }}>Loading…</td></tr>
             ) : filtered.length === 0 ? (
-              <tr><td colSpan={6} style={{ padding:32, textAlign:'center', color:'#9ca3af' }}>No requests found</td></tr>
+              <tr><td colSpan={6} style={{ padding:32, textAlign:'center', color:'#9ca3af' }}>{t('approvals.noRequests')}</td></tr>
             ) : filtered.map((req, i) => (
               <tr key={req.id} style={{ borderBottom: i<filtered.length-1 ? '1px solid #f1f5f9' : 'none', background: req.status==='Pending' ? '#fffdf0' : '#fff' }}
                 onMouseEnter={e=>e.currentTarget.style.background='#f8f9fb'}
@@ -256,7 +261,7 @@ export default function Approvals() {
                 <td style={{ padding:'12px 16px' }}><StatusBadge status={req.status}/></td>
                 <td style={{ padding:'12px 16px' }}>
                   <button onClick={()=>openDetail(req)} style={{ padding:'4px 12px', borderRadius:6, border:`1px solid ${req.status==='Pending'?'#fde68a':'#e2e6ed'}`, background: req.status==='Pending'?'#fffbeb':'#fff', color: req.status==='Pending'?'#ca8a04':'#374151', cursor:'pointer', fontSize:12, fontWeight: req.status==='Pending'?600:400 }}>
-                    {req.status === 'Pending' ? '⏳ Review' : 'View'}
+                    {req.status === 'Pending' ? t('approvals.review') : t('common.view')}
                   </button>
                 </td>
               </tr>
