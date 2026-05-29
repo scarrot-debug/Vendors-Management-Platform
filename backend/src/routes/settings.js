@@ -9,6 +9,27 @@ function adminOnly(req, res, next) {
   next();
 }
 
+// GET /api/settings/check-ip — public, no auth required
+router.get('/check-ip', async (req, res) => {
+  try {
+    const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim()
+      || req.headers['x-real-ip']
+      || req.socket.remoteAddress;
+
+    const result = await pool.query("SELECT value FROM system_settings WHERE key='allowed_ips'");
+    const allowedIps = result.rows[0]?.value ? JSON.parse(result.rows[0].value) : [];
+
+    // Empty list = allow all
+    if (allowedIps.length === 0) return res.json({ allowed: true });
+
+    const allowed = allowedIps.includes(ip);
+    res.json({ allowed, ip });
+  } catch (err) {
+    // On error — allow through
+    res.json({ allowed: true });
+  }
+});
+
 // GET /api/settings/my-permissions — for logged in user
 router.get('/my-permissions', auth, async (req, res) => {
   try {

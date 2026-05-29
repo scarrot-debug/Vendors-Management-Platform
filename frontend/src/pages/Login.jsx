@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth.jsx';
 import { api } from '../api/client.js';
@@ -9,11 +9,42 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [ipAllowed, setIpAllowed] = useState(null); // null = checking
   const { login } = useAuth();
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'he';
   const sessionExpired = new URLSearchParams(window.location.search).get('expired') === '1';
+
+  useEffect(() => {
+    api.checkIp().then(res => setIpAllowed(res.allowed)).catch(() => setIpAllowed(true));
+  }, []);
+
+  // Loading IP check
+  if (ipAllowed === null) {
+    return (
+      <div style={{ minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center', background:'#f4f6f9' }}>
+        <div style={{ color:'#9ca3af', fontSize:14 }}>Loading…</div>
+      </div>
+    );
+  }
+
+  // Blocked
+  if (ipAllowed === false) {
+    return (
+      <div style={{ minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center', background:'#f4f6f9' }}>
+        <div style={{ background:'#fff', border:'1px solid #fecaca', borderRadius:16, padding:40, width:380, boxShadow:'0 8px 32px rgba(0,0,0,0.08)', textAlign:'center' }}>
+          <div style={{ fontSize:48, marginBottom:16 }}>🔒</div>
+          <h2 style={{ fontSize:18, fontWeight:700, color:'#1a1d23', marginBottom:8 }}>
+            {isRTL ? 'גישה נדחתה' : 'Access Denied'}
+          </h2>
+          <p style={{ fontSize:13, color:'#6b7280', lineHeight:1.6 }}>
+            {isRTL ? 'כתובת ה-IP שלך אינה מורשית לגשת למערכת זו. פנה למנהל המערכת.' : 'Your IP address is not authorized to access this system. Contact your system administrator.'}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();

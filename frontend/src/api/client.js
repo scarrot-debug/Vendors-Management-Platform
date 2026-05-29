@@ -72,6 +72,7 @@ export const api = {
   downloadRequestDoc: (reqId, docId) => `${BASE}/requests/${reqId}/documents/${docId}/download`,
   getPageTitles: () => req('/settings/page-titles'),
   setPageTitles: (titles) => req('/settings/page-titles', { method: 'PUT', body: JSON.stringify({ titles }) }),
+  checkIp: () => req('/settings/check-ip'),
   getAllowedIps: () => req('/settings/allowed-ips'),
   setAllowedIps: (ips) => req('/settings/allowed-ips', { method: 'PUT', body: JSON.stringify({ ips }) }),
 };// Add these lines before the closing };
