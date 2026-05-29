@@ -164,4 +164,31 @@ router.put('/page-titles', auth, adminOnly, async (req, res) => {
   }
 });
 
+// GET /api/settings/allowed-ips
+router.get('/allowed-ips', auth, adminOnly, async (req, res) => {
+  try {
+    const result = await pool.query("SELECT value FROM system_settings WHERE key='allowed_ips'");
+    const ips = result.rows[0]?.value ? JSON.parse(result.rows[0].value) : [];
+    res.json(ips);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch allowed IPs' });
+  }
+});
+
+// PUT /api/settings/allowed-ips
+router.put('/allowed-ips', auth, adminOnly, async (req, res) => {
+  try {
+    const { ips } = req.body;
+    await pool.query(
+      `INSERT INTO system_settings (key, value) VALUES ('allowed_ips', $1)
+       ON CONFLICT (key) DO UPDATE SET value=$1, updated_at=NOW()`,
+      [JSON.stringify(ips)]
+    );
+    await logHistory(req.user?.id, 'UPDATE', 'setting', 'Allowed IPs', { count: ips.length });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to save allowed IPs' });
+  }
+});
+
 module.exports = router;

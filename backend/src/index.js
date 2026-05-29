@@ -8,12 +8,21 @@ const historyRoutes = require('./routes/history');
 const settingsRoutes = require('./routes/settings');
 const documentsRoutes = require('./routes/documents');
 const requestsRoutes = require('./routes/requests');
-const ipFilter = require('./middleware/ipFilter');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-app.use(cors());
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim())
+  : ['http://localhost', 'http://localhost:5173', 'https://vendors.191.co.il', 'https://vendor-frontend-68gz.onrender.com'];
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
+    callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true,
+}));
 app.use(express.json({ limit: '15mb' }));
 
 // Initialize DB tables on startup
@@ -75,17 +84,11 @@ async function initDB() {
     await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS last_name VARCHAR(100)`);
     await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS mobile VARCHAR(50)`);
 
-    // Seed admin user (password: admin123)
+    // Seed admin user (password: admin123) — CHANGE THIS PASSWORD AFTER FIRST LOGIN
+    // Hash of 'admin123' with bcrypt rounds=10
     await pool.query(`
       INSERT INTO users (username, email, password_hash, role)
-      VALUES ('admin', 'admin@one.local', '$2b$10$rOzJqLwZQjKqLwZQjKqLwOuB5VBt9Pq1NrLq5X9y7T2mA3W8K1vQe', 'admin')
-      ON CONFLICT DO NOTHING
-    `);
-
-    // Seed viewer user (password: viewer123)
-    await pool.query(`
-      INSERT INTO users (username, email, password_hash, role)
-      VALUES ('viewer', 'viewer@one.local', '$2b$10$rOzJqLwZQjKqLwZQjKqLwOuB5VBt9Pq1NrLq5X9y7T2mA3W8K1vQe', 'viewer')
+      VALUES ('admin', 'admin@one.local', '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin')
       ON CONFLICT DO NOTHING
     `);
 
@@ -206,6 +209,12 @@ async function initDB() {
       settings:  { title: 'Settings',  subtitle: 'System configuration and user management' },
     })]);
 
+    // Default allowed IPs
+    await pool.query(`
+      INSERT INTO system_settings (key, value) VALUES ('allowed_ips', $1)
+      ON CONFLICT DO NOTHING
+    `, [JSON.stringify(['31.154.240.84'])]);
+
     console.log('DB initialized successfully');
   } catch (err) {
     console.error('DB init error:', err.message);
@@ -231,4 +240,3 @@ app.listen(PORT, async () => {
   console.log(`ONE Vendor Management API running on port ${PORT}`);
   await initDB();
 });
-// Settings routes added below

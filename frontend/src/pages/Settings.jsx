@@ -631,6 +631,96 @@ function PageTitlesSection() {
   );
 }
 
+function IpWhitelistSection() {
+  const [ips, setIps] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [newIp, setNewIp] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === 'he';
+
+  useEffect(() => {
+    api.getAllowedIps().then(d => { setIps(d || []); setLoading(false); }).catch(() => setLoading(false));
+  }, []);
+
+  const save = async (list) => {
+    setSaving(true);
+    try {
+      await api.setAllowedIps(list);
+      setIps(list);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    } catch(e) { alert(e.message); }
+    finally { setSaving(false); }
+  };
+
+  const validateIp = (ip) => /^(\d{1,3}\.){3}\d{1,3}$/.test(ip.trim());
+
+  const handleAdd = async () => {
+    const trimmed = newIp.trim();
+    if (!trimmed) return;
+    if (!validateIp(trimmed)) { alert('Invalid IP address format'); return; }
+    if (ips.includes(trimmed)) { alert('IP already exists'); return; }
+    await save([...ips, trimmed]);
+    setNewIp('');
+  };
+
+  const handleDelete = (ip) => save(ips.filter(i => i !== ip));
+
+  return (
+    <div style={{ background:'#fff', border:'1px solid #e2e6ed', borderRadius:10, overflow:'hidden', marginTop:24 }}>
+      <div style={{ padding:'16px 24px', borderBottom:'1px solid #e2e6ed', background:'#f8f9fb' }}>
+        <h2 style={{ fontSize:16, fontWeight:600, color:'#1a1d23', marginBottom:2 }}>🔒 IP Whitelist</h2>
+        <p style={{ fontSize:13, color:'#6b7280' }}>
+          {isRTL ? 'רק כתובות IP אלו יוכלו לגשת למערכת. רשימה ריקה = גישה לכולם.' : 'Only these IP addresses can access the system. Empty list = allow all.'}
+        </p>
+      </div>
+      <div style={{ padding:'20px 24px' }}>
+        {loading ? <div style={{ color:'#9ca3af', fontSize:13 }}>Loading…</div> : (
+          <>
+            <div style={{ display:'flex', gap:8, marginBottom:16 }}>
+              <input
+                value={newIp}
+                onChange={e => setNewIp(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && handleAdd()}
+                placeholder="e.g. 31.154.240.84"
+                style={{ flex:1, padding:'8px 12px', borderRadius:7, border:'1px solid #e2e6ed', fontSize:13, outline:'none', textAlign: isRTL ? 'right' : 'left' }}
+              />
+              <button onClick={handleAdd} disabled={saving || !newIp.trim()}
+                style={{ padding:'8px 16px', borderRadius:7, border:'none', background:'#1a1d23', color:'#fff', fontSize:13, cursor:'pointer', fontWeight:500 }}>
+                {isRTL ? 'הוסף' : 'Add'}
+              </button>
+            </div>
+
+            {ips.length === 0 ? (
+              <div style={{ color:'#9ca3af', fontSize:13, fontStyle:'italic', padding:'8px 0' }}>
+                {isRTL ? 'אין הגבלות IP — גישה פתוחה לכולם' : 'No IP restrictions — all IPs allowed'}
+              </div>
+            ) : (
+              <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
+                {ips.map(ip => (
+                  <div key={ip} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'8px 12px', background:'#f8f9fb', borderRadius:8, border:'1px solid #e2e6ed' }}>
+                    <span style={{ fontFamily:'monospace', fontSize:14, color:'#1a1d23' }}>🌐 {ip}</span>
+                    <button onClick={() => handleDelete(ip)}
+                      style={{ background:'none', border:'none', color:'#dc2626', cursor:'pointer', fontSize:12, padding:'2px 6px' }}>
+                      <Trash2 size={14}/>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {saved && (
+              <div style={{ marginTop:12, color:'#16a34a', fontSize:13, fontWeight:500 }}>✓ {isRTL ? 'נשמר בהצלחה' : 'Saved!'}</div>
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function HistorySection() {
   const [history, setHistory] = useState([]);
   const [total, setTotal] = useState(0);
@@ -985,6 +1075,9 @@ export default function Settings() {
       {permissionsUser && (
         <PermissionsModal user={permissionsUser} onClose={()=>setPermissionsUser(null)}/>
       )}
+
+      {/* IP Whitelist */}
+      {isAdmin && <IpWhitelistSection/>}
 
       {/* Page Titles */}
       {isAdmin && <PageTitlesSection/>}
