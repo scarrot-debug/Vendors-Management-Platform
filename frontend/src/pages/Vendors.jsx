@@ -227,9 +227,8 @@ function DraggableHeader({ col, sortField, sortDir, onSort, onDragStart, onDragO
 
 function DistributorRow({ dist, isViewer, open, onToggle, columns, permissions, selected, onSelect, onEditDist, onDeleteDist, onAddProduct, onEditProduct, onDeleteProduct, onOpenDocs }) {
   const productCount = dist.products?.length || 0;
-  const { t } = useTranslation();
-
-  const renderCell = (key) => {
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === 'he';
     switch(key) {
       case 'status': return <td key={key} style={{ padding:'13px 12px' }}><StatusBadge status={dist.status}/></td>;
       case 'name': return (
