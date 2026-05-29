@@ -303,18 +303,18 @@ function DistributorRow({ dist, isViewer, open, onToggle, columns, permissions, 
         <>
           <tr style={{ background:'#f0f6ff', borderTop:'2px solid #2563eb', borderBottom:'1px solid #dbeafe' }}>
             <td colSpan={2} style={{ padding:'7px 16px 7px 48px' }}/>
-            <td style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#2563eb', textTransform:'uppercase', letterSpacing:1 }}>Status</td>
-            <td style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#2563eb', textTransform:'uppercase', letterSpacing:1 }}>Product Name</td>
-            <td style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#2563eb', textTransform:'uppercase', letterSpacing:1 }}>Manufacturer</td>
-            <td style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#2563eb', textTransform:'uppercase', letterSpacing:1 }}>Category</td>
-            <td style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#2563eb', textTransform:'uppercase', letterSpacing:1 }}>Description</td>
-            <td style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#2563eb', textTransform:'uppercase', letterSpacing:1 }}>Cost Price</td>
-            <td style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#2563eb', textTransform:'uppercase', letterSpacing:1 }}>Customer Price</td>
-            <td style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#2563eb', textTransform:'uppercase', letterSpacing:1 }}>Actions</td>
+            <td style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#2563eb', textTransform:'uppercase', letterSpacing:1 }}>{t('vendors.colStatus')}</td>
+            <td style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#2563eb', textTransform:'uppercase', letterSpacing:1 }}>{t('vendors.productName')}</td>
+            <td style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#2563eb', textTransform:'uppercase', letterSpacing:1 }}>{t('vendors.manufacturer')}</td>
+            <td style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#2563eb', textTransform:'uppercase', letterSpacing:1 }}>{t('vendors.category')}</td>
+            <td style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#2563eb', textTransform:'uppercase', letterSpacing:1 }}>{t('vendors.description')}</td>
+            <td style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#2563eb', textTransform:'uppercase', letterSpacing:1 }}>{t('vendors.costPrice')}</td>
+            <td style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#2563eb', textTransform:'uppercase', letterSpacing:1 }}>{t('vendors.customerPrice')}</td>
+            <td style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#2563eb', textTransform:'uppercase', letterSpacing:1 }}>{t('vendors.colActions')}</td>
           </tr>
           {dist.products?.length === 0 ? (
             <tr style={{ background:'#f8fbff', borderBottom:'2px solid #e2e6ed' }}>
-              <td colSpan={10} style={{ padding:'12px 48px', color:'#9ca3af', fontSize:13, fontStyle:'italic' }}>No products for this distributor</td>
+              <td colSpan={10} style={{ padding:'12px 48px', color:'#9ca3af', fontSize:13, fontStyle:'italic' }}>{t('vendors.noProducts')}</td>
             </tr>
           ) : dist.products?.map((p, idx) => (
             <tr key={p.id} style={{
@@ -345,7 +345,7 @@ function DistributorRow({ dist, isViewer, open, onToggle, columns, permissions, 
                 {!isViewer && (
                   <div style={{ display:'flex', gap:5 }}>
                     <button onClick={()=>onEditProduct(dist, p)} style={{...btnStyle, padding:'3px 9px', background:'#fff', color:'#2563eb', border:'1px solid #e2e6ed', fontSize:12}}>
-                      <Edit2 size={11}/> Edit
+                      <Edit2 size={11}/> {t('vendors.edit')}
                     </button>
                     <button onClick={()=>onDeleteProduct(dist, p)} style={{...btnStyle, padding:'3px 9px', background:'#fff', color:'#dc2626', border:'1px solid #fee2e2', fontSize:12}}>
                       <Trash2 size={11}/>
