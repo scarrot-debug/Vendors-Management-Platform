@@ -235,7 +235,7 @@ export default {
     logoGuidelinesDimensions: 'מידות מומלצות: 160×40px או פורמט רחב דומה',
     logoGuidelinesBackground: 'רקע: שקוף או כהה — הלוגו מוצג על רקע כהה',
     logoGuidelinesNote: 'שים לב: אותה תמונה משמשת גם לסרגל מורחב וגם לכווץ.',
-    sessionTimeout: 'פסק זמן פגישה',
+    sessionTimeout: 'תוקף חיבור למערכת',
     sessionTimeoutDesc: 'יציאה אוטומטית לאחר חוסר פעילות',
     autoLogoutAfter: 'יציאה אוטומטית לאחר:',
     changeHistory: 'היסטוריית שינויים',
