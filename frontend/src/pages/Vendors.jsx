@@ -309,73 +309,76 @@ function DistributorRow({ dist, isViewer, open, onToggle, columns, permissions, 
         )}
         {columns.map(col => renderCell(col.key))}
       </tr>
-      {open && (
-        <>
-          <tr style={{ background:'#f0f6ff', borderTop:'2px solid #2563eb', borderBottom:'1px solid #dbeafe' }}>
-            <td colSpan={2} style={{ padding:'7px 16px 7px 48px' }}/>
-            <td style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#2563eb', textTransform:'uppercase', letterSpacing:1 }}>{t('vendors.colStatus')}</td>
-            <td style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#2563eb', textTransform:'uppercase', letterSpacing:1 }}>{t('vendors.productName')}</td>
-            <td style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#2563eb', textTransform:'uppercase', letterSpacing:1 }}>{t('vendors.manufacturer')}</td>
-            <td style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#2563eb', textTransform:'uppercase', letterSpacing:1 }}>{t('vendors.category')}</td>
-            <td style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#2563eb', textTransform:'uppercase', letterSpacing:1 }}>{t('vendors.description')}</td>
-            <td style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#2563eb', textTransform:'uppercase', letterSpacing:1 }}>{t('vendors.costPrice')}</td>
-            <td style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#2563eb', textTransform:'uppercase', letterSpacing:1 }}>{t('vendors.customerPrice')}</td>
-            <td style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#2563eb', textTransform:'uppercase', letterSpacing:1 }}>{t('vendors.colActions')}</td>
-          </tr>
-          {dist.products?.length === 0 ? (
-            <tr style={{ background:'#f8fbff', borderBottom:'2px solid #e2e6ed' }}>
-              <td colSpan={10} style={{ padding:'12px 48px', color:'#9ca3af', fontSize:13, fontStyle:'italic' }}>{t('vendors.noProducts')}</td>
+      {open && (() => {
+        const totalCols = columns.length + 1 + (isViewer ? 0 : 1);
+        return (
+          <>
+            <tr style={{ background:'#f0f6ff', borderTop:'2px solid #2563eb', borderBottom:'1px solid #dbeafe' }}>
+              <td colSpan={2} style={{ padding:'7px 16px 7px 48px' }}/>
+              <td style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#2563eb', textTransform:'uppercase', letterSpacing:1 }}>{t('vendors.colStatus')}</td>
+              <td style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#2563eb', textTransform:'uppercase', letterSpacing:1 }}>{t('vendors.productName')}</td>
+              <td style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#2563eb', textTransform:'uppercase', letterSpacing:1 }}>{t('vendors.manufacturer')}</td>
+              <td style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#2563eb', textTransform:'uppercase', letterSpacing:1 }}>{t('vendors.category')}</td>
+              <td style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#2563eb', textTransform:'uppercase', letterSpacing:1 }}>{t('vendors.description')}</td>
+              <td style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#2563eb', textTransform:'uppercase', letterSpacing:1 }}>{t('vendors.costPrice')}</td>
+              <td style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#2563eb', textTransform:'uppercase', letterSpacing:1 }}>{t('vendors.customerPrice')}</td>
+              <td colSpan={totalCols - 9} style={{ padding:'7px 16px', fontSize:11, fontWeight:700, color:'#2563eb', textTransform:'uppercase', letterSpacing:1 }}>{t('vendors.colActions')}</td>
             </tr>
-          ) : dist.products?.map((p, idx) => (
-            <tr key={p.id} style={{
-              background: idx % 2 === 0 ? '#f8fbff' : '#f0f6ff',
-              borderBottom: idx === (dist.products.length-1) ? '2px solid #bfdbfe' : '1px solid #e8f0fe',
-            }}>
-              <td style={{ padding:'10px 0 10px 32px', borderLeft:'3px solid #2563eb' }} colSpan={2}/>
-              <td style={{ padding:'10px 16px' }}><StatusBadge status={p.status}/></td>
-              <td style={{ padding:'10px 16px' }}><div style={{ fontWeight:600, color:'#1e40af', fontSize:13 }}>{p.name}</div></td>
-              <td style={{ padding:'10px 16px', color:'#374151', fontSize:13 }}>{p.vendor || '—'}</td>
-              <td style={{ padding:'10px 16px', color:'#6b7280', fontSize:13 }}>{p.category || '—'}</td>
-              <td style={{ padding:'10px 16px', color:'#6b7280', fontSize:13 }}>{p.description || '—'}</td>
-              <td style={{ padding:'10px 16px' }}>
-                {permissions?.can_see_cost_price !== false ? (
-                  <span style={{ fontWeight:700, color:'#1a1d23', fontVariantNumeric:'tabular-nums', fontSize:14 }}>
-                    {formatCost(p.cost, p.currency)}
-                  </span>
-                ) : <span style={{ color:'#d1d5db', fontSize:13 }}>—</span>}
-              </td>
-              <td style={{ padding:'10px 16px' }}>
-                {permissions?.can_see_customer_price !== false ? (
-                  <span style={{ fontWeight:700, color:'#16a34a', fontVariantNumeric:'tabular-nums', fontSize:14 }}>
-                    {formatCost(p.customer_price, p.currency)}
-                  </span>
-                ) : <span style={{ color:'#d1d5db', fontSize:13 }}>—</span>}
-              </td>
-              <td style={{ padding:'10px 16px' }}>
-                {!isViewer && (
-                  <div style={{ display:'flex', gap:5 }}>
-                    <button onClick={()=>onEditProduct(dist, p)} style={{...btnStyle, padding:'3px 9px', background:'#fff', color:'#2563eb', border:'1px solid #e2e6ed', fontSize:12}}>
-                      <Edit2 size={11}/> {t('vendors.edit')}
-                    </button>
-                    <button onClick={()=>onDeleteProduct(dist, p)} style={{...btnStyle, padding:'3px 9px', background:'#fff', color:'#dc2626', border:'1px solid #fee2e2', fontSize:12}}>
-                      <Trash2 size={11}/>
-                    </button>
-                  </div>
-                )}
-              </td>
-            </tr>
-          ))}
-          {dist.notes && (
-            <tr style={{ background:'#fffbeb', borderBottom:'2px solid #bfdbfe', borderTop:'1px solid #fde68a' }}>
-              <td colSpan={2} style={{ padding:'10px 0 10px 32px', borderLeft:'3px solid #d97706' }}/>
-              <td colSpan={8} style={{ padding:'10px 16px' }}>
-                <span style={{ fontSize:12, fontWeight:600, color:'#92400e', marginRight:8 }}>📝 {t('common.notes')}</span>
-                <span style={{ fontSize:13, color:'#78350f' }}>{dist.notes}</span>
-              </td>
-            </tr>
-          )}
-        </>
-      )}
+            {dist.products?.length === 0 ? (
+              <tr style={{ background:'#f8fbff', borderBottom:'2px solid #e2e6ed' }}>
+                <td colSpan={totalCols} style={{ padding:'12px 48px', color:'#9ca3af', fontSize:13, fontStyle:'italic' }}>{t('vendors.noProducts')}</td>
+              </tr>
+            ) : dist.products?.map((p, idx) => (
+              <tr key={p.id} style={{
+                background: idx % 2 === 0 ? '#f8fbff' : '#f0f6ff',
+                borderBottom: idx === (dist.products.length-1) ? '2px solid #bfdbfe' : '1px solid #e8f0fe',
+              }}>
+                <td style={{ padding:'10px 0 10px 32px', borderLeft:'3px solid #2563eb' }} colSpan={2}/>
+                <td style={{ padding:'10px 16px' }}><StatusBadge status={p.status}/></td>
+                <td style={{ padding:'10px 16px' }}><div style={{ fontWeight:600, color:'#1e40af', fontSize:13 }}>{p.name}</div></td>
+                <td style={{ padding:'10px 16px', color:'#374151', fontSize:13 }}>{p.vendor || '—'}</td>
+                <td style={{ padding:'10px 16px', color:'#6b7280', fontSize:13 }}>{p.category || '—'}</td>
+                <td style={{ padding:'10px 16px', color:'#6b7280', fontSize:13 }}>{p.description || '—'}</td>
+                <td style={{ padding:'10px 16px' }}>
+                  {permissions?.can_see_cost_price !== false ? (
+                    <span style={{ fontWeight:700, color:'#1a1d23', fontVariantNumeric:'tabular-nums', fontSize:14 }}>
+                      {formatCost(p.cost, p.currency)}
+                    </span>
+                  ) : <span style={{ color:'#d1d5db', fontSize:13 }}>—</span>}
+                </td>
+                <td style={{ padding:'10px 16px' }}>
+                  {permissions?.can_see_customer_price !== false ? (
+                    <span style={{ fontWeight:700, color:'#16a34a', fontVariantNumeric:'tabular-nums', fontSize:14 }}>
+                      {formatCost(p.customer_price, p.currency)}
+                    </span>
+                  ) : <span style={{ color:'#d1d5db', fontSize:13 }}>—</span>}
+                </td>
+                <td colSpan={totalCols - 9} style={{ padding:'10px 16px' }}>
+                  {!isViewer && (
+                    <div style={{ display:'flex', gap:5 }}>
+                      <button onClick={()=>onEditProduct(dist, p)} style={{...btnStyle, padding:'3px 9px', background:'#fff', color:'#2563eb', border:'1px solid #e2e6ed', fontSize:12}}>
+                        <Edit2 size={11}/> {t('vendors.edit')}
+                      </button>
+                      <button onClick={()=>onDeleteProduct(dist, p)} style={{...btnStyle, padding:'3px 9px', background:'#fff', color:'#dc2626', border:'1px solid #fee2e2', fontSize:12}}>
+                        <Trash2 size={11}/>
+                      </button>
+                    </div>
+                  )}
+                </td>
+              </tr>
+            ))}
+            {dist.notes && (
+              <tr style={{ background:'#fffbeb', borderBottom:'2px solid #bfdbfe', borderTop:'1px solid #fde68a' }}>
+                <td colSpan={2} style={{ padding:'10px 0 10px 32px', borderLeft:'3px solid #d97706' }}/>
+                <td colSpan={totalCols - 2} style={{ padding:'10px 16px' }}>
+                  <span style={{ fontSize:12, fontWeight:600, color:'#92400e', marginRight:8 }}>📝 {t('common.notes')}</span>
+                  <span style={{ fontSize:13, color:'#78350f' }}>{dist.notes}</span>
+                </td>
+              </tr>
+            )}
+          </>
+        );
+      })()}
     </>
   );
 }
