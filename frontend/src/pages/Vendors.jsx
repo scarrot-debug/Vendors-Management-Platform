@@ -245,8 +245,8 @@ function DistributorRow({ dist, isViewer, open, onToggle, columns, permissions, 
       );
       case 'contact': return <td key={key} style={{ padding:'13px 16px', color:'#374151' }}>{dist.contact || '—'}</td>;
       case 'email':   return <td key={key} style={{ padding:'13px 16px', color:'#6b7280', fontSize:13 }}>{dist.email || '—'}</td>;
-      case 'phone':   return <td key={key} style={{ padding:'13px 16px', color:'#6b7280', fontSize:13 }}>{dist.phone || '—'}</td>;
-      case 'mobile':  return <td key={key} style={{ padding:'13px 16px', color:'#6b7280', fontSize:13 }}>{dist.mobile || '—'}</td>;
+      case 'phone':   return <td key={key} style={{ padding:'13px 16px', color:'#6b7280', fontSize:13, direction:'ltr', textAlign: isRTL ? 'right' : 'left' }}>{dist.phone || '—'}</td>;
+      case 'mobile':  return <td key={key} style={{ padding:'13px 16px', color:'#6b7280', fontSize:13, direction:'ltr', textAlign: isRTL ? 'right' : 'left' }}>{dist.mobile || '—'}</td>;
       case 'website': return (
         <td key={key} style={{ padding:'13px 16px', fontSize:13 }}>
           {dist.website ? (
