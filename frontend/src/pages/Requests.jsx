@@ -205,9 +205,9 @@ function RequestDetail({ request, onClose, onRefresh, currentUser }) {
           <table style={{ width:'100%', borderCollapse:'collapse', fontSize:13 }}>
             <thead>
               <tr style={{ background:'#f8f9fb', borderBottom:'1px solid #e2e6ed' }}>
-                <th style={{ padding:'8px 12px', textAlign:'left', color:'#374151', fontWeight:600 }}>Product</th>
+                <th style={{ padding:'8px 12px', textAlign: isRTL ? 'right' : 'left', color:'#374151', fontWeight:600 }}>Product</th>
                 <th style={{ padding:'8px 12px', textAlign:'center', color:'#374151', fontWeight:600 }}>Qty</th>
-                <th style={{ padding:'8px 12px', textAlign:'left', color:'#374151', fontWeight:600 }}>Notes</th>
+                <th style={{ padding:'8px 12px', textAlign: isRTL ? 'right' : 'left', color:'#374151', fontWeight:600 }}>Notes</th>
               </tr>
             </thead>
             <tbody>
@@ -288,7 +288,8 @@ function RequestDetail({ request, onClose, onRefresh, currentUser }) {
 
 export default function Requests() {
   const { user } = useAuth();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === 'he';
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState(null);
@@ -364,7 +365,7 @@ export default function Requests() {
           <thead>
             <tr style={{ borderBottom:'1px solid #e2e6ed', background:'#f8f9fb' }}>
               {[t('requests.requestTitle'),t('vendors.distributor'),t('common.name'),t('common.date'),t('common.status'),t('common.actions')].map(h=>(
-                <th key={h} style={{ padding:'11px 16px', textAlign:'left', color:'#374151', fontWeight:600, fontSize:12, textTransform:'uppercase', letterSpacing:0.5 }}>{h}</th>
+                <th key={h} style={{ padding:'11px 16px', textAlign: isRTL ? 'right' : 'left', color:'#374151', fontWeight:600, fontSize:12, textTransform:'uppercase', letterSpacing:0.5 }}>{h}</th>
               ))}
             </tr>
           </thead>
@@ -378,7 +379,7 @@ export default function Requests() {
                 onMouseEnter={e=>e.currentTarget.style.background='#f8f9fb'}
                 onMouseLeave={e=>e.currentTarget.style.background='#fff'}>
                 <td style={{ padding:'12px 16px' }}>
-                  <button onClick={()=>openDetail(req)} style={{ background:'none', border:'none', color:'#1e40af', cursor:'pointer', fontSize:14, fontWeight:600, padding:0, textAlign:'left' }}>
+                  <button onClick={()=>openDetail(req)} style={{ background:'none', border:'none', color:'#1e40af', cursor:'pointer', fontSize:14, fontWeight:600, padding:0, textAlign: isRTL ? 'right' : 'left' }}>
                     {req.title}
                   </button>
                 </td>

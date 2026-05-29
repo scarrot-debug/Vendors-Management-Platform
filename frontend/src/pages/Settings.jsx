@@ -556,7 +556,7 @@ function HistorySection() {
         <thead>
           <tr style={{ borderBottom:'1px solid #e2e6ed', background:'#fafafa' }}>
             {[t('settings.colHistDate'), t('settings.colHistUser'), t('settings.colHistAction'), t('settings.colHistType'), t('common.name')].map(h=>(
-              <th key={h} style={{ padding:'10px 20px', textAlign:'left', color:'#374151', fontWeight:600, fontSize:12, textTransform:'uppercase', letterSpacing:0.5 }}>{h}</th>
+              <th key={h} style={{ padding:'10px 20px', textAlign: isRTL ? 'right' : 'left', color:'#374151', fontWeight:600, fontSize:12, textTransform:'uppercase', letterSpacing:0.5 }}>{h}</th>
             ))}
           </tr>
         </thead>
@@ -602,8 +602,8 @@ function HistorySection() {
 
 export default function Settings() {
   const { user: currentUser, sessionTimeout, updateSessionTimeout, logo, updateLogo } = useAuth();
-  const { t } = useTranslation();
-  const logoFileRef = useRef(null);
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === 'he';
   const [permissionsUser, setPermissionsUser] = useState(null);
   const [logoUploading, setLogoUploading] = useState(false);
   const [users, setUsers] = useState([]);
@@ -700,7 +700,7 @@ export default function Settings() {
           <thead>
             <tr style={{ borderBottom:'1px solid #e2e6ed', background:'#fafafa' }}>
               {['', t('settings.colFirstName'), t('settings.colLastName'), t('settings.colUsername'), t('settings.colEmail'), t('settings.colRole'), t('common.date'), t('settings.colActions')].map(h => (
-                <th key={h} style={{ padding:'10px 16px', textAlign:'left', color:'#374151', fontWeight:600, fontSize:12, textTransform:'uppercase', letterSpacing:0.5 }}>{h}</th>
+                <th key={h} style={{ padding:'10px 16px', textAlign: isRTL ? 'right' : 'left', color:'#374151', fontWeight:600, fontSize:12, textTransform:'uppercase', letterSpacing:0.5 }}>{h}</th>
               ))}
             </tr>
           </thead>
