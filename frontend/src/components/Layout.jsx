@@ -163,7 +163,10 @@ export default function Layout() {
 
           {userMenuOpen && (
             <div style={{
-              position:'absolute', top:'calc(100% + 8px)', right:0, zIndex:200,
+              position:'absolute', top:'calc(100% + 8px)',
+              right: isRTL ? 'auto' : 0,
+              left: isRTL ? 0 : 'auto',
+              zIndex:200,
               background:'#fff', border:'1px solid #e2e6ed', borderRadius:10,
               boxShadow:'0 8px 24px rgba(0,0,0,0.12)', minWidth:200, overflow:'hidden',
             }} onMouseLeave={()=>setUserMenuOpen(false)}>
