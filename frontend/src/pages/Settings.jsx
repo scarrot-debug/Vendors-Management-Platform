@@ -791,7 +791,7 @@ export default function Settings() {
       )}
 
       <h1 style={{ fontSize:24, fontWeight:700, marginBottom:4, color:'#1a1d23' }}>{pageTitle}</h1>
-      <p style={{ color:'#6b7280', fontSize:14, marginBottom:28 }}>{t('settings.subtitle')}</p>
+      <p style={{ color:'#6b7280', fontSize:14, marginBottom:28 }}>{pageSubtitle}</p>
 
       {/* User Management */}
       <div style={{ background:'#fff', border:'1px solid #e2e6ed', borderRadius:10, overflow:'hidden' }}>
