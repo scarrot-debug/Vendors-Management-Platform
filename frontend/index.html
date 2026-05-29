@@ -3,12 +3,33 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="ONE Vendor Management Platform — Manage distributors, products, purchase requests and approvals in one place." />
+  <meta name="robots" content="noindex, nofollow" />
   <title>ONE Vendor Management</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    .skip-link {
+      position: absolute;
+      top: -40px;
+      left: 0;
+      background: #1a1d23;
+      color: #fff;
+      padding: 8px 16px;
+      z-index: 9999;
+      font-size: 14px;
+      border-radius: 0 0 6px 0;
+      transition: top 0.2s;
+    }
+    .skip-link:focus {
+      top: 0;
+    }
+  </style>
 </head>
 <body>
-  <div id="root"></div>
+  <a href="#main" class="skip-link">Skip to main content</a>
+  <h1 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;">ONE Vendor Management Platform</h1>
+  <div id="root"><div id="main"></div></div>
   <script type="module" src="/src/main.jsx"></script>
 </body>
 </html>
