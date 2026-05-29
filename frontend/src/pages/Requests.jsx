@@ -151,6 +151,8 @@ function RequestForm({ onSave, onCancel, saving }) {
 }
 
 function RequestDetail({ request, onClose, onRefresh, currentUser }) {
+  const { i18n } = useTranslation();
+  const isRTL = i18n.language === 'he';
   const canReview = ['admin', 'user'].includes(currentUser?.role);
   const isOwner = request.requested_by === currentUser?.id;
   const [reviewNote, setReviewNote] = useState('');
