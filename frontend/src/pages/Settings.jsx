@@ -529,10 +529,8 @@ function HistorySection() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const limit = 20;
-  const { t } = useTranslation();
-
-  useEffect(() => {
-    setLoading(true);
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === 'he';
     api.getHistory({ page, limit }).then(d => {
       setHistory(d.history || []);
       setTotal(d.total || 0);
@@ -604,6 +602,7 @@ export default function Settings() {
   const { user: currentUser, sessionTimeout, updateSessionTimeout, logo, updateLogo } = useAuth();
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'he';
+  const logoFileRef = useRef(null);
   const [permissionsUser, setPermissionsUser] = useState(null);
   const [logoUploading, setLogoUploading] = useState(false);
   const [users, setUsers] = useState([]);
