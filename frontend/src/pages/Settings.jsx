@@ -550,7 +550,7 @@ function HistorySection() {
           </h2>
           <p style={{ fontSize:13, color:'#6b7280' }}>{t('settings.changeHistoryDesc')}</p>
         </div>
-        <span style={{ fontSize:13, color:'#6b7280' }}>{total} records</span>
+        <span style={{ fontSize:13, color:'#6b7280' }}>{total} {t('settings.records')}</span>
       </div>
       <table style={{ width:'100%', borderCollapse:'collapse', fontSize:13 }}>
         <thead>
@@ -777,7 +777,7 @@ export default function Settings() {
             <h2 style={{ fontSize:16, fontWeight:600, color:'#1a1d23', marginBottom:2, display:'flex', alignItems:'center', gap:8 }}>
               <Image size={16} color="#2563eb"/> {t('settings.sidebarLogo')}
             </h2>
-            <p style={{ fontSize:13, color:'#6b7280' }}>Customize the logo displayed in the sidebar</p>
+            <p style={{ fontSize:13, color:'#6b7280' }}>{t('settings.sidebarLogoDesc')}</p>
           </div>
           <div style={{ padding:'20px 24px' }}>
             <div style={{ display:'flex', alignItems:'center', gap:24, marginBottom:20 }}>
@@ -787,10 +787,10 @@ export default function Settings() {
                   {logo ? (
                     <img src={logo} alt="Current logo" style={{ maxHeight:32, maxWidth:120, objectFit:'contain' }}/>
                   ) : (
-                    <img src="https://www.one1.co.il/wp-content/uploads/2024/11/dark_logo.webp" alt="Default logo" style={{ maxHeight:32, maxWidth:120, objectFit:'contain' }}/>
+                    <img src="https://www.one1.co.il/wp-content/uploads/2024/11/dark_logo.webp" alt={t('settings.defaultLogo')} style={{ maxHeight:32, maxWidth:120, objectFit:'contain' }}/>
                   )}
                 </div>
-                <span style={{ fontSize:11, color:'#9ca3af' }}>{logo ? 'Custom logo' : 'Default logo'}</span>
+                <span style={{ fontSize:11, color:'#9ca3af' }}>{logo ? t('settings.customLogo') : t('settings.defaultLogo')}</span>
               </div>
               {/* Actions */}
               <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
