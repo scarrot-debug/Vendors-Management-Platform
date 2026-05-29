@@ -531,6 +531,9 @@ function HistorySection() {
   const limit = 20;
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'he';
+
+  useEffect(() => {
+    setLoading(true);
     api.getHistory({ page, limit }).then(d => {
       setHistory(d.history || []);
       setTotal(d.total || 0);
