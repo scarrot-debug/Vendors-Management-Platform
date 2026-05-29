@@ -142,6 +142,10 @@ export default {
     active: 'Active',
     pending: 'Pending',
     inactive: 'Inactive',
+    visitSite: 'Visit',
+    confirmDelete: 'Confirm Delete',
+    deleteWarning: 'All products of this distributor will also be deleted.',
+    currencies: { USD: 'USD — Dollar', EUR: 'EUR — Euro', ILS: 'ILS — Shekel', GBP: 'GBP — Pound' },
   },
   // Documents
   documents: {

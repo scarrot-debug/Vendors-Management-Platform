@@ -80,7 +80,11 @@ function DistributorForm({ initial, onSave, onCancel, saving }) {
         <div>
           <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>{t('common.status')}</label>
           <select value={form.status} onChange={e=>set('status',e.target.value)} style={inputStyle}>
-            {['Active','Pending','Inactive'].map(s=><option key={s}>{s}</option>)}
+            {[
+              { value:'Active',   label: t('vendors.active') },
+              { value:'Pending',  label: t('vendors.pending') },
+              { value:'Inactive', label: t('vendors.inactive') },
+            ].map(s=><option key={s.value} value={s.value}>{s.label}</option>)}
           </select>
         </div>
       </div>
@@ -136,7 +140,7 @@ function ProductForm({ initial, onSave, onCancel, saving }) {
         <div>
           <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>{t('vendors.currency')}</label>
           <select value={form.currency} onChange={e=>set('currency',e.target.value)} style={inputStyle}>
-            {CURRENCIES.map(c=><option key={c}>{c}</option>)}
+            {CURRENCIES.map(c=><option key={c} value={c}>{t(`vendors.currencies.${c}`, { defaultValue: c })}</option>)}
           </select>
         </div>
       </div>
@@ -249,7 +253,7 @@ function DistributorRow({ dist, isViewer, open, onToggle, columns, permissions, 
               style={{ color:'#2563eb', textDecoration:'none', fontSize:12 }}
               onMouseEnter={e=>e.currentTarget.style.textDecoration='underline'}
               onMouseLeave={e=>e.currentTarget.style.textDecoration='none'}>
-              🔗 Visit
+              🔗 {t('vendors.visitSite')}
             </a>
           ) : '—'}
         </td>
@@ -990,16 +994,16 @@ export default function Vendors() {
         </Modal>
       )}
       {deleteConfirm && (
-        <Modal title="Confirm Delete" onClose={()=>setDeleteConfirm(null)}>
+        <Modal title={t('vendors.confirmDelete')} onClose={()=>setDeleteConfirm(null)}>
           <p style={{ color:'#6b7280', marginBottom:20 }}>
-            Delete <strong style={{ color:'#1a1d23' }}>{deleteConfirm.data.name}</strong>?
+            {t('common.delete')} <strong style={{ color:'#1a1d23' }}>{deleteConfirm.data.name}</strong>?
             {deleteConfirm.type === 'dist' && deleteConfirm.data.products?.length > 0 &&
-              <span style={{ display:'block', marginTop:8, color:'#dc2626', fontSize:13 }}>⚠️ All products of this distributor will also be deleted.</span>
+              <span style={{ display:'block', marginTop:8, color:'#dc2626', fontSize:13 }}>⚠️ {t('vendors.deleteWarning')}</span>
             }
           </p>
           <div style={{ display:'flex', gap:10, justifyContent:'flex-end' }}>
-            <button onClick={()=>setDeleteConfirm(null)} style={{...btnStyle, background:'#f4f6f9', color:'#6b7280'}}>Cancel</button>
-            <button onClick={handleDelete} style={{...btnStyle, background:'#dc2626', color:'#fff'}}><Trash2 size={14}/> Delete</button>
+            <button onClick={()=>setDeleteConfirm(null)} style={{...btnStyle, background:'#f4f6f9', color:'#6b7280'}}>{t('common.cancel')}</button>
+            <button onClick={handleDelete} style={{...btnStyle, background:'#dc2626', color:'#fff'}}><Trash2 size={14}/> {t('common.delete')}</button>
           </div>
         </Modal>
       )}

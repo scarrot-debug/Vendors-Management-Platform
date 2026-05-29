@@ -142,6 +142,10 @@ export default {
     active: 'פעיל',
     pending: 'ממתין',
     inactive: 'לא פעיל',
+    visitSite: 'בקר באתר',
+    confirmDelete: 'אישור מחיקה',
+    deleteWarning: 'כל מוצרי המפיץ הזה יימחקו גם כן.',
+    currencies: { USD: 'USD — דולר', EUR: 'EUR — יורו', ILS: 'ILS — שקל', GBP: 'GBP — פאונד' },
   },
   // Documents
   documents: {
