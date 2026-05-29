@@ -49,7 +49,7 @@ export default function Login() {
           <p style={{ color: '#6b7280', fontSize: 14 }}>{t('auth.login')}</p>
         </div>
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }} dir={isRTL ? 'rtl' : 'ltr'}>
           {[
             { label: t('auth.username'), value: username, set: setUsername, type: 'text', placeholder: '' },
             { label: t('auth.password'), value: password, set: setPassword, type: 'password', placeholder: '' },

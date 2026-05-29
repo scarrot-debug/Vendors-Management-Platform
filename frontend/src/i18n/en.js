@@ -62,6 +62,7 @@ export default {
   // Auth
   auth: {
     login: 'Sign In',
+    signIn: 'Sign In',
     logout: 'Logout',
     username: 'Username',
     password: 'Password',
@@ -95,7 +96,7 @@ export default {
     addDistributor: 'Add Distributor',
     editDistributor: 'Edit Distributor',
     deleteDistributor: 'Delete Distributor',
-    addProduct: '+ Product',
+    addProduct: 'Product',
     editProduct: 'Edit Product',
     deleteProduct: 'Delete Product',
     searchPlaceholder: 'Search distributors and products…',
@@ -222,7 +223,7 @@ export default {
     subtitle: 'System configuration and user management',
     userManagement: 'User Management',
     userManagementDesc: 'Add, edit or remove system users',
-    addUser: '+ Add User',
+    addUser: 'Add User',
     sidebarLogo: 'Sidebar Logo',
     sidebarLogoDesc: 'Customize the logo displayed in the sidebar',
     defaultLogo: 'Default logo',

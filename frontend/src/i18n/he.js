@@ -62,6 +62,7 @@ export default {
   // Auth
   auth: {
     login: 'כניסה למערכת',
+    signIn: 'כניסה',
     logout: 'יציאה',
     username: 'שם משתמש',
     password: 'סיסמה',
