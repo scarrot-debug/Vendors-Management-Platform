@@ -20,10 +20,19 @@ export function usePageTitle(pageKey, defaults) {
     }).catch(() => {});
   }, []);
 
-  const langData = titles[pageKey]?.[lang] || titles[pageKey] || {};
+  const pageData = titles[pageKey];
 
-  return {
-    title:    langData.title    || defaults.title,
-    subtitle: langData.subtitle || defaults.subtitle,
-  };
+  // Support both new format {en:{title,subtitle}, he:{title,subtitle}}
+  // and old flat format {title, subtitle}
+  let title, subtitle;
+  if (pageData?.en || pageData?.he) {
+    const langData = pageData[lang] || pageData['en'] || {};
+    title    = langData.title    || defaults.title;
+    subtitle = langData.subtitle || defaults.subtitle;
+  } else {
+    title    = pageData?.title    || defaults.title;
+    subtitle = pageData?.subtitle || defaults.subtitle;
+  }
+
+  return { title, subtitle };
 }
