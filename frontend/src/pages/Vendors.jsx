@@ -333,7 +333,7 @@ function DistributorRow({ dist, isViewer, open, onToggle, columns, permissions, 
                 background: idx % 2 === 0 ? '#f8fbff' : '#f0f6ff',
                 borderBottom: idx === (dist.products.length-1) ? '2px solid #bfdbfe' : '1px solid #e8f0fe',
               }}>
-                <td style={{ padding:'10px 0 10px 32px', borderLeft:'3px solid #2563eb' }} colSpan={2}/>
+                <td style={{ padding:'10px 0 10px 32px', borderInlineStart:'3px solid #2563eb' }} colSpan={2}/>
                 <td style={{ padding:'10px 16px' }}><StatusBadge status={p.status}/></td>
                 <td style={{ padding:'10px 16px' }}><div style={{ fontWeight:600, color:'#1e40af', fontSize:13 }}>{p.name}</div></td>
                 <td style={{ padding:'10px 16px', color:'#374151', fontSize:13 }}>{p.vendor || '—'}</td>
@@ -369,9 +369,9 @@ function DistributorRow({ dist, isViewer, open, onToggle, columns, permissions, 
             ))}
             {dist.notes && (
               <tr style={{ background:'#fffbeb', borderBottom:'2px solid #bfdbfe', borderTop:'1px solid #fde68a' }}>
-                <td colSpan={2} style={{ padding:'10px 0 10px 32px', borderLeft:'3px solid #d97706' }}/>
+                <td colSpan={2} style={{ padding:'10px 0 10px 32px', borderInlineStart:'3px solid #d97706' }}/>
                 <td colSpan={totalCols - 2} style={{ padding:'10px 16px' }}>
-                  <span style={{ fontSize:12, fontWeight:600, color:'#92400e', marginRight:8 }}>📝 {t('common.notes')}</span>
+                  <span style={{ fontSize:12, fontWeight:600, color:'#92400e', marginInlineEnd:8 }}>📝 {t('common.notes')}</span>
                   <span style={{ fontSize:13, color:'#78350f' }}>{dist.notes}</span>
                 </td>
               </tr>
