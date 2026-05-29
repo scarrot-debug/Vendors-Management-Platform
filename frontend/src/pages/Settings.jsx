@@ -749,7 +749,7 @@ export default function Settings() {
                         🔒 {t('settings.colRole')}
                       </button>
                       <button onClick={()=>setModal({type:'reset', data:u})} style={{...btnStyle, padding:'5px 11px', background:'#fff', color:'#d97706', border:'1px solid #fde68a', fontSize:12}}>
-                        <KeyRound size={12}/> Reset
+                        <KeyRound size={12}/> {t('settings.resetPasswordTitle')}
                       </button>
                       {u.username!==currentUser?.username && (
                         <button onClick={()=>setDeleteConfirm(u)} style={{...btnStyle, padding:'5px 9px', background:'#fff', color:'#dc2626', border:'1px solid #fee2e2', fontSize:12}}>
@@ -879,17 +879,17 @@ export default function Settings() {
 
       {/* Modals */}
       {modal?.type==='add' && (
-        <Modal title="Add New User" onClose={()=>setModal(null)}>
+        <Modal title={t('settings.addUser')} onClose={()=>setModal(null)}>
           <AddUserWizard onSave={handleSaveUser} onCancel={()=>setModal(null)} saving={saving}/>
         </Modal>
       )}
       {modal?.type==='edit' && (
-        <Modal title={`Edit User — ${modal.data.username}`} onClose={()=>setModal(null)}>
+        <Modal title={`${t('settings.editUser')} — ${modal.data.username}`} onClose={()=>setModal(null)}>
           <EditUserForm initial={modal.data} onSave={handleSaveUser} onCancel={()=>setModal(null)} saving={saving}/>
         </Modal>
       )}
       {modal?.type==='reset' && (
-        <Modal title="Reset Password" onClose={()=>setModal(null)}>
+        <Modal title={t('settings.resetPasswordTitle')} onClose={()=>setModal(null)}>
           <ResetPasswordForm user={modal.data} onSave={handleResetPassword} onCancel={()=>setModal(null)} saving={saving}/>
         </Modal>
       )}

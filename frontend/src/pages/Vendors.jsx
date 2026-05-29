@@ -379,7 +379,6 @@ function DocumentsPanel({ dist, onClose, isViewer }) {
   const [minimized, setMinimized] = useState(false);
   const fileRef = useRef(null);
   const token = localStorage.getItem('token');
-  const { t } = useTranslation();
 
   const loadDocs = () => {
     setLoading(true);
@@ -446,9 +445,14 @@ function DocumentsPanel({ dist, onClose, isViewer }) {
     return '📄';
   };
 
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === 'he';
+
   return (
     <div style={{
-      position:'fixed', bottom:16, right:16,
+      position:'fixed', bottom:16,
+      right: isRTL ? 'auto' : 16,
+      left: isRTL ? 16 : 'auto',
       width:340, maxWidth:'90vw',
       height: minimized ? 'auto' : 480,
       background:'#fff', boxShadow:'0 8px 32px rgba(0,0,0,0.18)',
@@ -460,7 +464,7 @@ function DocumentsPanel({ dist, onClose, isViewer }) {
       <div style={{ padding:'14px 16px', background:'#1a1d23', flexShrink:0 }}>
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
           <div>
-            <div style={{ fontSize:13, fontWeight:600, color:'#fff' }}>📄 Documents</div>
+            <div style={{ fontSize:13, fontWeight:600, color:'#fff' }}>📄 {t('documents.title')}</div>
             <div style={{ fontSize:11, color:'rgba(255,255,255,0.5)', marginTop:1 }}>{dist.name}</div>
           </div>
           <div style={{ display:'flex', gap:6 }}>
@@ -545,7 +549,7 @@ function DocumentsPanel({ dist, onClose, isViewer }) {
       {/* Footer */}
       {!minimized && (
       <div style={{ padding:'10px 16px', borderTop:'1px solid #e2e6ed', fontSize:12, color:'#9ca3af', flexShrink:0 }}>
-        {docs.length} document{docs.length !== 1 ? 's' : ''}
+        {docs.length} {t('documents.title').toLowerCase()}
       </div>
       )}
     </div>
@@ -941,7 +945,7 @@ export default function Vendors() {
 
       {/* Modals */}
       {modal?.type === 'addDist' && (
-        <Modal title="Add New Distributor" onClose={()=>setModal(null)} wide>
+        <Modal title={t('vendors.addDistributor')} onClose={()=>setModal(null)} wide>
           <DistributorForm onSave={handleSaveDist} onCancel={()=>setModal(null)} saving={saving}/>
         </Modal>
       )}
