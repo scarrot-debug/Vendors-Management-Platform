@@ -3,6 +3,7 @@ import { api } from '../api/client.js';
 import { useAuth } from '../hooks/useAuth.jsx';
 import { Plus, X, Check, Trash2, Send, Edit2, ChevronDown, ChevronUp } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { usePageTitle } from '../hooks/usePageTitle.js';
 
 const STATUS_STYLES = {
   Draft:    { bg:'#f1f5f9', color:'#64748b', border:'#e2e8f0' },
@@ -290,6 +291,7 @@ export default function Requests() {
   const { user } = useAuth();
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'he';
+  const { title: pageTitle, subtitle: pageSubtitle } = usePageTitle('requests', { title: t('requests.title'), subtitle: t('requests.subtitle') });
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState(null);

@@ -3,6 +3,7 @@ import { api } from '../api/client.js';
 import { useAuth } from '../hooks/useAuth.jsx';
 import { X, ChevronDown, ChevronUp } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { usePageTitle } from '../hooks/usePageTitle.js';
 
 const STATUS_STYLES = {
   Draft:    { bg:'#f1f5f9', color:'#64748b', border:'#e2e8f0' },
@@ -161,6 +162,7 @@ export default function Approvals() {
   const { user } = useAuth();
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'he';
+  const { title: pageTitle, subtitle: pageSubtitle } = usePageTitle('approvals', { title: t('approvals.title'), subtitle: t('approvals.subtitle') });
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [detail, setDetail] = useState(null);
@@ -208,12 +210,12 @@ export default function Approvals() {
 
       <div style={{ marginBottom:20 }}>
         <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom:2 }}>
-          <h1 style={{ fontSize:20, fontWeight:700, color:'#1a1d23' }}>{t('approvals.title')}</h1>
+          <h1 style={{ fontSize:20, fontWeight:700, color:'#1a1d23' }}>{pageTitle}</h1>
           {pendingCount > 0 && (
             <span style={{ background:'#dc2626', color:'#fff', borderRadius:12, padding:'2px 8px', fontSize:12, fontWeight:700 }}>{pendingCount}</span>
           )}
         </div>
-        <p style={{ color:'#6b7280', fontSize:13 }}>{t('approvals.subtitle')}</p>
+        <p style={{ color:'#6b7280', fontSize:13 }}>{pageSubtitle}</p>
       </div>
 
       {/* Filters */}

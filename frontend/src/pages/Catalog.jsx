@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { api } from '../api/client.js';
 import { useAuth } from '../hooks/useAuth.jsx';
 import { useTranslation } from 'react-i18next';
+import { usePageTitle } from '../hooks/usePageTitle.js';
 
 const inputStyle = {
   width:'100%', padding:'9px 12px', borderRadius:7,
@@ -101,10 +102,11 @@ function ListManager({ title, description, fetchFn, saveFn, icon }) {
 
 export default function Catalog() {
   const { t } = useTranslation();
+  const { title: pageTitle, subtitle: pageSubtitle } = usePageTitle('catalog', { title: t('catalog.title'), subtitle: t('catalog.subtitle') });
   return (
     <div style={{ padding:'16px 24px', flex:1 }}>
-      <h1 style={{ fontSize:20, fontWeight:700, marginBottom:2, color:'#1a1d23' }}>{t('catalog.title')}</h1>
-      <p style={{ color:'#6b7280', fontSize:13, marginBottom:24 }}>{t('catalog.subtitle')}</p>
+      <h1 style={{ fontSize:20, fontWeight:700, marginBottom:2, color:'#1a1d23' }}>{pageTitle}</h1>
+      <p style={{ color:'#6b7280', fontSize:13, marginBottom:24 }}>{pageSubtitle}</p>
 
       <div style={{ display:'flex', flexDirection:'column', gap:20 }}>
         <ListManager

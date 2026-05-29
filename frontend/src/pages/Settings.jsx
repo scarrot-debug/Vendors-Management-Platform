@@ -713,6 +713,7 @@ export default function Settings() {
   const { user: currentUser, sessionTimeout, updateSessionTimeout, logo, updateLogo } = useAuth();
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'he';
+  const { title: pageTitle, subtitle: pageSubtitle } = usePageTitle('settings', { title: t('settings.title'), subtitle: t('settings.subtitle') });
   const logoFileRef = useRef(null);
   const [permissionsUser, setPermissionsUser] = useState(null);
   const [logoUploading, setLogoUploading] = useState(false);

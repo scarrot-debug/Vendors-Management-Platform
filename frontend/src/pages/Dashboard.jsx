@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { api } from '../api/client.js';
 import { Users, CheckCircle, Clock, XCircle, TrendingUp, Package, DollarSign, BarChart2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { usePageTitle } from '../hooks/usePageTitle.js';
 
 function formatCurrency(val) {
   if (!val) return '$0';
@@ -78,6 +79,7 @@ export default function Dashboard() {
   const [distributors, setDistributors] = useState([]);
   const [loading, setLoading] = useState(true);
   const { t } = useTranslation();
+  const { title: pageTitle, subtitle: pageSubtitle } = usePageTitle('dashboard', { title: t('dashboard.title'), subtitle: t('dashboard.subtitle') });
 
   useEffect(() => {
     api.getVendors({ limit: 200 }).then(d => {
@@ -145,8 +147,8 @@ export default function Dashboard() {
 
   return (
     <div style={{ padding:'16px 24px', flex:1 }}>
-      <h1 style={{ fontSize:24, fontWeight:700, marginBottom:4, color:'#1a1d23' }}>{t('dashboard.title')}</h1>
-      <p style={{ color:'#6b7280', fontSize:14, marginBottom:24 }}>{t('dashboard.subtitle')}</p>
+      <h1 style={{ fontSize:24, fontWeight:700, marginBottom:4, color:'#1a1d23' }}>{pageTitle}</h1>
+      <p style={{ color:'#6b7280', fontSize:14, marginBottom:24 }}>{pageSubtitle}</p>
 
       {/* Stats */}
       <div style={{ display:'grid', gridTemplateColumns:'repeat(6, 1fr)', gap:14, marginBottom:24 }}>

@@ -3,6 +3,7 @@ import { api } from '../api/client.js';
 import { useAuth } from '../hooks/useAuth.jsx';
 import { Plus, Search, Edit2, Trash2, RefreshCw, X, Check, ChevronDown, ChevronRight, Package, ChevronsDownUp, ChevronsUpDown, ArrowUpDown, GripVertical } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { usePageTitle } from '../hooks/usePageTitle.js';
 
 // Default column order — can be rearranged by drag & drop
 const DEFAULT_COLUMNS = [
