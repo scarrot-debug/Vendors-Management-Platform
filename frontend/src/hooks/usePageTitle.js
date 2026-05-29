@@ -3,6 +3,10 @@ import { api } from '../api/client.js';
 
 let cache = null;
 
+export function clearPageTitleCache() {
+  cache = null;
+}
+
 export function usePageTitle(pageKey, defaults) {
   const [titles, setTitles] = useState(cache || {});
 

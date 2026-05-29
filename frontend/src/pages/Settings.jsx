@@ -3,6 +3,7 @@ import { api } from '../api/client.js';
 import { useAuth, SESSION_OPTIONS } from '../hooks/useAuth.jsx';
 import { Plus, Edit2, Trash2, KeyRound, Check, X, Shield, Eye, User, History, Clock, Image, Upload } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { clearPageTitleCache } from '../hooks/usePageTitle.js';
 
 const ROLE_STYLES = {
   admin:  { bg:'#eff6ff', color:'#1d4ed8', border:'#bfdbfe', icon: Shield },
@@ -550,6 +551,7 @@ function PageTitlesSection() {
     setSaving(true);
     try {
       await api.setPageTitles(titles);
+      clearPageTitleCache();
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
     } catch(e) { alert(e.message); }
