@@ -153,7 +153,11 @@ function ProductForm({ initial, onSave, onCancel, saving }) {
       <div>
         <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>{t('common.status')}</label>
         <select value={form.status} onChange={e=>set('status',e.target.value)} style={inputStyle}>
-          {['Active','Pending','Inactive'].map(s=><option key={s}>{s}</option>)}
+          {[
+            { value:'Active',   label: t('vendors.active') },
+            { value:'Pending',  label: t('vendors.pending') },
+            { value:'Inactive', label: t('vendors.inactive') },
+          ].map(s=><option key={s.value} value={s.value}>{s.label}</option>)}
         </select>
       </div>
       <div>
@@ -558,7 +562,8 @@ function DocumentsPanel({ dist, onClose, isViewer }) {
 
 export default function Vendors() {
   const { user, permissions = { can_see_cost_price: true, can_see_customer_price: true } } = useAuth();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === 'he';
   const isViewer = user?.role === 'viewer';
   const [data, setData] = useState({ distributors: [], total: 0 });
   const [loading, setLoading] = useState(true);
@@ -955,7 +960,7 @@ export default function Vendors() {
         </Modal>
       )}
       {modal?.type === 'addProduct' && (
-        <Modal title={`${t('vendors.addProduct')} → ${modal.dist.name}`} onClose={()=>setModal(null)} wide>
+        <Modal title={`${t('vendors.addProduct')} ${isRTL ? '←' : '→'} ${modal.dist.name}`} onClose={()=>setModal(null)} wide>
           <ProductForm onSave={handleSaveProduct} onCancel={()=>setModal(null)} saving={saving}/>
         </Modal>
       )}

@@ -269,6 +269,8 @@ export default {
     confirmPassword: 'Confirm Password',
     currentPassword: 'Current Password',
     resetPasswordTitle: 'Reset Password',
+    passwordMinChars: 'Min. 6 characters',
+    passwordRepeat: 'Repeat password',
     colHistDate: 'Date & Time',
     colHistUser: 'User',
     colHistAction: 'Action',

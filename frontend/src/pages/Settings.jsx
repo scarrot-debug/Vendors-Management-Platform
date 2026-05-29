@@ -227,12 +227,12 @@ function ResetPasswordForm({ user, onSave, onCancel, saving }) {
       </p>
       <div>
         <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>{t('settings.newPassword')} *</label>
-        <input type="password" value={password} onChange={e=>setPassword(e.target.value)} style={inputStyle} autoComplete="new-password" placeholder="Min. 6 characters"/>
+        <input type="password" value={password} onChange={e=>setPassword(e.target.value)} style={inputStyle} autoComplete="new-password" placeholder={t('settings.passwordMinChars')}/>
       </div>
       <div>
         <label style={{ fontSize:13, color:'#374151', fontWeight:500, display:'block', marginBottom:5 }}>{t('settings.confirmPassword')} *</label>
         <input type="password" value={confirm} onChange={e=>setConfirm(e.target.value)}
-          style={{...inputStyle, borderColor: mismatch ? '#ef4444' : '#e2e6ed'}} placeholder="Repeat password"/>
+          style={{...inputStyle, borderColor: mismatch ? '#ef4444' : '#e2e6ed'}} placeholder={t('settings.passwordRepeat')}/>
         {mismatch && <p style={{ fontSize:12, color:'#ef4444', marginTop:4 }}>{t('profile.passwordMismatch')}</p>}
       </div>
       <div style={{ display:'flex', gap:10, justifyContent:'flex-end', marginTop:6 }}>

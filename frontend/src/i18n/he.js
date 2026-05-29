@@ -269,6 +269,8 @@ export default {
     confirmPassword: 'אימות סיסמה',
     currentPassword: 'סיסמה נוכחית',
     resetPasswordTitle: 'איפוס סיסמה',
+    passwordMinChars: 'לפחות 6 תווים',
+    passwordRepeat: 'חזור על הסיסמה',
     colHistDate: 'תאריך ושעה',
     colHistUser: 'משתמש',
     colHistAction: 'פעולה',
