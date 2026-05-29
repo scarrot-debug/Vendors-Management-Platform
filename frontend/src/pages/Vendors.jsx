@@ -574,6 +574,7 @@ export default function Vendors() {
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'he';
   const isViewer = user?.role === 'viewer';
+  const { title: pageTitle, subtitle: pageSubtitle } = usePageTitle('vendors', { title: t('vendors.title'), subtitle: t('vendors.subtitle') });
   const [data, setData] = useState({ distributors: [], total: 0 });
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -780,8 +781,8 @@ export default function Vendors() {
     <div style={{ padding:'16px 24px', flex:1, minWidth:0 }}>
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:12 }}>
         <div>
-          <h1 style={{ fontSize:20, fontWeight:700, marginBottom:2, color:'#1a1d23' }}>{t('vendors.title')}</h1>
-          <p style={{ color:'#6b7280', fontSize:13 }}>{t('vendors.subtitle')}</p>
+          <h1 style={{ fontSize:20, fontWeight:700, marginBottom:2, color:'#1a1d23' }}>{pageTitle}</h1>
+          <p style={{ color:'#6b7280', fontSize:13 }}>{pageSubtitle}</p>
         </div>
       </div>
 

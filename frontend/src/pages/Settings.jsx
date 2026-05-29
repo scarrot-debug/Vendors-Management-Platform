@@ -790,7 +790,7 @@ export default function Settings() {
         }}>{toast.msg}</div>
       )}
 
-      <h1 style={{ fontSize:24, fontWeight:700, marginBottom:4, color:'#1a1d23' }}>{t('settings.title')}</h1>
+      <h1 style={{ fontSize:24, fontWeight:700, marginBottom:4, color:'#1a1d23' }}>{pageTitle}</h1>
       <p style={{ color:'#6b7280', fontSize:14, marginBottom:28 }}>{t('settings.subtitle')}</p>
 
       {/* User Management */}

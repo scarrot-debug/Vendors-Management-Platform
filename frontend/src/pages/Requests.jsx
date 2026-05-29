@@ -344,8 +344,8 @@ export default function Requests() {
 
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:20 }}>
         <div>
-          <h1 style={{ fontSize:20, fontWeight:700, marginBottom:2, color:'#1a1d23' }}>{t('requests.title')}</h1>
-          <p style={{ color:'#6b7280', fontSize:13 }}>{t('requests.subtitle')}</p>
+          <h1 style={{ fontSize:20, fontWeight:700, marginBottom:2, color:'#1a1d23' }}>{pageTitle}</h1>
+          <p style={{ color:'#6b7280', fontSize:13 }}>{pageSubtitle}</p>
         </div>
         <button onClick={()=>setModal('new')} style={{...btnStyle, background:'#1a1d23', color:'#fff'}}>
           <Plus size={15}/> {t('requests.newRequest')}
