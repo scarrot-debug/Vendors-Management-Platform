@@ -46,7 +46,7 @@ router.get('/:id', auth, async (req, res) => {
     if (!result.rows.length) return res.status(404).json({ error: 'Request not found' });
     const request = result.rows[0];
 
-    const items = await pool.query('SELECT * FROM request_items WHERE request_id=$1 ORDER BY created_at', [req.params.id]);
+    const items = await pool.query('SELECT * FROM request_items WHERE request_id=$1 ORDER BY id', [req.params.id]);
     const docs = await pool.query('SELECT id, name, mime_type, size_bytes, created_at FROM request_documents WHERE request_id=$1', [req.params.id]);
 
     res.json({ ...request, items: items.rows, documents: docs.rows });

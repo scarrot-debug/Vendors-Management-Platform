@@ -10,7 +10,13 @@ export function clearPageTitleCache() {
 
 export function usePageTitle(pageKey, defaults) {
   const [titles, setTitles] = useState(cache || {});
-  const lang = i18n.language === 'he' ? 'he' : 'en';
+  const [lang, setLang] = useState(i18n.language === 'he' ? 'he' : 'en');
+
+  useEffect(() => {
+    const onLangChange = (lng) => setLang(lng === 'he' ? 'he' : 'en');
+    i18n.on('languageChanged', onLangChange);
+    return () => i18n.off('languageChanged', onLangChange);
+  }, []);
 
   useEffect(() => {
     if (cache) { setTitles(cache); return; }

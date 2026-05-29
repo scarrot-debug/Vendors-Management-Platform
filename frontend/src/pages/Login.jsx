@@ -13,6 +13,7 @@ export default function Login() {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'he';
+  const sessionExpired = new URLSearchParams(window.location.search).get('expired') === '1';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -68,6 +69,11 @@ export default function Login() {
           <p style={{ color: '#6b7280', fontSize: 14 }}>{t('auth.login')}</p>
         </div>
 
+        {sessionExpired && (
+          <div style={{ background:'#fef9c3', border:'1px solid #fde68a', borderRadius:8, padding:'10px 14px', color:'#92400e', fontSize:13, marginBottom:16, textAlign: isRTL ? 'right' : 'left' }}>
+            {t('auth.sessionExpired')}
+          </div>
+        )}
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }} dir={isRTL ? 'rtl' : 'ltr'}>
           {[
             { label: t('auth.username'), value: username, set: setUsername, type: 'text', placeholder: '' },

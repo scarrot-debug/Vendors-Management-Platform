@@ -39,6 +39,8 @@ function ApprovalDetail({ request, onClose, onRefresh }) {
   const [acting, setActing] = useState(false);
   const [showItems, setShowItems] = useState(true);
   const token = localStorage.getItem('token');
+  const { i18n } = useTranslation();
+  const isRTL = i18n.language === 'he';
 
   const handleAction = async (action) => {
     setActing(true);

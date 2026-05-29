@@ -5,7 +5,7 @@ const auth = require('../middleware/auth');
 const logHistory = require('../middleware/logHistory');
 
 // GET /api/vendors — distributors with their products
-router.get('/', async (req, res) => {
+router.get('/', auth, async (req, res) => {
   try {
     const { status, search, category, page = 1, limit = 20 } = req.query;
     const offset = (parseInt(page) - 1) * parseInt(limit);
@@ -61,7 +61,7 @@ router.get('/', async (req, res) => {
 });
 
 // GET /api/vendors/categories
-router.get('/categories', async (req, res) => {
+router.get('/categories', auth, async (req, res) => {
   try {
     const result = await pool.query('SELECT DISTINCT category FROM products WHERE category IS NOT NULL ORDER BY category');
     res.json(result.rows.map(r => r.category));
@@ -104,7 +104,7 @@ router.get('/export', auth, async (req, res) => {
 });
 
 // GET /api/vendors/:id
-router.get('/:id', async (req, res) => {
+router.get('/:id', auth, async (req, res) => {
   try {
     const dist = await pool.query('SELECT * FROM distributors WHERE id=$1', [req.params.id]);
     if (!dist.rows.length) return res.status(404).json({ error: 'Distributor not found' });

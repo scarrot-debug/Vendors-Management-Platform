@@ -45,7 +45,7 @@ export function AuthProvider({ children }) {
     if (sessionTimeout === 0) return;
     timer.current = setTimeout(() => {
       logout();
-      alert('Your session has expired. Please log in again.');
+      window.location.href = '/login?expired=1';
     }, sessionTimeout * 60 * 1000);
   }, [sessionTimeout, logout]);
 
