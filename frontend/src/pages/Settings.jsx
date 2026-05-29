@@ -553,6 +553,7 @@ function PageTitlesSection() {
       await api.setPageTitles(titles);
       clearPageTitleCache();
       setSaved(true);
+      setTimeout(() => { window.location.reload(); }, 800);
       setTimeout(() => setSaved(false), 2000);
     } catch(e) { alert(e.message); }
     finally { setSaving(false); }
