@@ -524,12 +524,12 @@ function CategoriesSection() {
 }
 
 const PAGE_DEFS = [
-  { key:'dashboard', label:'Dashboard',  icon:'📊' },
-  { key:'vendors',   label:'Vendors',    icon:'🏢' },
-  { key:'catalog',   label:'Catalog',    icon:'📚' },
-  { key:'requests',  label:'Requests',   icon:'📋' },
-  { key:'approvals', label:'Approvals',  icon:'✅' },
-  { key:'settings',  label:'Settings',   icon:'⚙️' },
+  { key:'dashboard', labelKey:'nav.dashboard',  icon:'📊' },
+  { key:'vendors',   labelKey:'nav.vendors',    icon:'🏢' },
+  { key:'catalog',   labelKey:'nav.catalog',    icon:'📚' },
+  { key:'requests',  labelKey:'nav.requests',   icon:'📋' },
+  { key:'approvals', labelKey:'nav.approvals',  icon:'✅' },
+  { key:'settings',  labelKey:'nav.settings',   icon:'⚙️' },
 ];
 
 function PageTitlesSection() {
@@ -572,15 +572,18 @@ function PageTitlesSection() {
                 <div key={h} style={{ fontSize:12, fontWeight:600, color:'#9ca3af', textTransform:'uppercase', letterSpacing:0.5, textAlign: isRTL ? 'right' : 'left' }}>{h}</div>
               ))}
             </div>
-            {PAGE_DEFS.map(({ key, label, icon }) => (
+            {PAGE_DEFS.map(({ key, labelKey, icon }) => {
+              const label = t(labelKey);
+              return (
               <div key={key} style={{ display:'grid', gridTemplateColumns:'120px 1fr 1fr', gap:12, alignItems:'center', padding:'8px 0', borderBottom:'1px solid #f8f9fb' }}>
                 <div style={{ display:'flex', alignItems:'center', gap:7, fontSize:13, fontWeight:600, color:'#374151' }}>
                   <span>{icon}</span> {label}
                 </div>
                 <input value={titles[key]?.title || ''} onChange={e => set(key, 'title', e.target.value)} placeholder={label} style={inputStyle}/>
-                <input value={titles[key]?.subtitle || ''} onChange={e => set(key, 'subtitle', e.target.value)} placeholder="Subtitle…" style={{...inputStyle, color:'#6b7280'}}/>
+                <input value={titles[key]?.subtitle || ''} onChange={e => set(key, 'subtitle', e.target.value)} placeholder={t('settings.pageTitlesSubtitle') + '…'} style={{...inputStyle, color:'#6b7280'}}/>
               </div>
-            ))}
+              );
+            })}
             <div style={{ display:'flex', justifyContent:'flex-end', marginTop:16 }}>
               <button onClick={handleSave} disabled={saving}
                 style={{ display:'flex', alignItems:'center', gap:6, padding:'8px 18px', borderRadius:7, border:'none', background: saved ? '#16a34a' : '#1a1d23', color:'#fff', fontSize:13, fontWeight:500, cursor:'pointer' }}>
