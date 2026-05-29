@@ -11,7 +11,8 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === 'he';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -36,6 +37,7 @@ export default function Login() {
         background: '#fff', border: '1px solid #e2e6ed',
         borderRadius: 16, padding: 40, width: 380,
         boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
+        direction: isRTL ? 'rtl' : 'ltr',
       }}>
         <div style={{ textAlign: 'center', marginBottom: 32 }}>
           <img
@@ -60,6 +62,7 @@ export default function Login() {
                   width: '100%', padding: '10px 14px', borderRadius: 8,
                   border: '1px solid #e2e6ed', background: '#f8f9fb',
                   color: '#1a1d23', fontSize: 14, outline: 'none', boxSizing: 'border-box',
+                  textAlign: isRTL ? 'right' : 'left',
                 }}
               />
             </div>
