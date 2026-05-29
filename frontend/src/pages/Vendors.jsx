@@ -231,6 +231,7 @@ function DistributorRow({ dist, isViewer, open, onToggle, columns, permissions, 
   const isRTL = i18n.language === 'he';
 
   const renderCell = (key) => {
+    switch(key) {
       case 'status': return <td key={key} style={{ padding:'13px 12px' }}><StatusBadge status={dist.status}/></td>;
       case 'name': return (
         <td key={key} style={{ padding:'13px 16px', fontWeight:700, color:'#1a1d23', fontSize:14 }}>
