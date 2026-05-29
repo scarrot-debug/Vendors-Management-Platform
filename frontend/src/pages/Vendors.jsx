@@ -36,8 +36,10 @@ const btnStyle = {
 };
 
 function StatusBadge({ status }) {
+  const { t } = useTranslation();
   const s = STATUS_STYLES[status] || STATUS_STYLES.Inactive;
-  return <span style={{ display:'inline-block', padding:'3px 10px', borderRadius:6, fontSize:12, fontWeight:500, background:s.bg, color:s.color, border:`1px solid ${s.border}` }}>{status}</span>;
+  const labels = { Active: t('vendors.active'), Pending: t('vendors.pending'), Inactive: t('vendors.inactive') };
+  return <span style={{ display:'inline-block', padding:'3px 10px', borderRadius:6, fontSize:12, fontWeight:500, background:s.bg, color:s.color, border:`1px solid ${s.border}` }}>{labels[status] || status}</span>;
 }
 
 function Modal({ title, onClose, children, wide }) {
@@ -944,17 +946,17 @@ export default function Vendors() {
         </Modal>
       )}
       {modal?.type === 'editDist' && (
-        <Modal title={`Edit Distributor — ${modal.data.name}`} onClose={()=>setModal(null)} wide>
+        <Modal title={`${t('vendors.editDistributor')} — ${modal.data.name}`} onClose={()=>setModal(null)} wide>
           <DistributorForm initial={modal.data} onSave={handleSaveDist} onCancel={()=>setModal(null)} saving={saving}/>
         </Modal>
       )}
       {modal?.type === 'addProduct' && (
-        <Modal title={`Add Product → ${modal.dist.name}`} onClose={()=>setModal(null)} wide>
+        <Modal title={`${t('vendors.addProduct')} → ${modal.dist.name}`} onClose={()=>setModal(null)} wide>
           <ProductForm onSave={handleSaveProduct} onCancel={()=>setModal(null)} saving={saving}/>
         </Modal>
       )}
       {modal?.type === 'editProduct' && (
-        <Modal title={`Edit Product — ${modal.data.name}`} onClose={()=>setModal(null)} wide>
+        <Modal title={`${t('vendors.editProduct')} — ${modal.data.name}`} onClose={()=>setModal(null)} wide>
           <ProductForm initial={modal.data} onSave={handleSaveProduct} onCancel={()=>setModal(null)} saving={saving}/>
         </Modal>
       )}
