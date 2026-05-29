@@ -161,11 +161,15 @@ function RequestDetail({ request, onClose, onRefresh, currentUser }) {
   const token = localStorage.getItem('token');
 
   const handleAction = async (action) => {
+    if (action === 'delete') {
+      if (!confirm(`Delete "${request.title}"?`)) return;
+    }
     setActing(true);
     try {
       if (action === 'submit') await api.submitRequest(request.id);
       else if (action === 'approve') await api.approveRequest(request.id, { reviewer_notes: reviewNote });
       else if (action === 'reject') await api.rejectRequest(request.id, { reviewer_notes: reviewNote });
+      else if (action === 'delete') await api.deleteRequest(request.id);
       onRefresh(); onClose();
     } catch(err) { alert(err.message); }
     finally { setActing(false); }
@@ -262,8 +266,16 @@ function RequestDetail({ request, onClose, onRefresh, currentUser }) {
 
       {/* Actions */}
       <div style={{ display:'flex', gap:10, justifyContent:'flex-end', marginTop:8, flexWrap:'wrap' }}>
-        {/* Submit (owner, draft) */}
-        {isOwner && request.status === 'Draft' && (
+        {/* Delete (admin always, owner if draft) */}
+        {(currentUser?.role === 'admin' || (isOwner && request.status === 'Draft')) && (
+          <button onClick={()=>handleAction('delete')} disabled={acting}
+            style={{...btnStyle, background:'#fef2f2', color:'#dc2626', border:'1px solid #fecaca', marginRight:'auto'}}>
+            <Trash2 size={14}/> Delete
+          </button>
+        )}
+
+        {/* Submit (owner or admin, draft) */}
+        {(isOwner || currentUser?.role === 'admin') && request.status === 'Draft' && (
           <button onClick={()=>handleAction('submit')} disabled={acting} style={{...btnStyle, background:'#2563eb', color:'#fff'}}>
             <Send size={14}/> Submit for Approval
           </button>
