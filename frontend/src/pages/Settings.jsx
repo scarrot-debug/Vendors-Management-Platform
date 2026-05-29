@@ -694,7 +694,7 @@ export default function Settings() {
             <p style={{ fontSize:13, color:'#6b7280' }}>{t('settings.userManagementDesc')}</p>
           </div>
           {isAdmin && (
-            <button onClick={()=>setModal({type:'add'})} style={{...btnStyle, background:'#1a1d23', color:'#fff'}}>              <Plus size={15}/> {t('settings.addUser')}
+            <button onClick={()=>setModal({type:'add'})} style={{...btnStyle, background:'#1a1d23', color:'#fff'}}>{t('settings.addUser')}
             </button>
           )}
         </div>
