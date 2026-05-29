@@ -28,6 +28,13 @@ export default function Login() {
     }
   };
 
+  const toggleLang = () => {
+    const next = i18n.language === 'he' ? 'en' : 'he';
+    i18n.changeLanguage(next);
+    localStorage.setItem('language', next);
+    document.documentElement.dir = next === 'he' ? 'rtl' : 'ltr';
+  };
+
   return (
     <div style={{
       minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -38,7 +45,19 @@ export default function Login() {
         borderRadius: 16, padding: 40, width: 380,
         boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
         direction: isRTL ? 'rtl' : 'ltr',
+        position: 'relative',
       }}>
+        {/* Language toggle */}
+        <button onClick={toggleLang} style={{
+          position: 'absolute', top: 14,
+          right: isRTL ? 'auto' : 14,
+          left: isRTL ? 14 : 'auto',
+          background: 'none', border: 'none',
+          fontSize: 12, fontWeight: 600, color: '#9ca3af',
+          cursor: 'pointer', padding: '2px 4px',
+        }}>
+          {isRTL ? 'EN' : 'עב'}
+        </button>
         <div style={{ textAlign: 'center', marginBottom: 32 }}>
           <img
             src="https://www.one1.co.il/wp-content/uploads/2024/11/dark_logo.webp"
