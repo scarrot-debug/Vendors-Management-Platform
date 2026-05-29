@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api/client.js';
+import i18n from 'i18next';
 
 let cache = null;
 
@@ -9,6 +10,7 @@ export function clearPageTitleCache() {
 
 export function usePageTitle(pageKey, defaults) {
   const [titles, setTitles] = useState(cache || {});
+  const lang = i18n.language === 'he' ? 'he' : 'en';
 
   useEffect(() => {
     if (cache) { setTitles(cache); return; }
@@ -18,8 +20,10 @@ export function usePageTitle(pageKey, defaults) {
     }).catch(() => {});
   }, []);
 
+  const langData = titles[pageKey]?.[lang] || titles[pageKey] || {};
+
   return {
-    title:    titles[pageKey]?.title    || defaults.title,
-    subtitle: titles[pageKey]?.subtitle || defaults.subtitle,
+    title:    langData.title    || defaults.title,
+    subtitle: langData.subtitle || defaults.subtitle,
   };
 }

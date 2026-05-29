@@ -538,14 +538,32 @@ function PageTitlesSection() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [activeLang, setActiveLang] = useState('en');
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'he';
 
   useEffect(() => {
-    api.getPageTitles().then(t => { setTitles(t || {}); setLoading(false); }).catch(()=>setLoading(false));
+    api.getPageTitles().then(data => {
+      const migrated = {};
+      PAGE_DEFS.forEach(({ key }) => {
+        const val = data?.[key];
+        if (val && (val.en || val.he)) {
+          migrated[key] = val;
+        } else if (val && (val.title || val.subtitle)) {
+          migrated[key] = { en: { title: val.title || '', subtitle: val.subtitle || '' }, he: { title: '', subtitle: '' } };
+        } else {
+          migrated[key] = { en: { title: '', subtitle: '' }, he: { title: '', subtitle: '' } };
+        }
+      });
+      setTitles(migrated);
+      setLoading(false);
+    }).catch(() => setLoading(false));
   }, []);
 
-  const set = (page, field, val) => setTitles(prev => ({ ...prev, [page]: { ...prev[page], [field]: val } }));
+  const set = (page, field, val) => setTitles(prev => ({
+    ...prev,
+    [page]: { ...prev[page], [activeLang]: { ...(prev[page]?.[activeLang] || {}), [field]: val } }
+  }));
 
   const handleSave = async () => {
     setSaving(true);
@@ -554,21 +572,33 @@ function PageTitlesSection() {
       clearPageTitleCache();
       setSaved(true);
       setTimeout(() => { window.location.reload(); }, 800);
-      setTimeout(() => setSaved(false), 2000);
     } catch(e) { alert(e.message); }
     finally { setSaving(false); }
   };
 
-  const inputStyle = { width:'100%', padding:'8px 12px', borderRadius:7, border:'1px solid #e2e6ed', background:'#fff', color:'#1a1d23', fontSize:13, outline:'none', textAlign: isRTL ? 'right' : 'left' };
+  const inputStyle = { width:'100%', padding:'8px 12px', borderRadius:7, border:'1px solid #e2e6ed', background:'#fff', color:'#1a1d23', fontSize:13, outline:'none', textAlign: activeLang === 'he' ? 'right' : 'left', direction: activeLang === 'he' ? 'rtl' : 'ltr' };
 
   return (
     <div style={{ background:'#fff', border:'1px solid #e2e6ed', borderRadius:10, overflow:'hidden', marginTop:24 }}>
-      <div style={{ padding:'16px 24px', borderBottom:'1px solid #e2e6ed', background:'#f8f9fb' }}>
-        <h2 style={{ fontSize:16, fontWeight:600, color:'#1a1d23', marginBottom:2 }}>🖊️ {t('settings.pageTitles') || 'Page Titles'}</h2>
-        <p style={{ fontSize:13, color:'#6b7280' }}>{t('settings.pageTitlesDesc') || 'Customize the title and subtitle displayed on each page'}</p>
+      <div style={{ padding:'16px 24px', borderBottom:'1px solid #e2e6ed', background:'#f8f9fb', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+        <div>
+          <h2 style={{ fontSize:16, fontWeight:600, color:'#1a1d23', marginBottom:2 }}>\uD83D\uDD8A\uFE0F {t('settings.pageTitles')}</h2>
+          <p style={{ fontSize:13, color:'#6b7280' }}>{t('settings.pageTitlesDesc')}</p>
+        </div>
+        <div style={{ display:'flex', background:'#f0f0f0', borderRadius:8, padding:3, gap:2 }}>
+          {[{code:'en', label:'\uD83C\uDDFA\uD83C\uDDF8 EN'}, {code:'he', label:'\uD83C\uDDEE\uD83C\uDDF1 \u05E2\u05D1'}].map(({ code, label }) => (
+            <button key={code} onClick={() => setActiveLang(code)} style={{
+              padding:'5px 14px', borderRadius:6, border:'none', fontSize:12, fontWeight:600,
+              cursor:'pointer', transition:'all 0.15s',
+              background: activeLang === code ? '#fff' : 'transparent',
+              color: activeLang === code ? '#1a1d23' : '#9ca3af',
+              boxShadow: activeLang === code ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+            }}>{label}</button>
+          ))}
+        </div>
       </div>
       <div style={{ padding:'20px 24px' }}>
-        {loading ? <div style={{ color:'#9ca3af', fontSize:13 }}>Loading…</div> : (
+        {loading ? <div style={{ color:'#9ca3af', fontSize:13 }}>Loading\u2026</div> : (
           <>
             <div style={{ display:'grid', gridTemplateColumns:'120px 1fr 1fr', gap:12, marginBottom:8, paddingBottom:8, borderBottom:'1px solid #f1f5f9' }}>
               {[t('settings.pageTitlesPage'), t('settings.pageTitlesTitle'), t('settings.pageTitlesSubtitle')].map(h => (
@@ -577,20 +607,21 @@ function PageTitlesSection() {
             </div>
             {PAGE_DEFS.map(({ key, labelKey, icon }) => {
               const label = t(labelKey);
+              const val = titles[key]?.[activeLang] || {};
               return (
-              <div key={key} style={{ display:'grid', gridTemplateColumns:'120px 1fr 1fr', gap:12, alignItems:'center', padding:'8px 0', borderBottom:'1px solid #f8f9fb' }}>
-                <div style={{ display:'flex', alignItems:'center', gap:7, fontSize:13, fontWeight:600, color:'#374151' }}>
-                  <span>{icon}</span> {label}
+                <div key={key} style={{ display:'grid', gridTemplateColumns:'120px 1fr 1fr', gap:12, alignItems:'center', padding:'8px 0', borderBottom:'1px solid #f8f9fb' }}>
+                  <div style={{ display:'flex', alignItems:'center', gap:7, fontSize:13, fontWeight:600, color:'#374151' }}>
+                    <span>{icon}</span> {label}
+                  </div>
+                  <input value={val.title || ''} onChange={e => set(key, 'title', e.target.value)} placeholder={label} style={inputStyle}/>
+                  <input value={val.subtitle || ''} onChange={e => set(key, 'subtitle', e.target.value)} placeholder={t('settings.pageTitlesSubtitle') + '\u2026'} style={{...inputStyle, color:'#6b7280'}}/>
                 </div>
-                <input value={titles[key]?.title || ''} onChange={e => set(key, 'title', e.target.value)} placeholder={label} style={inputStyle}/>
-                <input value={titles[key]?.subtitle || ''} onChange={e => set(key, 'subtitle', e.target.value)} placeholder={t('settings.pageTitlesSubtitle') + '…'} style={{...inputStyle, color:'#6b7280'}}/>
-              </div>
               );
             })}
             <div style={{ display:'flex', justifyContent:'flex-end', marginTop:16 }}>
               <button onClick={handleSave} disabled={saving}
                 style={{ display:'flex', alignItems:'center', gap:6, padding:'8px 18px', borderRadius:7, border:'none', background: saved ? '#16a34a' : '#1a1d23', color:'#fff', fontSize:13, fontWeight:500, cursor:'pointer' }}>
-                <Check size={14}/> {saved ? 'Saved!' : saving ? 'Saving…' : (t('settings.saveChanges') || 'Save Changes')}
+                <Check size={14}/> {saved ? 'Saved!' : saving ? 'Saving\u2026' : t('settings.saveChanges')}
               </button>
             </div>
           </>
