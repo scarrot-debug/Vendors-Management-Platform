@@ -582,11 +582,11 @@ function PageTitlesSection() {
     <div style={{ background:'#fff', border:'1px solid #e2e6ed', borderRadius:10, overflow:'hidden', marginTop:24 }}>
       <div style={{ padding:'16px 24px', borderBottom:'1px solid #e2e6ed', background:'#f8f9fb', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
         <div>
-          <h2 style={{ fontSize:16, fontWeight:600, color:'#1a1d23', marginBottom:2 }}>\uD83D\uDD8A\uFE0F {t('settings.pageTitles')}</h2>
+          <h2 style={{ fontSize:16, fontWeight:600, color:'#1a1d23', marginBottom:2 }}>🖊️ {t('settings.pageTitles')}</h2>
           <p style={{ fontSize:13, color:'#6b7280' }}>{t('settings.pageTitlesDesc')}</p>
         </div>
         <div style={{ display:'flex', background:'#f0f0f0', borderRadius:8, padding:3, gap:2 }}>
-          {[{code:'en', label:'\uD83C\uDDFA\uD83C\uDDF8 EN'}, {code:'he', label:'\uD83C\uDDEE\uD83C\uDDF1 \u05E2\u05D1'}].map(({ code, label }) => (
+          {[{code:'en', label:'🇺🇸 EN'}, {code:'he', label:'🇮🇱 עב'}].map(({ code, label }) => (
             <button key={code} onClick={() => setActiveLang(code)} style={{
               padding:'5px 14px', borderRadius:6, border:'none', fontSize:12, fontWeight:600,
               cursor:'pointer', transition:'all 0.15s',
@@ -614,14 +614,14 @@ function PageTitlesSection() {
                     <span>{icon}</span> {label}
                   </div>
                   <input value={val.title || ''} onChange={e => set(key, 'title', e.target.value)} placeholder={label} style={inputStyle}/>
-                  <input value={val.subtitle || ''} onChange={e => set(key, 'subtitle', e.target.value)} placeholder={t('settings.pageTitlesSubtitle') + '\u2026'} style={{...inputStyle, color:'#6b7280'}}/>
+                  <input value={val.subtitle || ''} onChange={e => set(key, 'subtitle', e.target.value)} placeholder={t('settings.pageTitlesSubtitle') + '…'} style={{...inputStyle, color:'#6b7280'}}/>
                 </div>
               );
             })}
             <div style={{ display:'flex', justifyContent:'flex-end', marginTop:16 }}>
               <button onClick={handleSave} disabled={saving}
                 style={{ display:'flex', alignItems:'center', gap:6, padding:'8px 18px', borderRadius:7, border:'none', background: saved ? '#16a34a' : '#1a1d23', color:'#fff', fontSize:13, fontWeight:500, cursor:'pointer' }}>
-                <Check size={14}/> {saved ? 'Saved!' : saving ? 'Saving\u2026' : t('settings.saveChanges')}
+                <Check size={14}/> {saved ? 'Saved!' : saving ? 'Saving…' : t('settings.saveChanges')}
               </button>
             </div>
           </>
