@@ -369,7 +369,7 @@ function DistributorRow({ dist, isViewer, open, onToggle, columns, permissions, 
             <tr style={{ background:'#fffbeb', borderBottom:'2px solid #bfdbfe', borderTop:'1px solid #fde68a' }}>
               <td colSpan={2} style={{ padding:'10px 0 10px 32px', borderLeft:'3px solid #d97706' }}/>
               <td colSpan={8} style={{ padding:'10px 16px' }}>
-                <span style={{ fontSize:12, fontWeight:600, color:'#92400e', marginRight:8 }}>📝 Notes</span>
+                <span style={{ fontSize:12, fontWeight:600, color:'#92400e', marginRight:8 }}>📝 {t('common.notes')}</span>
                 <span style={{ fontSize:13, color:'#78350f' }}>{dist.notes}</span>
               </td>
             </tr>
