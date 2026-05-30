@@ -45,7 +45,9 @@ export function AuthProvider({ children }) {
     if (sessionTimeout === 0) return;
     timer.current = setTimeout(() => {
       logout();
-      window.location.href = '/login?expired=1';
+      const lang = localStorage.getItem('language') || 'en';
+      const msg = lang === 'he' ? 'תוקף החיבור למערכת הסתיים' : 'Your session has expired. Please log in again.';
+      alert(msg);
     }, sessionTimeout * 60 * 1000);
   }, [sessionTimeout, logout]);
 
